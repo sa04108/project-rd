@@ -22,6 +22,10 @@ static func run_all() -> Dictionary:
         _test_final_hold_and_cleanup_rewards,
         _test_crowd_control_stacking_and_final_target,
         _test_snapshot_roundtrip_and_validation,
+        _test_enemy_limit_is_immediate,
+        _test_enemy_limit_stops_scheduled_spawns,
+        _test_catalog_reachable_and_wave_coverage,
+        _test_previous_content_snapshot,
     ]
     for test_case in cases:
         var error: String = test_case.call()
@@ -517,4 +521,123 @@ static func _test_snapshot_roundtrip_and_validation() -> String:
     error = _assert_restore_rejected_without_mutation(restored, malformed, "missing fields")
     if not error.is_empty():
         return error
+    return ""
+
+static func _test_enemy_limit_is_immediate() -> String:
+    for last_kind in ["n01", "b30", "b100", "s10"]:
+        var sim: Variant = _new_sim()
+        sim.debug_jump_wave(31)
+        sim.enemies.clear()
+        for index in range(49):
+            var enemy: Dictionary = sim.add_enemy("n01", 31)
+            enemy.stun_until = 99999.0
+        if sim.result != "active":
+            return "49 stunned enemies must remain active"
+        var response: Dictionary = sim.summon_special(last_kind) if last_kind == "s10" else sim.add_enemy(last_kind, 31)
+        if response.is_empty() or sim.result != "defeat" or sim.enemies.size() != 50:
+            return "the 50th enemy of every category must immediately cause defeat"
+        var before: Dictionary = sim.snapshot()
+        var revision_before: int = sim.revision
+        sim.advance(10000)
+        if not sim.add_enemy("n01", 31).is_empty() or sim.summon_special("s30").ok or sim.summon().ok:
+            return "terminal crowd defeat must reject later spawns and economy"
+        if not sim.add_unit("u01", 0).is_empty() or sim.move_unit(1, 0).ok or sim.gamble(2).ok or sim.upgrade(1).ok or sim.combine("r01").ok:
+            return "terminal state must reject all unit and economy mutations"
+        sim.cycle_speed()
+        sim.debug_jump_wave(100)
+        sim.apply_cc(sim.enemies[0], sim.catalog.units["u01"])
+        if sim.snapshot() != before or sim.revision != revision_before:
+            return "terminal state must freeze without repeat rewards or transitions"
+    var tunable: Variant = _new_sim()
+    tunable.catalog.rules.T.enemy_limit = 3
+    tunable.add_enemy("n01", 1)
+    tunable.add_enemy("n01", 1)
+    if tunable.result != "defeat":
+        return "enemy limit must read tunable data"
+    return ""
+
+static func _test_enemy_limit_stops_scheduled_spawns() -> String:
+    var sim: Variant = _new_sim()
+    for index in range(48):
+        sim.add_enemy("n01", 1)
+    for enemy in sim.enemies:
+        enemy.stun_until = 99999.0
+    sim.advance(2000)
+    if sim.result != "defeat" or sim.enemies.size() != 50 or sim.time > 1.04 or sim.spawn_index != 2:
+        return "scheduled spawn must stop the same tick at 50 despite infinite crowd control"
+    var restored: Variant = _new_sim()
+    if not restored.restore(sim.snapshot()):
+        return "ended snapshot at the limit must remain valid"
+    var invalid: Dictionary = sim.snapshot()
+    invalid.result = "active"
+    if restored.restore(invalid):
+        return "active snapshots at the limit must be rejected"
+    for boundary in [10, 100]:
+        var boss_sim: Variant = _new_sim()
+        boss_sim.debug_jump_wave(boundary - 1)
+        boss_sim.enemies.clear()
+        for index in range(49):
+            var enemy: Dictionary = boss_sim.add_enemy("n01", boundary - 1)
+            enemy.stun_until = 99999.0
+        boss_sim.time = (boundary - 1) * 30.0 - 0.01
+        boss_sim.spawn_index = 10
+        boss_sim.advance(0.1)
+        if boss_sim.result != "defeat" or boss_sim.enemies.size() != 50 or boss_sim.enemies.back().kind != "b%d" % boundary:
+            return "boss and final-boss wave boundaries must trigger the same immediate cap"
+    return ""
+
+static func _test_catalog_reachable_and_wave_coverage() -> String:
+    var sim: Variant = _new_sim()
+    if sim.catalog.units.size() != 34 or sim.catalog.enemies.size() != 53:
+        return "full catalog must contain 34 mercenaries and 53 enemies"
+    var available: Dictionary = {}
+    for id in sim.catalog.pool(1):
+        available[id] = true
+    for iteration in range(4):
+        for recipe in sim.catalog.recipes:
+            var reachable := true
+            var count := 0
+            var tier: int = int(sim.catalog.units[recipe.result].tier)
+            for ingredient in recipe.ingredients:
+                reachable = reachable and available.has(ingredient)
+                count += int(recipe.ingredients[ingredient])
+                if tier < 4 and int(sim.catalog.units[ingredient].tier) != tier - 1:
+                    return "two- and three-star recipes must consume previous-tier units"
+            if tier < 4 and count != 2:
+                return "two- and three-star recipes require exactly two materials"
+            if reachable:
+                available[recipe.result] = true
+    if available.size() != 34:
+        return "every mercenary must be reachable from base summons"
+    var normals: Dictionary = {}
+    for at_wave in range(1, 101):
+        if at_wave % 10 != 0:
+            normals[sim.normal_enemy_kind(at_wave)] = true
+    if normals.size() != 40:
+        return "all 40 normal enemies must occur in the actual wave schedule"
+    if sim.hp_multiplier(30) <= sim.hp_multiplier(20) * 3:
+        return "wave 30 must introduce the configured difficulty ramp"
+    return ""
+
+static func _test_previous_content_snapshot() -> String:
+    var sim: Variant = _new_sim()
+    # 실제 이전 커밋의 엔진과 데이터로 만든 저장을 사용하여 재표기만 한 가짜 이행을 막는다.
+    var fixture: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/content-v0.2.0.json"))
+    var old: Dictionary = fixture.normal
+    if not sim.restore(old) or sim.enemies != old.enemies or sim.units != old.units:
+        return "previous content saves must preserve distinct live HP and units on migration"
+    if sim.rng.randi() != int(fixture.next_rng_draw):
+        return "previous content saves must preserve the next random draw"
+    var fresh: Dictionary = sim.add_enemy("n02", 31)
+    if fresh.max_hp == old.enemies[1].max_hp:
+        return "new spawns after migration must use the new balance"
+    if not sim.restore(fixture.crowded) or sim.result != "defeat" or sim.enemies != fixture.crowded.enemies:
+        return "old crowded saves must migrate to defeat without losing live enemies"
+    if sim.rng.randi() != int(fixture.next_rng_draw):
+        return "crowded migration must preserve RNG"
+    if not sim.restore(sim.snapshot()):
+        return "a migrated terminal snapshot must remain loadable"
+    old.content_version = "unknown"
+    if sim.restore(old):
+        return "unknown future content versions must fail without destructive migration"
     return ""

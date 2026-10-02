@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "family_dragon",
+    "description": "A compact cobalt and teal four-legged dragon with gold horns, cream underside, folded wings and gold barding.",
+    "base_image": "base-source.png"
+  },
+  "cell": {
+    "shape": "square",
+    "width": 256,
+    "height": 256,
+    "safe_margin_x": 24,
+    "safe_margin_y": 24,
+    "size": 256
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "idle": {
+      "frames": 6,
+      "fps": 6,
+      "loop": true,
+      "action": "six visibly varied organic idle poses, gentle breathing and small eye or antenna movement; keep silhouette grounded and stable"
+    },
+    "walk": {
+      "frames": 6,
+      "fps": 8,
+      "loop": true,
+      "action": "six distinct creature locomotion poses with clearly alternating limbs or body compression; preserve identity and no blur"
+    },
+    "attack": {
+      "frames": 6,
+      "fps": 8,
+      "loop": false,
+      "action": "six readable attack poses from ready, wind-up, strike, follow-through, recovery and return to ready; preserve identity"
+    }
+  },
+  "style": "Match the attached base image in identity, view, outline, palette and material. Keep the whole silhouette centered in each frame.",
+  "layout": "taxonomy/v1",
+  "fit": {
+    "resample": "nearest",
+    "align_x": "foot-centroid",
+    "align_y": "bottom"
+  }
+}

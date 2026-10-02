@@ -1,0 +1,19 @@
+{
+  "pipeline": "aldegad/sprite-gen",
+  "stages": [
+    "prepare",
+    "prompted_image_generation",
+    "extract",
+    "compose-atlas",
+    "inspect",
+    "score"
+  ],
+  "generation_route": "conversation image_gen tool using sprite-gen row prompts and layout guides",
+  "image_model_identifier": null,
+  "highest_tier_verified": false,
+  "sprite_gen_checks_passed": true,
+  "human_visual_review": {
+    "status": "reviewed_with_notes",
+    "notes": "Visual review complete: all legs and carapace details remain in frame; no detached fragments. Idle poses have minimal variation."
+  }
+}

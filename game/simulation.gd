@@ -90,7 +90,7 @@ func _allowed() -> bool:
 	return result == "active"
 
 func add_unit(kind: String, cell: int) -> Dictionary:
-	if not catalog.units.has(kind) or cell < 0 or cell >= 36 or not unit_at(cell).is_empty():
+	if not _allowed() or not catalog.units.has(kind) or cell < 0 or cell >= 36 or not unit_at(cell).is_empty():
 		return {}
 	var unit := {"id": next_id, "kind": kind, "cell": cell, "cooldown": 0.0}
 	next_id += 1
@@ -216,15 +216,40 @@ func summon_special(kind: String) -> Dictionary:
 	return {"ok": true, "reason": "%s 출현 · 처치하고 보상을 받으세요" % definition.name}
 
 func add_enemy(kind: String, spawn_wave: int) -> Dictionary:
+	if not _allowed() or not catalog.enemies.has(kind):
+		return {}
 	var definition: Dictionary = catalog.enemies[kind]
 	var hp: float = definition.hp
 	if definition.kind != "special":
-		hp *= pow(float(catalog.rules.T.hp_growth), spawn_wave - 1)
+		hp *= hp_multiplier(spawn_wave)
 	var enemy := {"id": next_id, "kind": kind, "hp": hp, "max_hp": hp, "progress": 0.0, "wave": spawn_wave, "slow": 0.0, "slow_until": 0.0, "stun_until": 0.0, "slows": []}
 	next_id += 1
 	enemies.append(enemy)
 	discovered_enemies[kind] = true
+	# 생성 직후 판정하여 같은 프레임의 공격이나 입력으로 한도를 우회할 수 없게 한다.
+	if enemies.size() >= enemy_limit():
+		_finish("defeat", "전장의 적이 %d마리에 도달했습니다" % enemy_limit())
 	return enemy
+
+func enemy_limit() -> int:
+	return int(catalog.rules.T.enemy_limit)
+
+func hp_multiplier(spawn_wave: int) -> float:
+	var curve: Array = catalog.rules.T.hp_curve
+	var scale: float = curve[-1].multiplier
+	for index in range(1, curve.size()):
+		var left: Dictionary = curve[index - 1]
+		var right: Dictionary = curve[index]
+		if spawn_wave <= int(right.wave):
+			var ratio := clampf(float(spawn_wave - int(left.wave)) / float(int(right.wave) - int(left.wave)), 0.0, 1.0)
+			scale = exp(lerpf(log(float(left.multiplier)), log(float(right.multiplier)), ratio))
+			break
+	return pow(float(catalog.rules.T.hp_growth), spawn_wave - 1) * scale
+
+func normal_enemy_kind(at_wave: int) -> String:
+	# 보스 웨이브를 제외한 90개 일반 웨이브에 40종을 순서대로 배정한다.
+	var ordinal := at_wave - 1 - floori(float(at_wave - 1) / 10.0)
+	return "n%02d" % (mini(39, floori(float(ordinal) * 40.0 / 90.0)) + 1)
 
 func _start_wave() -> void:
 	spawn_index = 0
@@ -232,11 +257,13 @@ func _start_wave() -> void:
 		add_enemy("b%d" % wave, wave)
 		spawn_index = 1
 	else:
-		add_enemy("n%02d" % (mini(7, (wave - 1) / 12) + 1), wave)
+		add_enemy(normal_enemy_kind(wave), wave)
 		spawn_index = 1
 	revision += 1
 
 func cycle_speed() -> int:
+	if not _allowed():
+		return speed
 	var values := [1, 2, 3, 5]
 	speed = values[(values.find(speed) + 1) % 4]
 	revision += 1
@@ -267,6 +294,8 @@ func attack_damage(unit: Dictionary) -> float:
 	return float(definition.damage) * (1.0 + float(catalog.rules.T.upgrade_factor) * int(upgrades[str(int(definition.tier))])) * (1.0 + bonus)
 
 func apply_cc(enemy: Dictionary, definition: Dictionary) -> void:
+	if not _allowed():
+		return
 	if float(definition.slow) > 0.0:
 		# 서로 다른 만료시간을 보존하여 강한 둔화가 끝나면 남은 약한 둔화를 복구한다.
 		var found := false
@@ -350,9 +379,11 @@ func _tick(delta: float) -> void:
 	if wave < 100 and time + 0.000001 >= wave * 30.0:
 		wave += 1
 		_start_wave()
+	if result != "active":
+		return
 	if wave % 10 != 0:
-		while spawn_index < 10 and time - (wave - 1) * 30.0 + 0.000001 >= spawn_index:
-			add_enemy("n%02d" % (mini(7, (wave - 1) / 12) + 1), wave)
+		while result == "active" and spawn_index < 10 and time - (wave - 1) * 30.0 + 0.000001 >= spawn_index:
+			add_enemy(normal_enemy_kind(wave), wave)
 			spawn_index += 1
 	for effect in effects.duplicate():
 		effect.life -= delta
@@ -411,13 +442,16 @@ func restore(saved: Dictionary) -> bool:
 	effects.clear()
 	pause_reasons = {"user": true}
 	revision += 1
+	# 이전 버전의 무제한 군중 저장은 원본 전투 상태를 보존한 채 새 패배 조건을 적용한다.
+	if result == "active" and enemies.size() >= enemy_limit():
+		_finish("defeat", "전장의 적이 %d마리에 도달했습니다" % enemy_limit())
 	return true
 
 func _valid_snapshot(s: Dictionary) -> bool:
 	for key in ["schema", "content_version", "run_id", "time", "wave", "spawn_index", "gold", "lives", "speed", "result", "result_reason", "units", "enemies", "upgrades", "cooldowns", "next_id", "rng_state", "rng_seed", "discovered_units", "discovered_enemies", "kills", "developer_run"]:
 		if not s.has(key):
 			return false
-	if s.schema != 1 or s.content_version != catalog.rules.content_version or not s.run_id is String or s.run_id.is_empty():
+	if s.schema != 1 or not s.content_version in ["0.2.0", catalog.rules.content_version] or not s.run_id is String or s.run_id.is_empty():
 		return false
 	for key in ["time", "wave", "spawn_index", "gold", "lives", "speed", "next_id"]:
 		if not (s[key] is float or s[key] is int) or not is_finite(float(s[key])):
@@ -438,6 +472,8 @@ func _valid_snapshot(s: Dictionary) -> bool:
 	if not s.rng_seed is String or not s.rng_state is String or not s.rng_seed.is_valid_int() or not s.rng_state.is_valid_int():
 		return false
 	if not s.units is Array or not s.enemies is Array or s.units.size() > 36:
+		return false
+	if s.content_version != "0.2.0" and s.result == "active" and s.enemies.size() >= enemy_limit():
 		return false
 	for key in ["upgrades", "cooldowns", "discovered_units", "discovered_enemies", "kills"]:
 		if not s[key] is Dictionary:

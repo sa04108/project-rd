@@ -15,7 +15,12 @@ func _run() -> void:
 	await _frames(4)
 	await _capture("menu")
 
-	await _tap(Vector2(360, 715))
+	# Android와 같은 터치 입력 전파 중 화면을 교체하는 경로를 검사한다.
+	await _touch(Vector2(360, 950))
+	_check(game.panel_name == "guide", "touch opens guide from menu")
+	await _touch(Vector2(640, 336))
+	_check(game.panel_name.is_empty(), "touch closes guide without removing a node during propagation")
+	await _touch(Vector2(360, 715))
 	if game.panel_name == "confirm_new":
 		await _tap(Vector2(360, 721))
 	await _frames(3)
@@ -67,6 +72,9 @@ func _run() -> void:
 
 	await _tap(Vector2(400, 206))
 	_check(game.panel_name == "codex" and not game.sim.pause_reasons.has("settings"), "codex opens without pausing")
+	# 원본 텍스처 크기로 최소 크기가 고정되어 글자를 덮는 회귀를 검사한다.
+	for portrait in game.overlay.find_children("*", "TextureRect", true, false):
+		_check(portrait.size.x <= 88.0 and portrait.size.y <= 96.0, "codex portraits stay inside the reserved row space")
 	await _capture("codex")
 	await _tap(Vector2(639, 326))
 
@@ -162,6 +170,38 @@ func _run() -> void:
 			locked += 1
 	_check(locked == 3, "all special enemies stay locked before wave11")
 	await _capture("special")
+	# 정지 중인 특수몬스터 버튼으로 50번째 적을 추가해도 즉시 결과창이 떠야 한다.
+	game.sim.debug_jump_wave(31)
+	game.sim.enemies.clear()
+	for index in range(49):
+		game.sim.add_enemy("n01", 31)
+	game._open_panel("special", true)
+	var special_button: Button = null
+	for node in game.overlay.find_children("*", "Button", true, false):
+		if node.text == "소환 시 패배" and not node.disabled:
+			special_button = node
+			break
+	_check(special_button != null, "unlocked special button warns of crowd defeat at 49 enemies")
+	if special_button != null:
+		await _tap(special_button.global_position + special_button.size / 2.0)
+		_check(game.sim.result == "defeat" and game.sim.enemies.size() == 50, "50th enemy triggers immediate defeat through real button")
+		_check(game.panel_name == "result", "paused transaction defeat opens result panel")
+		_check(not FileAccess.file_exists(game.store.directory.path_join("run.json")), "terminal crowd defeat clears resumable snapshot")
+		await _capture("crowd_defeat")
+	# 이전 버전의 정상 군중 저장은 메뉴에서도 손상 파일로 오인하면 안 된다.
+	game._show_menu()
+	var legacy: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/content-v0.2.0.json")).crowded
+	legacy.run_id = "legacy-ui-%d" % Time.get_ticks_usec()
+	legacy.developer_run = false
+	_check(game.store._write("run.json", legacy), "legacy crowded fixture is written into isolated UI store")
+	game._show_menu()
+	_check(not game.resume_data.is_empty() and game.store.last_error.is_empty(), "menu accepts migrated legacy crowd defeat as a resumable result")
+	await _tap(Vector2(360, 715))
+	_check(game.panel_name == "confirm_new", "legacy crowd save still requires overwrite confirmation")
+	await _tap(Vector2(360, 815))
+	await _tap(Vector2(360, 805))
+	_check(game.panel_name == "result" and game.sim.enemies.size() == 55 and game.sim.result == "defeat", "continue shows crowd migration result with all original enemies")
+	_check(game.store.profile.best_wave >= 31 and game.store.profile.ended_runs.get(legacy.run_id) == "defeat", "migration records reached wave and ended run exactly once")
 	print("UI_TEST_REPORT ", JSON.stringify({"checks": checks, "failed": errors.size(), "errors": errors}))
 	var status := 1 if not errors.is_empty() else 0
 	game.queue_free()
@@ -191,6 +231,19 @@ func _tap(position: Vector2) -> void:
 	release.pressed = false
 	root.push_input(release, true)
 	await _frames(2)
+
+func _touch(position: Vector2) -> void:
+	var previous_emulation := Input.emulate_mouse_from_touch
+	Input.emulate_mouse_from_touch = true
+	for pressed in [true, false]:
+		var event := InputEventScreenTouch.new()
+		event.position = position
+		event.index = 0
+		event.pressed = pressed
+		Input.parse_input_event(event)
+		Input.flush_buffered_events()
+		await _frames(2)
+	Input.emulate_mouse_from_touch = previous_emulation
 
 func _drag(start: Vector2, finish: Vector2) -> void:
 	var press := InputEventMouseButton.new()

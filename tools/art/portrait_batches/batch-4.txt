@@ -1,0 +1,23 @@
+Create a production-ready STATIC GAME PORTRAIT CUTOUT SHEET for a medieval fantasy mercenary defense game. This sheet contains DIFFERENT character identities, NOT successive animation frames. Match the referenced polished small pixel-art game character style: charming compact anatomy, excellent readable silhouette and equipment, crisp outlined detailed colored pixel clusters, warm light from upper left, three-quarter front view facing slightly right. Each is a separate full-body standing cutout, no environmental context.
+
+LAYOUT IS STRICT: exactly 4 columns by 4 rows, reading order left to right then top to bottom. Every cell has identical dimensions and contains exactly ONE fully visible subject. Each subject is centered, feet aligned near 85% cell height, body including weapon occupies about 65% of cell height and stays inside middle 70% of cell width. Never touch adjacent cells. Leave wide clean margins. SOLID PURE #FF00FF MAGENTA throughout all empty pixels and between every subject. NO floor shadows, NO gradient, NO gridlines, NO cell borders, NO text, NO letters, NO labels or numbers, NO extra people. Do not use magenta within the subjects themselves. The reference establishes rendering style ONLY; do not repeat its human swordsman for other roles or creature types. Every identity must have distinct silhouette, clothes, equipment and species as described. Do not crop wings, antennae, horns, staffs or feet.
+
+Subjects by exact grid slot:
+Row 1, column 1: 회색 늑대, quadruped fantasy monster, distinctive silhouette, its main palette is #9399a5.
+Row 1, column 2: 장갑 고블린, heavy fantasy monster, distinctive silhouette, its main palette is #758968.
+Row 1, column 3: 서리 슬라임, blob fantasy monster, distinctive silhouette, its main palette is #81c0d0.
+Row 1, column 4: 밤의 추적자, humanoid fantasy monster, distinctive silhouette, its main palette is #756a8e.
+Row 2, column 1: 독거미, multi fantasy monster, distinctive silhouette, its main palette is #917798.
+Row 2, column 2: 고대 골렘, heavy fantasy monster, distinctive silhouette, its main palette is #9c8d72.
+Row 2, column 3: 사막 전갈, multi fantasy monster, distinctive silhouette, its main palette is #bc995b.
+Row 2, column 4: 유령 기사, humanoid fantasy monster, distinctive silhouette, its main palette is #8da7ac.
+Row 3, column 1: 붉은 와이번, dragon fantasy monster, distinctive silhouette, its main palette is #bd6051.
+Row 3, column 2: 얼음 거수, quadruped fantasy monster, distinctive silhouette, its main palette is #95c1ce.
+Row 3, column 3: 맹독 슬라임, blob fantasy monster, distinctive silhouette, its main palette is #99b557.
+Row 3, column 4: 화산 투사, heavy fantasy monster, distinctive silhouette, its main palette is #b67553.
+Row 4, column 1: 황혼 정령, floating fantasy monster, distinctive silhouette, its main palette is #a680ac.
+Row 4, column 2: 칼날 사마귀, multi fantasy monster, distinctive silhouette, its main palette is #739f77.
+Row 4, column 3: 검은 사냥개, quadruped fantasy monster, distinctive silhouette, its main palette is #696c83.
+Row 4, column 4: 폐허 주술사, humanoid fantasy monster, distinctive silhouette, its main palette is #957eae.
+
+This is a clean alpha extraction source, not an illustration of a roster UI. Consistent magnification within each species. Maximum available quality. Square aspect ratio.

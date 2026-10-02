@@ -1,0 +1,40 @@
+{
+  "ok": true,
+  "kind": "sprite-gen-score-report",
+  "source_report": "/workspace/project-rd/assets/art/families/floating/sprite_run",
+  "overall_score": 100.0,
+  "candidate_rank": 1800,
+  "rows": [
+    {
+      "state": "idle",
+      "score": 100.0,
+      "candidate_rank": 600,
+      "expected_frames": 6,
+      "found_frames": 6,
+      "errors": [],
+      "warnings": [],
+      "hints": []
+    },
+    {
+      "state": "walk",
+      "score": 100.0,
+      "candidate_rank": 600,
+      "expected_frames": 6,
+      "found_frames": 6,
+      "errors": [],
+      "warnings": [],
+      "hints": []
+    },
+    {
+      "state": "attack",
+      "score": 100.0,
+      "candidate_rank": 600,
+      "expected_frames": 6,
+      "found_frames": 6,
+      "errors": [],
+      "warnings": [],
+      "hints": []
+    }
+  ],
+  "hints": []
+}
