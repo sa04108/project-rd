@@ -3,13 +3,15 @@ extends Control
 signal cell_pressed(cell: int)
 signal cell_dragged(unit_id: int, cell: int)
 
-const BACKGROUND = preload("res://assets/art/backgrounds/battlefield.png")
+const CELL_SIZE := 86.0
+const GRID_ORIGIN := Vector2(102, 130)
 const VisualAssets = preload("res://game/visual_assets.gd")
 var visuals = VisualAssets.new()
 
 var simulation: Object
 var selected_id: int = -1
 var reduced_motion: bool = false
+var blocked_screen_rects: Array[Rect2] = []
 
 const GRID_SIZE := 6
 const UNIT_RADIUS := 0.31
@@ -30,14 +32,8 @@ func _process(_delta: float) -> void:
 	queue_redraw()
 
 func ground_to_screen(point: Vector2) -> Vector2:
-	var y_fraction := clampf((point.y + 0.5) / 7.0, 0.0, 1.0)
-	var perspective := lerpf(0.78, 1.02, y_fraction)
-	var ground_width := maxf(size.x * 0.875, 1.0)
-	var ground_height := maxf(size.y * 0.825, 1.0)
-	return Vector2(
-		size.x * 0.5 + (point.x - 3.0) * ground_width / 7.0 * perspective,
-		size.y * 0.0879 + (point.y + 0.5) * ground_height / 7.0
-	)
+	# 두 축에 같은 배율을 적용해 모든 칸과 사거리를 정투영으로 유지한다.
+	return GRID_ORIGIN + point * CELL_SIZE
 
 func _animation_time() -> float:
 	if reduced_motion:
@@ -47,13 +43,10 @@ func _animation_time() -> float:
 	return float(Time.get_ticks_msec()) / 1000.0
 
 func screen_to_cell(point: Vector2) -> int:
-	var found := Vector2(-1, -1)
-	for col in GRID_SIZE:
-		for row in GRID_SIZE:
-			var poly := _cell_polygon(col, row)
-			if Geometry2D.is_point_in_polygon(point, poly):
-				return col * GRID_SIZE + row
-	return -1
+	var local := (point - GRID_ORIGIN) / CELL_SIZE
+	if local.x < 0 or local.y < 0 or local.x >= GRID_SIZE or local.y >= GRID_SIZE:
+		return -1
+	return floori(local.x) * GRID_SIZE + floori(local.y)
 
 func enemy_position(progress: float) -> Vector2:
 	var d := clampf(progress, 0.0, 26.0)
@@ -79,7 +72,6 @@ func _cell_polygon(col: int, row: int) -> PackedVector2Array:
 func _draw() -> void:
 	if size.x <= 0.0 or size.y <= 0.0:
 		return
-	_draw_background()
 	_draw_field()
 	_draw_selected_range()
 	_draw_effects()
@@ -87,15 +79,18 @@ func _draw() -> void:
 	_draw_units()
 	_draw_markers()
 
-func _draw_background() -> void:
-	draw_texture_rect(BACKGROUND, Rect2(Vector2.ZERO, size), false)
-
 func _draw_field() -> void:
-	# 그림의 잔디 위에 정확한 논리 칸과 맞는 얇은 경계선만 표시한다.
+	# 배경 그림과 별도로 정확한 정사각형 경계와 선택 영역을 그린다.
+	var field := Rect2(GRID_ORIGIN, Vector2.ONE * CELL_SIZE * GRID_SIZE)
+	draw_rect(field.grow(2), Color("4b572e"), false, 3)
 	for col in GRID_SIZE:
 		for row in GRID_SIZE:
-			var poly := _cell_polygon(col, row)
-			draw_polyline(PackedVector2Array([poly[0], poly[1], poly[2], poly[3], poly[0]]), Color(0.92, 0.93, 0.66, 0.28), 1.0, true)
+			var rect := Rect2(GRID_ORIGIN + Vector2(col, row) * CELL_SIZE, Vector2.ONE * CELL_SIZE)
+			if (col + row) % 2 == 0:
+				draw_rect(rect, Color(0.94, 0.91, 0.59, 0.05))
+	for line in range(GRID_SIZE + 1):
+		draw_line(GRID_ORIGIN + Vector2(line * CELL_SIZE, 0), GRID_ORIGIN + Vector2(line * CELL_SIZE, GRID_SIZE * CELL_SIZE), Color(0.93, 0.91, 0.64, 0.42), 1.2, true)
+		draw_line(GRID_ORIGIN + Vector2(0, line * CELL_SIZE), GRID_ORIGIN + Vector2(GRID_SIZE * CELL_SIZE, line * CELL_SIZE), Color(0.93, 0.91, 0.64, 0.42), 1.2, true)
 
 func _draw_selected_range() -> void:
 	if simulation == null or selected_id < 0:
@@ -115,8 +110,8 @@ func _draw_selected_range() -> void:
 			var a := TAU * i / 64.0
 			pts.append(c + x_axis * cos(a) + y_axis * sin(a))
 		pts.append(pts[0])
-		draw_colored_polygon(_range_fill(c, x_axis, y_axis), Color(0.76, 0.82, 0.45, 0.08))
-		draw_polyline(pts, Color(0.84, 0.88, 0.54, 0.7), 2.0, true)
+		draw_colored_polygon(_range_fill(c, x_axis, y_axis), Color(0.29, 0.78, 0.92, 0.11))
+		draw_polyline(pts, Color(0.55, 0.89, 0.95, 0.65), 2.0, true)
 		break
 
 func _range_fill(c: Vector2, xa: Vector2, ya: Vector2) -> PackedVector2Array:
@@ -135,9 +130,9 @@ func _draw_effects() -> void:
 		var a := ground_to_screen(from_point)
 		var b := ground_to_screen(to_point)
 		var color := Color(String(effect.get("color", "#f4d178")))
-		draw_line(a, b, Color(color, 0.26), maxf(size.x / 100.0, 5.0), true)
-		draw_line(a, b, color, maxf(size.x / 250.0, 2.0), true)
-		draw_circle(b, maxf(size.x / 100.0, 5.0), color)
+		draw_line(a, b, Color(color, 0.26), 3.0, true)
+		draw_line(a, b, color, 1.3, true)
+		draw_circle(b, 3.0, color)
 
 func _draw_enemies() -> void:
 	if simulation == null:
@@ -151,7 +146,7 @@ func _draw_enemies() -> void:
 		_draw_character(p, String(enemy.kind), tint, false, "idle" if float(enemy.stun_until) > simulation.time else "walk", anim_time, 1.45 if def.kind in ["boss", "final"] else 1.0)
 		var hp := clampf(float(enemy.get("hp", 1.0)) / maxf(float(enemy.get("max_hp", 1.0)), 0.01), 0.0, 1.0)
 		var bw := maxf(size.x / 30.0, 18.0)
-		var bar := Rect2(p + Vector2(-bw * 0.5, -size.y / 11.0 * (1.4 if def.kind in ["boss", "final"] else 1.0)), Vector2(bw, maxf(size.y / 140.0, 3.0)))
+		var bar := Rect2(p + Vector2(-bw * 0.5, -CELL_SIZE * 0.74 * (1.4 if def.kind in ["boss", "final"] else 1.0)), Vector2(bw, maxf(size.y / 140.0, 3.0)))
 		draw_rect(bar, Color("261f23"))
 		draw_rect(Rect2(bar.position, Vector2(bar.size.x * hp, bar.size.y)), Color("d7604c" if hp > 0.35 else "e9a044"))
 
@@ -174,14 +169,14 @@ func _draw_units() -> void:
 		var attacking := not reduced_motion and float(unit.cooldown) > 0.0 and elapsed < minf(0.65, float(def.interval))
 		_draw_character(p, String(unit.kind), tint, true, "attack" if attacking else "idle", elapsed if attacking else _animation_time() + cell * 0.17, 1.0 + tier * 0.035)
 		for star in range(tier):
-			var star_pos := p + Vector2((star - (tier - 1) * 0.5) * 6.0, -size.y / 10.7)
+			var star_pos := p + Vector2((star - (tier - 1) * 0.5) * 6.0, -CELL_SIZE * 0.76)
 			_draw_star(star_pos, maxf(size.x / 180.0, 2.2), Color("ffe08a"))
 
 func _draw_character(p: Vector2, identity: String, tint: Color, ally: bool, state: String, clock: float, scale_factor: float) -> void:
 	# 용병은 개별 원화를 사용하고, 대기 호흡과 공격 이동은 전체 텍스처에 적용한다.
 	var portrait: Texture2D = visuals.portrait(identity) if ally else null
 	if portrait != null:
-		var height := 65.0 * clampf(size.x / 668.0, 0.66, 1.15) * scale_factor
+		var height := CELL_SIZE * 0.76 * scale_factor
 		var width := height * portrait.get_width() / portrait.get_height()
 		var motion := Vector2.ZERO
 		if not reduced_motion:
@@ -193,7 +188,7 @@ func _draw_character(p: Vector2, identity: String, tint: Color, ally: bool, stat
 		# 누락된 에셋은 명시적인 자리 표시자로만 표시한다.
 		draw_circle(p + Vector2(0, -12), 12.0, tint)
 		return
-	var height := 65.0 * clampf(size.x / 668.0, 0.66, 1.15) * scale_factor
+	var height := CELL_SIZE * 0.76 * scale_factor
 	var width: float = height * sprite.region.size.x / sprite.region.size.y
 	var rect := Rect2(p - Vector2(width * 0.5, height * 0.87), Vector2(width, height))
 	# 공유 원화와 개별 팔레트의 관계를 매니페스트에 기록한다.
@@ -272,6 +267,13 @@ func _end_pointer(pos: Vector2) -> void:
 	if not _dragging and _pressed_unit >= 0 and pos.distance_to(_pointer_origin) >= 10.0:
 		_dragging = true
 	_pointer_down = false
+	# 포인터를 전장이 먼저 잡았어도 UI 위에서 놓으면 배치를 취소한다.
+	for blocked in blocked_screen_rects:
+		if blocked.has_point(get_global_transform() * pos):
+			_pressed_unit = -1
+			_press_cell = -1
+			_dragging = false
+			return
 	var release_cell := screen_to_cell(pos)
 	if _dragging and _pressed_unit >= 0 and release_cell >= 0:
 		cell_dragged.emit(_pressed_unit, release_cell)

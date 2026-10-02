@@ -1,5 +1,7 @@
 # MVP 0.3 검증 · 2026-10-02
 
+이 문서는 이전 Godot 4.4.1 빌드의 기록이다. 4.7.2 정투영·Web 검증은 [후속 검증](ORTHOGRAPHIC_WEB_QA.md)에 분리한다.
+
 Godot **4.4.1.stable.official.49a5bc7b6**, Linux x86_64, Compatibility,
 Xvfb + Mesa llvmpipe에서 검사했다. 최종 입력 체크섬은 `QA_SOURCE_SHA256.txt`에 기록한다.
 

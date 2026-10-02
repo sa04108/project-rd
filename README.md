@@ -1,19 +1,19 @@
 # project-rd · 용병 길드
 
-Godot 4.4.1, GDScript, 세로 720×1280의 오프라인 타워 디펜스 MVP입니다.
+Godot 4.7.2, GDScript, 세로 720×1280의 오프라인 타워 디펜스 MVP입니다.
 소환 → 조합 → 재배치 → 성급 강화와 군중제어 → 100웨이브 마왕 처치까지 플레이할 수 있습니다.
 
 ## 실행
 
-Godot **4.4.1 standard**로 `project.godot`을 열어 실행하거나:
+Godot **4.7.2 standard**로 `project.godot`을 열어 실행하거나:
 
 ```bash
-/path/to/godot-4.4.1 --path .
+/path/to/godot-4.7.2 --path .
 # 이 클라우드 환경에서는:
-.godot-tools/4.4.1-stable/godot --path .
+.godot-tools/4.7.2-stable/godot --path .
 ```
 
-클라우드에서 화면을 검증할 때는 Xvfb를 사용합니다. 사용자에게 노출되는 로컬 웹 미리보기는 제공하지 않습니다.
+클라우드의 네이티브 화면 검증은 Xvfb를 사용합니다. 브라우저용 빌드·배포·재현 방법은 [Web 플레이](docs/WEB_PREVIEW.md)에 있습니다.
 
 ## 조작
 
@@ -27,7 +27,7 @@ Godot **4.4.1 standard**로 `project.godot`을 열어 실행하거나:
 
 ## 제공 범위
 
-- 6×6 배치, 외곽 26단위 단방향 경로, 100웨이브 전체 일정과 마왕 승패.
+- 모든 칸이 86×86인 정투영 6×6 배치, 전장 전체 화면 배경과 HUD 오버레이, 외곽 26단위 단방향 경로, 100웨이브 전체 일정과 마왕 승패.
 - 34종 용병(1/2/3/4성 각 6/10/12/6), 28개 조합법.
 - 일반 적 40종, 보스 9종과 마왕 1종, 보상형 특수몬스터 3종.
 - 공유 공격력 강화, 성급별 도박, 둔화·기절·범위 공격·화력 지원.
@@ -40,12 +40,12 @@ Godot **4.4.1 standard**로 `project.godot`을 열어 실행하거나:
 ```bash
 bash scripts/mvp-check.sh
 VERIFY_VISUAL=1 bash scripts/mvp-check.sh
-GODOT_BIN=/path/to/godot-4.4.1 bash scripts/mvp-check.sh
-.godot-tools/4.4.1-stable/godot --headless --path . --script res://tests/balance_playthrough.gd
+GODOT_BIN=/path/to/godot-4.7.2 bash scripts/mvp-check.sh
+.godot-tools/4.7.2-stable/godot --headless --path . --script res://tests/balance_playthrough.gd
 ```
 
 `mvp-check.sh`는 버전, import, 29개 규칙·저장·아트 검사, 메인 300회 반복을 확인합니다.
-화면 검증을 켜면 Xvfb와 Mesa로 실제 UI 입력 104개 검사를 수행하고 `artifacts/screenshots/`에 PNG를 만듭니다.
+화면 검증을 켜면 Xvfb와 Mesa로 실제 UI 입력·정투영 좌표 183개 검사를 수행하고 `artifacts/screenshots/`에 PNG를 만듭니다.
 로그와 테스트용 저장 데이터는 `artifacts/`에 격리합니다.
 
 개발용 웨이브 점프는 `-- --dev`로 실행한 경우에만 F8로 제공합니다. 개발 판은 최고 기록에 반영되지 않습니다.
@@ -59,7 +59,7 @@ bash scripts/android-export.sh
 bash scripts/android-emulator-test.sh
 ```
 
-이 클라우드의 기본 구성은 API 30 AOSP + Xvfb/Mesa llvmpipe이며, 실제 APK에서 화면·입력·저장 복원 등 44개 검사를 통과했습니다. 상세 결과와 물리 기기 연결 방법은 [Android QA](docs/ANDROID_QA.md)를 확인하세요.
+기존 Godot 4.4.1 빌드는 API 30 AOSP + Xvfb/Mesa llvmpipe의 실제 APK에서 화면·입력·저장 복원 등 44개 검사를 통과했습니다. 이번 4.7.2 화면 변경에 대한 Android APK 재검사는 아직 수행하지 않았습니다. 상세 결과와 물리 기기 연결 방법은 [Android QA](docs/ANDROID_QA.md)를 확인하세요.
 첫 클리어율 5%는 사람 대상 목표이며 자동 플레이 봇의 성공률과 동일한 수치가 아닙니다.
 
-[실제 검증 결과](docs/QA_ACCEPTANCE.md) · [구현 결정](DECISIONS.md) · [미구현·결정 사항](docs/REMAINING.md) · [명세](docs/MVP_SPEC_v0.2.md)
+[4.7.2 정투영·Web 검증](docs/ORTHOGRAPHIC_WEB_QA.md) · [이전 검증 결과](docs/QA_ACCEPTANCE.md) · [구현 결정](DECISIONS.md) · [미구현·결정 사항](docs/REMAINING.md) · [명세](docs/MVP_SPEC_v0.2.md)

@@ -6,13 +6,13 @@ TOOLS_ROOT="/workspace/.tools"
 SDK_ROOT="$TOOLS_ROOT/android-sdk/sdk"
 SDK_DOWNLOADS="$TOOLS_ROOT/android-sdk/downloads"
 GODOT_DATA="$TOOLS_ROOT/godot-templates/data"
-TEMPLATE_DOWNLOADS="$TOOLS_ROOT/godot-templates/downloads"
+TEMPLATE_DOWNLOADS="$TOOLS_ROOT/godot-templates/downloads/4.7.2-stable"
 GODOT_VERSION="${GODOT_VERSION:-}"
 if [[ -z "$GODOT_VERSION" ]]; then
 	if [[ -f "$ROOT/.godot-version" ]]; then
 		GODOT_VERSION="$(tr -d '\r\n' < "$ROOT/.godot-version")"
 	else
-		GODOT_VERSION="4.4.1-stable"
+		GODOT_VERSION="4.7.2-stable"
 	fi
 fi
 ANDROID_API="${ANDROID_API:-30}"
@@ -25,7 +25,7 @@ TEMPLATE_ARCHIVE="Godot_v${GODOT_VERSION}_export_templates.tpz"
 for tool in curl sha1sum sha512sum unzip java python3; do
 	command -v "$tool" >/dev/null
 done
-[[ "$GODOT_VERSION" == "4.4.1-stable" && "$(uname -m)" == "x86_64" ]]
+[[ "$GODOT_VERSION" == "4.7.2-stable" && "$(uname -m)" == "x86_64" ]]
 mkdir -p "$SDK_DOWNLOADS" "$SDK_ROOT" "$TEMPLATE_DOWNLOADS"
 
 if [[ ! -x "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]]; then
@@ -65,7 +65,7 @@ SYSTEM_IMAGE_PATH="${ANDROID_SYSTEM_IMAGE#system-images;}"
 SYSTEM_IMAGE_PATH="${SYSTEM_IMAGE_PATH//;/\/}"
 test -f "$SDK_ROOT/system-images/$SYSTEM_IMAGE_PATH/system.img"
 
-TEMPLATE_DIR="$GODOT_DATA/godot/export_templates/4.4.1.stable"
+TEMPLATE_DIR="$GODOT_DATA/godot/export_templates/4.7.2.stable"
 TEMPLATE_PATH="$TEMPLATE_DOWNLOADS/$TEMPLATE_ARCHIVE"
 if [[ ! -f "$TEMPLATE_PATH" ]]; then
 	curl -fL --retry 3 "https://github.com/godotengine/godot/releases/download/$GODOT_VERSION/$TEMPLATE_ARCHIVE" -o "$TEMPLATE_PATH"
@@ -82,7 +82,7 @@ for name in android_debug.apk android_release.apk android_source.zip icudt_godot
 		unzip -p "$TEMPLATE_PATH" "templates/$name" > "$TEMPLATE_DIR/$name"
 	fi
 done
-test "$(cat "$TEMPLATE_DIR/version.txt")" = "4.4.1.stable"
+test "$(cat "$TEMPLATE_DIR/version.txt")" = "4.7.2.stable"
 
 AVD_HOME="$TOOLS_ROOT/android-sdk/avd"
 export ANDROID_AVD_HOME="$AVD_HOME"

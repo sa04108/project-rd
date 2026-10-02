@@ -35,7 +35,7 @@ if [[ -z "$GODOT_VERSION_ACTUAL" ]]; then
 	if [[ -f "$ROOT/.godot-version" ]]; then
 		GODOT_VERSION_ACTUAL="$(tr -d '\r\n' < "$ROOT/.godot-version")"
 	else
-		GODOT_VERSION_ACTUAL="4.4.1-stable"
+		GODOT_VERSION_ACTUAL="4.7.2-stable"
 	fi
 fi
 SDK_TOOLS_REVISION="$(sed -n 's/^Pkg.Revision=//p' "$SDK_ROOT/cmdline-tools/latest/source.properties" | head -n 1)"

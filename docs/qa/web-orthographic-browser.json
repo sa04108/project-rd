@@ -1,0 +1,412 @@
+{
+  "result": "pass",
+  "run_id": "20261002T151205.778Z",
+  "base_url": "http://127.0.0.1:4173/",
+  "browser": "Chromium via Playwright",
+  "browser_version": "151.0.7922.173",
+  "playwright_version": "1.57.0",
+  "checks": [
+    "QA bridge gated by query flag",
+    "initial art and frame ready",
+    "new run and three summons",
+    "pause freezes simulation",
+    "speed cycle 1→2→3→5→1",
+    "unit relocation",
+    "guide/codex/recipe panels",
+    "save-menu-continue",
+    "browser reload and persistent restore",
+    "desktop, mobile-touch, and wide viewport input",
+    "public URL omits QA bridge",
+    "all screenshots contain visible pixel diversity"
+  ],
+  "final_state": {
+    "android_qa": false,
+    "art_ready": true,
+    "buttons": {
+      "codex": {
+        "disabled": false,
+        "height": 54,
+        "width": 78,
+        "x": 552,
+        "y": 151
+      },
+      "gamble": {
+        "disabled": false,
+        "height": 63,
+        "width": 216,
+        "x": 252,
+        "y": 1160
+      },
+      "guide": {
+        "disabled": false,
+        "height": 59,
+        "width": 78,
+        "x": 552,
+        "y": 82
+      },
+      "pause": {
+        "disabled": false,
+        "height": 59,
+        "width": 60,
+        "x": 639,
+        "y": 82
+      },
+      "recipes": {
+        "disabled": false,
+        "height": 50,
+        "width": 113,
+        "x": 586,
+        "y": 216
+      },
+      "settings": {
+        "disabled": false,
+        "height": 54,
+        "width": 60,
+        "x": 639,
+        "y": 151
+      },
+      "special": {
+        "disabled": false,
+        "height": 63,
+        "width": 216,
+        "x": 477,
+        "y": 1160
+      },
+      "speed": {
+        "disabled": false,
+        "height": 49,
+        "width": 57,
+        "x": 642,
+        "y": 19
+      },
+      "summon": {
+        "disabled": false,
+        "height": 83,
+        "width": 262,
+        "x": 229,
+        "y": 1034
+      },
+      "upgrade": {
+        "disabled": false,
+        "height": 63,
+        "width": 216,
+        "x": 27,
+        "y": 1160
+      }
+    },
+    "cell_centers": [
+      {
+        "cell": 0,
+        "x": 145,
+        "y": 397
+      },
+      {
+        "cell": 1,
+        "x": 145,
+        "y": 483
+      },
+      {
+        "cell": 2,
+        "x": 145,
+        "y": 569
+      },
+      {
+        "cell": 3,
+        "x": 145,
+        "y": 655
+      },
+      {
+        "cell": 4,
+        "x": 145,
+        "y": 741
+      },
+      {
+        "cell": 5,
+        "x": 145,
+        "y": 827
+      },
+      {
+        "cell": 6,
+        "x": 231,
+        "y": 397
+      },
+      {
+        "cell": 7,
+        "x": 231,
+        "y": 483
+      },
+      {
+        "cell": 8,
+        "x": 231,
+        "y": 569
+      },
+      {
+        "cell": 9,
+        "x": 231,
+        "y": 655
+      },
+      {
+        "cell": 10,
+        "x": 231,
+        "y": 741
+      },
+      {
+        "cell": 11,
+        "x": 231,
+        "y": 827
+      },
+      {
+        "cell": 12,
+        "x": 317,
+        "y": 397
+      },
+      {
+        "cell": 13,
+        "x": 317,
+        "y": 483
+      },
+      {
+        "cell": 14,
+        "x": 317,
+        "y": 569
+      },
+      {
+        "cell": 15,
+        "x": 317,
+        "y": 655
+      },
+      {
+        "cell": 16,
+        "x": 317,
+        "y": 741
+      },
+      {
+        "cell": 17,
+        "x": 317,
+        "y": 827
+      },
+      {
+        "cell": 18,
+        "x": 403,
+        "y": 397
+      },
+      {
+        "cell": 19,
+        "x": 403,
+        "y": 483
+      },
+      {
+        "cell": 20,
+        "x": 403,
+        "y": 569
+      },
+      {
+        "cell": 21,
+        "x": 403,
+        "y": 655
+      },
+      {
+        "cell": 22,
+        "x": 403,
+        "y": 741
+      },
+      {
+        "cell": 23,
+        "x": 403,
+        "y": 827
+      },
+      {
+        "cell": 24,
+        "x": 489,
+        "y": 397
+      },
+      {
+        "cell": 25,
+        "x": 489,
+        "y": 483
+      },
+      {
+        "cell": 26,
+        "x": 489,
+        "y": 569
+      },
+      {
+        "cell": 27,
+        "x": 489,
+        "y": 655
+      },
+      {
+        "cell": 28,
+        "x": 489,
+        "y": 741
+      },
+      {
+        "cell": 29,
+        "x": 489,
+        "y": 827
+      },
+      {
+        "cell": 30,
+        "x": 575,
+        "y": 397
+      },
+      {
+        "cell": 31,
+        "x": 575,
+        "y": 483
+      },
+      {
+        "cell": 32,
+        "x": 575,
+        "y": 569
+      },
+      {
+        "cell": 33,
+        "x": 575,
+        "y": 655
+      },
+      {
+        "cell": 34,
+        "x": 575,
+        "y": 741
+      },
+      {
+        "cell": 35,
+        "x": 575,
+        "y": 827
+      }
+    ],
+    "enemy_count": 1,
+    "frame_size": [
+      720,
+      1280
+    ],
+    "gold": 108,
+    "lives": 20,
+    "mode": "battle",
+    "panel_name": "",
+    "pause_reasons": {
+      "user": true
+    },
+    "process_id": 0,
+    "result": "active",
+    "save_error": "",
+    "selected": -1,
+    "session_id": "1790953908.086-675000",
+    "snapshot_exists": true,
+    "speed": 1,
+    "time": 9.50420952380951,
+    "units": [
+      {
+        "cell": 3,
+        "cooldown": 1.00416666666667,
+        "id": 2,
+        "kind": "u03"
+      },
+      {
+        "cell": 1,
+        "cooldown": 0.920833333333333,
+        "id": 4,
+        "kind": "u04"
+      },
+      {
+        "cell": 2,
+        "cooldown": 0.267233333333333,
+        "id": 5,
+        "kind": "u02"
+      }
+    ],
+    "wave": 1
+  },
+  "screenshots": [
+    {
+      "file": "/workspace/project-rd/artifacts/web-qa-final-20261002T1511Z/menu.png",
+      "width": 720,
+      "height": 1280,
+      "unique_sampled_rgb": 37459,
+      "sampled_channel_min": 1,
+      "sampled_channel_max": 255
+    },
+    {
+      "file": "/workspace/project-rd/artifacts/web-qa-final-20261002T1511Z/battle-after-summon.png",
+      "width": 720,
+      "height": 1280,
+      "unique_sampled_rgb": 33880,
+      "sampled_channel_min": 0,
+      "sampled_channel_max": 255
+    },
+    {
+      "file": "/workspace/project-rd/artifacts/web-qa-final-20261002T1511Z/recipes.png",
+      "width": 720,
+      "height": 1280,
+      "unique_sampled_rgb": 19616,
+      "sampled_channel_min": 0,
+      "sampled_channel_max": 255
+    },
+    {
+      "file": "/workspace/project-rd/artifacts/web-qa-final-20261002T1511Z/resumed.png",
+      "width": 720,
+      "height": 1280,
+      "unique_sampled_rgb": 31958,
+      "sampled_channel_min": 0,
+      "sampled_channel_max": 255
+    },
+    {
+      "file": "/workspace/project-rd/artifacts/web-qa-final-20261002T1511Z/browser-restart.png",
+      "width": 720,
+      "height": 1280,
+      "unique_sampled_rgb": 31958,
+      "sampled_channel_min": 0,
+      "sampled_channel_max": 255
+    },
+    {
+      "file": "/workspace/project-rd/artifacts/web-qa-final-20261002T1511Z/mobile-resumed.png",
+      "width": 360,
+      "height": 640,
+      "unique_sampled_rgb": 35847,
+      "sampled_channel_min": 0,
+      "sampled_channel_max": 255
+    },
+    {
+      "file": "/workspace/project-rd/artifacts/web-qa-final-20261002T1511Z/wide-viewport-layout.png",
+      "width": 1280,
+      "height": 800,
+      "unique_sampled_rgb": 13957,
+      "sampled_channel_min": 0,
+      "sampled_channel_max": 255,
+      "frame_size": [
+        720,
+        1280
+      ],
+      "canvas_bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 800
+      },
+      "fitted_canvas_bounds": {
+        "x": 415,
+        "y": 0,
+        "width": 450,
+        "height": 800
+      }
+    },
+    {
+      "file": "/workspace/project-rd/artifacts/web-qa-final-20261002T1511Z/wide-viewport.png",
+      "width": 1280,
+      "height": 800,
+      "unique_sampled_rgb": 13958,
+      "sampled_channel_min": 0,
+      "sampled_channel_max": 255
+    },
+    {
+      "file": "/workspace/project-rd/artifacts/web-qa-final-20261002T1511Z/public-normal.png",
+      "width": 720,
+      "height": 1280,
+      "unique_sampled_rgb": 37459,
+      "sampled_channel_min": 1,
+      "sampled_channel_max": 255
+    }
+  ],
+  "browser_errors": []
+}
