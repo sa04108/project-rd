@@ -28,6 +28,24 @@ func _run() -> void:
 	await _frames(3)
 	_check(game.mode == "battle", "new game enters battle")
 	_check(game.sim.units.is_empty() and game.sim.gold == 150, "new battle starts empty with summon gold")
+
+	# 최소 320px 폭에서도 모든 주요 버튼은 44px 이상의 입력 영역을 갖는다.
+	var action_rects: Array[Rect2] = []
+	for action in ["speed", "pause", "guide", "codex", "settings", "recipes", "summon", "upgrade", "gamble", "special"]:
+		var target: Control = null
+		for node in game.find_children("*", "Button", true, false):
+			if node.is_visible_in_tree() and node.get_meta("qa_action", "") == action:
+				target = node
+				break
+		_check(target != null, "touch action exists: " + action)
+		if target == null:
+			continue
+		var rect := target.get_global_rect()
+		_check(rect.size.x * 320.0 / 720.0 >= 44.0 and rect.size.y * 320.0 / 720.0 >= 44.0, "minimum-width touch target: " + action)
+		_check(Rect2(0, 0, 720, 1280).encloses(rect), "touch target remains inside portrait canvas: " + action)
+		for prior in action_rects:
+			_check(not rect.intersects(prior), "main touch targets do not overlap: " + action)
+		action_rects.append(rect)
 	await _capture("battle_empty")
 
 	await _tap(_action_center("pause"))
@@ -121,7 +139,7 @@ func _run() -> void:
 	var upgrade_button := _find_button("강화   ◈ 80")
 	_check(upgrade_button != null and upgrade_button.disabled, "upgrade is disabled below its price")
 	game.sim.gold = 80
-	await _frames(20)
+	await _wait_until(func(): return upgrade_button != null and not upgrade_button.disabled)
 	_check(upgrade_button != null and not upgrade_button.disabled, "upgrade becomes affordable without reopening the panel")
 	await _tap(_action_center("close_panel"))
 
@@ -131,7 +149,7 @@ func _run() -> void:
 	var gamble_button := _find_button("계약   ◈ 100")
 	_check(gamble_button != null and gamble_button.disabled, "gamble is disabled below its price")
 	game.sim.gold = 100
-	await _frames(20)
+	await _wait_until(func(): return gamble_button != null and not gamble_button.disabled)
 	_check(gamble_button != null and not gamble_button.disabled, "gamble becomes affordable while its panel stays open")
 	await _capture("gamble")
 	await _tap(_action_center("close_panel"))
@@ -345,3 +363,9 @@ func _touch_drag(start: Vector2, finish: Vector2) -> void:
 	Input.parse_input_event(release)
 	Input.flush_buffered_events()
 	await _frames(2)
+
+func _wait_until(predicate: Callable, timeout_ms: int = 1000) -> void:
+	# 고정 프레임 수 대신 실제 갱신 조건을 제한 시간 안에서 관찰한다.
+	var deadline := Time.get_ticks_msec() + timeout_ms
+	while not predicate.call() and Time.get_ticks_msec() < deadline:
+		await process_frame
