@@ -1,0 +1,24 @@
+config_version=5
+
+[application]
+config/name="project-rd · 용병 길드"
+run/main_scene="res://game/main.tscn"
+config/features=PackedStringArray("4.4", "GL Compatibility")
+
+[display]
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/size/window_width_override=540
+window/size/window_height_override=960
+window/stretch/mode="canvas_items"
+handheld/orientation=1
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+environment/defaults/default_clear_color=Color(0.035, 0.055, 0.085, 1)
+
+[input_devices]
+pointing/emulate_touch_from_mouse=false
+pointing/emulate_mouse_from_touch=true

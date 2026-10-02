@@ -1,0 +1,87 @@
+{
+  "content_version": "0.2.0",
+  "F": {
+    "board_cols": 6,
+    "board_rows": 6,
+    "path_length": 26.0,
+    "wave_seconds": 30.0,
+    "max_wave": 100,
+    "start_lives": 20,
+    "normal_count": 10,
+    "special_cooldown": 300.0,
+    "speeds": [
+      1,
+      2,
+      3,
+      5
+    ]
+  },
+  "I": {
+    "normal_travel": 18.0,
+    "boss_travel": 27.0,
+    "final_travel": 30.0
+  },
+  "D": {
+    "summon_fixed_cost": true,
+    "start_gold": 150,
+    "normal_spawn_seconds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "boss_count": 1,
+    "boss_only_waves": [
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90
+    ],
+    "final_boss_count": 1,
+    "occupied_move": "swap",
+    "pause_allows_economy_and_reposition": true,
+    "combination_cost": 0,
+    "recipe_matching": "exact_unit_ids_and_counts",
+    "catalogue_unlocked_for_browsing": true,
+    "targeting": "greatest_path_progress_then_stable_id",
+    "slow_stacking": "strongest_only",
+    "stun_stacking": "latest_expiry",
+    "upgrade_categories": [
+      "attack_damage"
+    ],
+    "upgrade_levels": "1_to_4_star_shared",
+    "special_cooldown_scope": "per_type_game_time",
+    "same_type_specials_may_coexist": true,
+    "save_resume_starts_paused": true
+  },
+  "T": {
+    "summon_cost": 50,
+    "gamble": {
+      "2": {
+        "cost": 100,
+        "chance": 0.65
+      },
+      "3": {
+        "cost": 240,
+        "chance": 0.3
+      }
+    },
+    "upgrade_cost": 80,
+    "upgrade_factor": 0.18,
+    "upgrade_max": 10,
+    "normal_reward": 12,
+    "boss_reward": 160,
+    "hp_growth": 1.055
+  }
+}

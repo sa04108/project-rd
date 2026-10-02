@@ -1,0 +1,83 @@
+[
+  {
+    "id": "r_u07",
+    "result": "u07",
+    "ingredients": {
+      "u01": 1,
+      "u02": 1
+    }
+  },
+  {
+    "id": "r_u08",
+    "result": "u08",
+    "ingredients": {
+      "u02": 1,
+      "u03": 1
+    }
+  },
+  {
+    "id": "r_u09",
+    "result": "u09",
+    "ingredients": {
+      "u04": 1,
+      "u05": 1
+    }
+  },
+  {
+    "id": "r_u10",
+    "result": "u10",
+    "ingredients": {
+      "u03": 1,
+      "u06": 1
+    }
+  },
+  {
+    "id": "r_u11",
+    "result": "u11",
+    "ingredients": {
+      "u01": 2
+    }
+  },
+  {
+    "id": "r_u12",
+    "result": "u12",
+    "ingredients": {
+      "u07": 1,
+      "u08": 1
+    }
+  },
+  {
+    "id": "r_u13",
+    "result": "u13",
+    "ingredients": {
+      "u08": 1,
+      "u09": 1
+    }
+  },
+  {
+    "id": "r_u14",
+    "result": "u14",
+    "ingredients": {
+      "u10": 1,
+      "u11": 1
+    }
+  },
+  {
+    "id": "r_u15",
+    "result": "u15",
+    "ingredients": {
+      "u12": 1,
+      "u13": 1,
+      "u01": 1
+    }
+  },
+  {
+    "id": "r_u16",
+    "result": "u16",
+    "ingredients": {
+      "u14": 1,
+      "u09": 1,
+      "u06": 1
+    }
+  }
+]

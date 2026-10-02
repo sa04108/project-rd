@@ -1,0 +1,240 @@
+extends SceneTree
+
+var errors: Array[String] = []
+var checks := 0
+var game: Control
+
+func _initialize() -> void:
+	call_deferred("_run")
+
+func _run() -> void:
+	await process_frame
+	var packed: PackedScene = load("res://game/main.tscn")
+	game = packed.instantiate()
+	root.add_child(game)
+	await _frames(4)
+	await _capture("menu")
+
+	await _tap(Vector2(360, 715))
+	if game.panel_name == "confirm_new":
+		await _tap(Vector2(360, 721))
+	await _frames(3)
+	_check(game.mode == "battle", "new game enters battle")
+	_check(game.sim.units.is_empty() and game.sim.gold == 150, "new battle starts empty with summon gold")
+	await _capture("battle_empty")
+
+	await _tap(Vector2(183, 206))
+	for _i in range(3):
+		await _tap(Vector2(360, 1058))
+	_check(game.sim.units.size() == 3, "three real summon button presses create three units")
+	_check(game.sim.gold == 0, "three summons spend the starting gold")
+	var first_run_units: Array = game.sim.units.duplicate(true)
+	await _capture("battle")
+
+	var initial_time: float = game.sim.time
+	_check(game.sim.pause_reasons.has("user"), "pause button adds user pause reason")
+	await _frames(8)
+	_check(is_equal_approx(game.sim.time, initial_time), "paused simulation time remains fixed")
+	for expected in [2, 3, 5, 1]:
+		await _tap(Vector2(66, 206))
+		_check(game.sim.speed == expected, "speed button cycles to x%d" % expected)
+	await _capture("battle_paused")
+
+	var board: Control = game.board
+	if game.selected >= 0:
+		await _tap(_cell_screen(board, int(game.sim.unit_by_id(game.selected).cell)))
+	var first_id: int = int(game.sim.units[0].id)
+	var second_id: int = int(game.sim.units[1].id)
+	var first_cell: int = int(game.sim.unit_by_id(first_id).cell)
+	var second_cell: int = int(game.sim.unit_by_id(second_id).cell)
+	await _tap(_cell_screen(board, first_cell))
+	_check(game.selected == first_id, "board tap selects a unit through input")
+	await _tap(_cell_screen(board, 35))
+	_check(int(game.sim.unit_by_id(first_id).cell) == 35, "board tap moves selected unit")
+	await _tap(_cell_screen(board, 35))
+	await _tap(_cell_screen(board, second_cell))
+	_check(game.selected == second_id, "board tap selects second unit")
+	await _tap(_cell_screen(board, 35))
+	_check(int(game.sim.unit_by_id(second_id).cell) == 35, "occupied destination receives second unit")
+	_check(int(game.sim.unit_by_id(first_id).cell) == second_cell, "occupied destination swaps atomically")
+	var before_invalid_drag: Array = game.sim.units.duplicate(true)
+	var drag_start := _cell_screen(board, 35)
+	await _drag(drag_start, Vector2(10, 300))
+	_check(_unit_layout_matches(before_invalid_drag), "drag released outside the board leaves placement unchanged")
+	await _capture("battle_placed")
+	await _tap(Vector2(183, 206))
+	_check(not game.sim.pause_reasons.has("user"), "resume button clears user pause")
+
+	await _tap(Vector2(400, 206))
+	_check(game.panel_name == "codex" and not game.sim.pause_reasons.has("settings"), "codex opens without pausing")
+	await _capture("codex")
+	await _tap(Vector2(639, 326))
+
+	await _tap(Vector2(522, 206))
+	_check(game.panel_name == "recipes" and not game.sim.pause_reasons.has("settings"), "recipes open without pausing")
+	var protected_layout: Array = game.sim.units.duplicate(true)
+	await _tap(Vector2(360, 800))
+	_check(_unit_layout_matches(protected_layout), "recipe overlay consumes taps above the board")
+	await _capture("recipes")
+	await _tap(Vector2(639, 326))
+
+	await _tap(Vector2(132, 1158))
+	_check(game.panel_name == "upgrade" and not game.sim.pause_reasons.has("settings"), "upgrade panel opens without pausing")
+	var upgrade_time: float = game.sim.time
+	await _frames(10)
+	_check(game.sim.time > upgrade_time, "simulation advances while upgrade panel is open")
+	await _capture("upgrade")
+	await _tap(Vector2(183, 206))
+	game.sim.gold = 79
+	await _frames(20)
+	var upgrade_button := _find_button("강화   ◈ 80")
+	_check(upgrade_button != null and upgrade_button.disabled, "upgrade is disabled below its price")
+	game.sim.gold = 80
+	await _frames(20)
+	_check(upgrade_button != null and not upgrade_button.disabled, "upgrade becomes affordable without reopening the panel")
+	await _tap(Vector2(639, 660))
+
+	game.sim.gold = 99
+	await _tap(Vector2(360, 1158))
+	await _frames(20)
+	var gamble_button := _find_button("계약   ◈ 100")
+	_check(gamble_button != null and gamble_button.disabled, "gamble is disabled below its price")
+	game.sim.gold = 100
+	await _frames(20)
+	_check(gamble_button != null and not gamble_button.disabled, "gamble becomes affordable while its panel stays open")
+	await _capture("gamble")
+	await _tap(Vector2(639, 660))
+	await _tap(Vector2(183, 206))
+
+	await _tap(Vector2(303, 206))
+	_check(game.panel_name == "guide" and not game.sim.pause_reasons.has("settings"), "guide opens without pausing")
+	await _tap(Vector2(639, 326))
+
+	await _tap(Vector2(183, 206))
+	_check(game.sim.pause_reasons.has("user"), "pause before checking settings pause stacking")
+	await _tap(Vector2(648, 206))
+	_check(game.panel_name == "settings" and game.sim.pause_reasons.has("settings"), "settings adds its independent pause reason")
+	await _capture("settings")
+	await _tap(Vector2(360, 810))
+	_check(game.panel_name.is_empty() and not game.sim.pause_reasons.has("settings"), "settings close clears only settings pause")
+	_check(game.sim.pause_reasons.has("user"), "closing settings preserves user pause state")
+
+	var saved_units: Array = game.sim.units.duplicate(true)
+	await _tap(Vector2(648, 206))
+	await _tap(Vector2(360, 898))
+	_check(game.mode == "menu", "settings save action returns to menu")
+	_check(not game.store.load_run().is_empty(), "settings menu action stores a resumable run")
+	await _capture("menu_saved")
+	await _tap(Vector2(360, 805))
+	_check(game.mode == "battle" and game.sim.units.size() == saved_units.size(), "resume restores the saved battle")
+	_check(_unit_layout_matches(saved_units), "resume restores unit ids, kinds, and cells")
+	_check(game.sim.pause_reasons.has("user"), "resume restores in user-paused state")
+	await _capture("battle_resumed")
+	await _tap(Vector2(648, 206))
+	await _tap(Vector2(360, 898))
+	await _tap(Vector2(360, 715))
+	_check(game.panel_name == "confirm_new", "new game asks before replacing a saved battle")
+	await _tap(Vector2(360, 815))
+	_check(game.mode == "menu" and game.panel_name.is_empty(), "cancel keeps the existing save on menu")
+	await _tap(Vector2(360, 805))
+	_check(_unit_layout_matches(saved_units), "cancel preserves the saved unit layout")
+
+	# 실제 재료를 얻은 전투에서 조합 버튼을 누른다.
+	await _tap(Vector2(522, 206))
+	var combine_button: Button = null
+	for node in game.overlay.find_children("*", "Button", true, false):
+		if node.text == "조합" and not node.disabled:
+			combine_button = node
+			break
+	_check(combine_button != null, "a valid recipe is offered for the summoned composition")
+	if combine_button != null:
+		var before_count: int = game.sim.units.size()
+		await _tap(combine_button.global_position + combine_button.size / 2.0)
+		_check(game.sim.units.size() == before_count - 1, "real combine button consumes two materials into one")
+		_check(not game.sim.unit_by_id(game.selected).is_empty() and int(game.sim.catalog.units[game.sim.unit_by_id(game.selected).kind].tier) == 2, "real combine produces the exact higher tier")
+	await _capture("combined")
+	await _tap(Vector2(639, 326))
+	await _tap(Vector2(586, 1158))
+	_check(game.panel_name == "special", "special-monster panel opens through the bottom action")
+	var locked := 0
+	for node in game.overlay.find_children("*", "Button", true, false):
+		if node.text == "무료 소환" and node.disabled:
+			locked += 1
+	_check(locked == 3, "all special enemies stay locked before wave11")
+	await _capture("special")
+	print("UI_TEST_REPORT ", JSON.stringify({"checks": checks, "failed": errors.size(), "errors": errors}))
+	var status := 1 if not errors.is_empty() else 0
+	game.queue_free()
+	await _frames(3)
+	quit(status)
+
+func _check(condition: bool, label: String) -> void:
+	checks += 1
+	if not condition:
+		errors.append(label)
+		push_error("UI scenario failed: " + label)
+
+func _frames(count: int) -> void:
+	for _i in range(count):
+		await process_frame
+
+func _tap(position: Vector2) -> void:
+	var press := InputEventMouseButton.new()
+	press.position = position
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	root.push_input(press, true)
+	await _frames(1)
+	var release := InputEventMouseButton.new()
+	release.position = position
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.pressed = false
+	root.push_input(release, true)
+	await _frames(2)
+
+func _drag(start: Vector2, finish: Vector2) -> void:
+	var press := InputEventMouseButton.new()
+	press.position = start
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	root.push_input(press, true)
+	await _frames(1)
+	var motion := InputEventMouseMotion.new()
+	motion.position = finish
+	motion.relative = finish - start
+	motion.button_mask = MOUSE_BUTTON_MASK_LEFT
+	root.push_input(motion, true)
+	await _frames(1)
+	var release := InputEventMouseButton.new()
+	release.position = finish
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.pressed = false
+	root.push_input(release, true)
+	await _frames(2)
+
+func _cell_screen(target_board: Control, cell: int) -> Vector2:
+	var logical := Vector2(floori(float(cell) / 6.0) + 0.5, cell % 6 + 0.5)
+	return target_board.position + target_board.ground_to_screen(logical)
+
+func _unit_layout_matches(expected: Array) -> bool:
+	if game.sim.units.size() != expected.size():
+		return false
+	for entry in expected:
+		var current: Dictionary = game.sim.unit_by_id(int(entry.id))
+		if current.is_empty() or current.kind != entry.kind or int(current.cell) != int(entry.cell):
+			return false
+	return true
+
+func _capture(name: String) -> void:
+	await RenderingServer.frame_post_draw
+	var directory := ProjectSettings.globalize_path("res://artifacts/screenshots")
+	DirAccess.make_dir_recursive_absolute(directory)
+	var image: Image = root.get_texture().get_image()
+	var result := image.save_png(directory.path_join(name + ".png"))
+	_check(result == OK, "save screenshot " + name)
+
+func _find_button(text_value: String) -> Button:
+	for node in game.find_children("*", "Button", true, false):
+		if node.text == text_value:
+			return node
+	return null
