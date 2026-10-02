@@ -79,5 +79,152 @@
       "u09": 1,
       "u06": 1
     }
+  },
+  {
+    "id": "r_u17",
+    "result": "u17",
+    "ingredients": {
+      "u02": 1,
+      "u04": 1
+    }
+  },
+  {
+    "id": "r_u18",
+    "result": "u18",
+    "ingredients": {
+      "u05": 1,
+      "u06": 1
+    }
+  },
+  {
+    "id": "r_u19",
+    "result": "u19",
+    "ingredients": {
+      "u03": 2
+    }
+  },
+  {
+    "id": "r_u20",
+    "result": "u20",
+    "ingredients": {
+      "u01": 1,
+      "u06": 1
+    }
+  },
+  {
+    "id": "r_u21",
+    "result": "u21",
+    "ingredients": {
+      "u04": 1,
+      "u06": 1
+    }
+  },
+  {
+    "id": "r_u22",
+    "result": "u22",
+    "ingredients": {
+      "u07": 1,
+      "u11": 1
+    }
+  },
+  {
+    "id": "r_u23",
+    "result": "u23",
+    "ingredients": {
+      "u18": 1,
+      "u21": 1
+    }
+  },
+  {
+    "id": "r_u24",
+    "result": "u24",
+    "ingredients": {
+      "u08": 1,
+      "u17": 1
+    }
+  },
+  {
+    "id": "r_u25",
+    "result": "u25",
+    "ingredients": {
+      "u10": 1,
+      "u19": 1
+    }
+  },
+  {
+    "id": "r_u26",
+    "result": "u26",
+    "ingredients": {
+      "u09": 1,
+      "u20": 1
+    }
+  },
+  {
+    "id": "r_u27",
+    "result": "u27",
+    "ingredients": {
+      "u07": 1,
+      "u20": 1
+    }
+  },
+  {
+    "id": "r_u28",
+    "result": "u28",
+    "ingredients": {
+      "u09": 1,
+      "u18": 1
+    }
+  },
+  {
+    "id": "r_u29",
+    "result": "u29",
+    "ingredients": {
+      "u17": 1,
+      "u19": 1
+    }
+  },
+  {
+    "id": "r_u30",
+    "result": "u30",
+    "ingredients": {
+      "u10": 1,
+      "u21": 1
+    }
+  },
+  {
+    "id": "r_u31",
+    "result": "u31",
+    "ingredients": {
+      "u24": 1,
+      "u29": 1,
+      "u02": 1
+    }
+  },
+  {
+    "id": "r_u32",
+    "result": "u32",
+    "ingredients": {
+      "u23": 1,
+      "u25": 1,
+      "u06": 1
+    }
+  },
+  {
+    "id": "r_u33",
+    "result": "u33",
+    "ingredients": {
+      "u22": 1,
+      "u28": 1,
+      "u05": 1
+    }
+  },
+  {
+    "id": "r_u34",
+    "result": "u34",
+    "ingredients": {
+      "u26": 1,
+      "u27": 1,
+      "u30": 1
+    }
   }
 ]

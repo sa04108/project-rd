@@ -1,0 +1,46 @@
+{
+  "ok": true,
+  "kind": "sprite-gen-score-report",
+  "source_report": "/workspace/project-rd/assets/art/families/blob/sprite_run",
+  "overall_score": 99.0,
+  "candidate_rank": 1799,
+  "rows": [
+    {
+      "state": "idle",
+      "score": 100.0,
+      "candidate_rank": 600,
+      "expected_frames": 6,
+      "found_frames": 6,
+      "errors": [],
+      "warnings": [],
+      "hints": []
+    },
+    {
+      "state": "walk",
+      "score": 100.0,
+      "candidate_rank": 600,
+      "expected_frames": 6,
+      "found_frames": 6,
+      "errors": [],
+      "warnings": [],
+      "hints": []
+    },
+    {
+      "state": "attack",
+      "score": 97.0,
+      "candidate_rank": 599,
+      "expected_frames": 6,
+      "found_frames": 6,
+      "errors": [],
+      "warnings": [
+        "attack: frame 02 has 28 non-transparent edge pixels"
+      ],
+      "hints": [
+        "attack: Sprite content touched the frame edge. Leave the requested safe margin around every full-body pose."
+      ]
+    }
+  ],
+  "hints": [
+    "attack: Sprite content touched the frame edge. Leave the requested safe margin around every full-body pose."
+  ]
+}

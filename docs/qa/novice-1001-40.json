@@ -1,0 +1,400 @@
+{
+	"clear_rate": 0.0,
+	"failure_wave_counts": {
+		"100": 8,
+		"31": 1,
+		"32": 2,
+		"33": 1,
+		"34": 1,
+		"35": 2,
+		"36": 2,
+		"38": 1,
+		"39": 1,
+		"41": 2,
+		"42": 1,
+		"43": 1,
+		"44": 1,
+		"45": 1,
+		"47": 2,
+		"49": 1,
+		"51": 1,
+		"55": 1,
+		"56": 1,
+		"59": 1,
+		"64": 1,
+		"83": 1,
+		"84": 1,
+		"86": 1,
+		"91": 1,
+		"95": 2,
+		"96": 1
+	},
+	"human_first_clear_target": 0.05,
+	"human_observations": 0,
+	"policy": "delayed_actions_default_placement_v1",
+	"rows": [
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1001,
+			"time": 1259.29999999951,
+			"wave": 42
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1002,
+			"time": 2498.73333333172,
+			"wave": 84
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1003,
+			"time": 986.233333333094,
+			"wave": 33
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1004,
+			"time": 1076.09999999968,
+			"wave": 36
+		},
+		{
+			"final_hp_before_last_step": 19520.5030021746,
+			"final_max_hp": 280621.886202174,
+			"lives": 18,
+			"result": "defeat",
+			"seed": 1005,
+			"time": 3065.49999999787,
+			"wave": 100
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1006,
+			"time": 1380.86666666607,
+			"wave": 47
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1007,
+			"time": 1226.46666666621,
+			"wave": 41
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1008,
+			"time": 1741.83333333241,
+			"wave": 59
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1009,
+			"time": 1321.86666666612,
+			"wave": 45
+		},
+		{
+			"final_hp_before_last_step": 110468.632602178,
+			"final_max_hp": 280621.886202174,
+			"lives": 16,
+			"result": "defeat",
+			"seed": 1010,
+			"time": 3049.03333333122,
+			"wave": 100
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1011,
+			"time": 1405.96666666605,
+			"wave": 47
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1012,
+			"time": 2824.89999999809,
+			"wave": 95
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1013,
+			"time": 1208.03333333289,
+			"wave": 41
+		},
+		{
+			"final_hp_before_last_step": 127026.581402174,
+			"final_max_hp": 280621.886202174,
+			"lives": 12,
+			"result": "defeat",
+			"seed": 1014,
+			"time": 3034.36666666456,
+			"wave": 100
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1015,
+			"time": 1167.06666666626,
+			"wave": 39
+		},
+		{
+			"final_hp_before_last_step": 43346.2702021775,
+			"final_max_hp": 280621.886202174,
+			"lives": 2,
+			"result": "defeat",
+			"seed": 1016,
+			"time": 3089.39999999785,
+			"wave": 100
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1017,
+			"time": 1651.19999999916,
+			"wave": 56
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1018,
+			"time": 2728.19999999818,
+			"wave": 91
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1019,
+			"time": 1919.63333333224,
+			"wave": 64
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1020,
+			"time": 1468.39999999932,
+			"wave": 49
+		},
+		{
+			"final_hp_before_last_step": 103668.830202174,
+			"final_max_hp": 280621.886202174,
+			"lives": 7,
+			"result": "defeat",
+			"seed": 1021,
+			"time": 3043.99999999789,
+			"wave": 100
+		},
+		{
+			"final_hp_before_last_step": 9345.32620217605,
+			"final_max_hp": 280621.886202174,
+			"lives": 19,
+			"result": "defeat",
+			"seed": 1022,
+			"time": 3105.29999999783,
+			"wave": 100
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1023,
+			"time": 928.26666666648,
+			"wave": 31
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1024,
+			"time": 2554.066666665,
+			"wave": 86
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1025,
+			"time": 1620.86666666585,
+			"wave": 55
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1026,
+			"time": 1076.49999999968,
+			"wave": 36
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1027,
+			"time": 1290.39999999948,
+			"wave": 44
+		},
+		{
+			"final_hp_before_last_step": 27371.0382021753,
+			"final_max_hp": 280621.886202174,
+			"lives": 13,
+			"result": "defeat",
+			"seed": 1028,
+			"time": 3056.13333333121,
+			"wave": 100
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1029,
+			"time": 2463.33333333175,
+			"wave": 83
+		},
+		{
+			"final_hp_before_last_step": 81170.318202178,
+			"final_max_hp": 280621.886202174,
+			"lives": 8,
+			"result": "defeat",
+			"seed": 1030,
+			"time": 3058.16666666454,
+			"wave": 100
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1031,
+			"time": 2825.86666666475,
+			"wave": 95
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1032,
+			"time": 1139.63333333295,
+			"wave": 38
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1033,
+			"time": 954.599999999789,
+			"wave": 32
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1034,
+			"time": 1047.93333333304,
+			"wave": 35
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1035,
+			"time": 2861.83333333139,
+			"wave": 96
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1036,
+			"time": 1017.79999999973,
+			"wave": 34
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1037,
+			"time": 1289.53333333282,
+			"wave": 43
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1038,
+			"time": 1528.8333333326,
+			"wave": 51
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1039,
+			"time": 1048.73333333304,
+			"wave": 35
+		},
+		{
+			"final_hp_before_last_step": 0.0,
+			"final_max_hp": 0.0,
+			"lives": 0,
+			"result": "defeat",
+			"seed": 1040,
+			"time": 958.333333333119,
+			"wave": 32
+		}
+	],
+	"sample_size": 40,
+	"seed_start": 1001,
+	"wins": 0
+}

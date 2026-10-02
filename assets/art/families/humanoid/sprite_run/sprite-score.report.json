@@ -1,0 +1,46 @@
+{
+  "ok": false,
+  "kind": "sprite-gen-score-report",
+  "source_report": "/workspace/project-rd/assets/art/families/humanoid/sprite_run",
+  "overall_score": 95.0,
+  "candidate_rank": 1799,
+  "rows": [
+    {
+      "state": "idle",
+      "score": 85.0,
+      "candidate_rank": 599,
+      "expected_frames": 6,
+      "found_frames": 6,
+      "errors": [],
+      "warnings": [
+        "idle: motion presence is too low (0.0084 < 0.0100)"
+      ],
+      "hints": [
+        "idle: Adjacent frames are too similar (motion presence 0.0084). Make the action visibly progress across the row while preserving the same character identity and foot baseline."
+      ]
+    },
+    {
+      "state": "walk",
+      "score": 100.0,
+      "candidate_rank": 600,
+      "expected_frames": 6,
+      "found_frames": 6,
+      "errors": [],
+      "warnings": [],
+      "hints": []
+    },
+    {
+      "state": "attack",
+      "score": 100.0,
+      "candidate_rank": 600,
+      "expected_frames": 6,
+      "found_frames": 6,
+      "errors": [],
+      "warnings": [],
+      "hints": []
+    }
+  ],
+  "hints": [
+    "idle: Adjacent frames are too similar (motion presence 0.0084). Make the action visibly progress across the row while preserving the same character identity and foot baseline."
+  ]
+}

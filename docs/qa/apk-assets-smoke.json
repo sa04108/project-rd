@@ -1,0 +1,11 @@
+{
+  "target": "actual APK project assets executed under Linux headless, not Android OS",
+  "apk_sha256": "c2477ea903ad3793c026b475d87abf2143f41b130173d69ea267cfb6f20d7cca",
+  "godot": "4.4.1.stable.official.49a5bc7b6",
+  "engine_iterations": 60,
+  "exit_status": 0,
+  "menu_entered": true,
+  "art_ready": true,
+  "save_error": "",
+  "content_matches_final_checkout": true
+}

@@ -1,0 +1,123 @@
+{
+  "ok": true,
+  "engine": "component-row",
+  "kind": "sprite-gen-inspect-report",
+  "run_dir": "/workspace/project-rd/assets/art/families/blob/sprite_run",
+  "states": [
+    "idle",
+    "walk",
+    "attack"
+  ],
+  "thresholds": {
+    "histogram_min": 0.0,
+    "dhash_min": 0.55,
+    "motion_min": 0.01
+  },
+  "rows": [
+    {
+      "state": "idle",
+      "source": "frames",
+      "expected_frames": 6,
+      "found_frames": 6,
+      "natural_pose_count": 6,
+      "frame_files": [
+        "frames/idle/frame-0.png",
+        "frames/idle/frame-1.png",
+        "frames/idle/frame-2.png",
+        "frames/idle/frame-3.png",
+        "frames/idle/frame-4.png",
+        "frames/idle/frame-5.png"
+      ],
+      "metrics": {
+        "histogram_intersection": {
+          "min": 0.9063234212247713,
+          "mean": 0.9473457348064934
+        },
+        "dhash_similarity": {
+          "min": 0.8125,
+          "mean": 0.9072916666666667
+        },
+        "motion_presence": 0.10184661266850491,
+        "centroid_sigma": {
+          "x": 2.0021755080580848,
+          "y": 6.546158984953922
+        }
+      },
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "state": "walk",
+      "source": "frames",
+      "expected_frames": 6,
+      "found_frames": 6,
+      "natural_pose_count": 6,
+      "frame_files": [
+        "frames/walk/frame-0.png",
+        "frames/walk/frame-1.png",
+        "frames/walk/frame-2.png",
+        "frames/walk/frame-3.png",
+        "frames/walk/frame-4.png",
+        "frames/walk/frame-5.png"
+      ],
+      "metrics": {
+        "histogram_intersection": {
+          "min": 0.9272046375017664,
+          "mean": 0.9458271582718005
+        },
+        "dhash_similarity": {
+          "min": 0.8125,
+          "mean": 0.8729166666666667
+        },
+        "motion_presence": 0.09896934359681372,
+        "centroid_sigma": {
+          "x": 6.019986302405406,
+          "y": 4.142708688179658
+        }
+      },
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "state": "attack",
+      "source": "frames",
+      "expected_frames": 6,
+      "found_frames": 6,
+      "natural_pose_count": 6,
+      "frame_files": [
+        "frames/attack/frame-0.png",
+        "frames/attack/frame-1.png",
+        "frames/attack/frame-2.png",
+        "frames/attack/frame-3.png",
+        "frames/attack/frame-4.png",
+        "frames/attack/frame-5.png"
+      ],
+      "metrics": {
+        "histogram_intersection": {
+          "min": 0.8132849351853999,
+          "mean": 0.8882473402165645
+        },
+        "dhash_similarity": {
+          "min": 0.71875,
+          "mean": 0.784375
+        },
+        "motion_presence": 0.12370806525735294,
+        "centroid_sigma": {
+          "x": 9.021757971322721,
+          "y": 11.152145918435608
+        }
+      },
+      "ok": true,
+      "errors": [],
+      "warnings": [
+        "attack: frame 02 has 28 non-transparent edge pixels"
+      ]
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    "attack: frame 02 has 28 non-transparent edge pixels"
+  ]
+}

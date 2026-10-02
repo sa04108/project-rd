@@ -1,0 +1,9 @@
+# 재생성 가능한 중간 출력과 과거 실패 시안은 로컬 검증 자료로 보존한다.
+families/*/.*.sg-rwlock
+families/*/sprite_run/frames/
+families/*/sprite_run/sprite-sheet-alpha.png
+families/*/sprite_run/**/*.import
+families/*/sprite_run/*.import
+families/*/sprite_run/raw/*.previous-*.png
+portraits/batch-*/*.png
+portraits/batch-*/*.import

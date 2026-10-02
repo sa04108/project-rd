@@ -1,0 +1,15 @@
+Create a production-ready STATIC GAME PORTRAIT CUTOUT SHEET for a medieval fantasy mercenary defense game. This sheet contains DIFFERENT character identities, NOT successive animation frames. Match the referenced polished small pixel-art game character style: charming compact anatomy, excellent readable silhouette and equipment, crisp outlined detailed colored pixel clusters, warm light from upper left, three-quarter front view facing slightly right. Each is a separate full-body standing cutout, no environmental context.
+
+LAYOUT IS STRICT: exactly 4 columns by 2 rows, reading order left to right then top to bottom. Every cell has identical dimensions and contains exactly ONE fully visible subject. Each subject is centered, feet aligned near 85% cell height, body including weapon occupies about 65% of cell height and stays inside middle 70% of cell width. Never touch adjacent cells. Leave wide clean margins. SOLID PURE #FF00FF MAGENTA throughout all empty pixels and between every subject. NO floor shadows, NO gradient, NO gridlines, NO cell borders, NO text, NO letters, NO labels or numbers, NO extra people. Do not use magenta within the subjects themselves. The reference establishes rendering style ONLY; do not repeat its human swordsman for other roles or creature types. Every identity must have distinct silhouette, clothes, equipment and species as described. Do not crop wings, antennae, horns, staffs or feet.
+
+Subjects by exact grid slot:
+Row 1, column 1: 화산 거인, heavy fantasy monster, distinctive silhouette, its main palette is #bd6047.
+Row 1, column 2: 폭풍 와이번, dragon fantasy monster, distinctive silhouette, its main palette is #6d8eaf.
+Row 1, column 3: 타락한 용기사, humanoid fantasy monster, distinctive silhouette, its main palette is #8c5360.
+Row 1, column 4: 마왕, dragon fantasy monster, distinctive silhouette, its main palette is #6f3448.
+Row 2, column 1: 골드 고블린, humanoid fantasy monster, distinctive silhouette, its main palette is #e2bd45.
+Row 2, column 2: 황금 고블린, humanoid fantasy monster, distinctive silhouette, its main palette is #d9a941.
+Row 2, column 3: 도적 두목, heavy fantasy monster, distinctive silhouette, its main palette is #bd7547.
+Row 2, column 4: small overflowing medieval gold coin purse, shiny single gold coin in front.
+
+This is a clean alpha extraction source, not an illustration of a roster UI. Consistent magnification within each species. Maximum available quality. Wide landscape aspect ratio, 2:1.

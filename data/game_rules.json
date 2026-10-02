@@ -1,5 +1,5 @@
 {
-  "content_version": "0.2.0",
+  "content_version": "0.3.0",
   "F": {
     "board_cols": 6,
     "board_rows": 6,
@@ -63,7 +63,9 @@
     "upgrade_levels": "1_to_4_star_shared",
     "special_cooldown_scope": "per_type_game_time",
     "same_type_specials_may_coexist": true,
-    "save_resume_starts_paused": true
+    "save_resume_starts_paused": true,
+    "enemy_limit_scope": "all_active_enemies_including_boss_and_special",
+    "enemy_limit_trigger": "immediate_on_spawn_at_or_above_limit"
   },
   "T": {
     "summon_cost": 50,
@@ -82,6 +84,31 @@
     "upgrade_max": 10,
     "normal_reward": 12,
     "boss_reward": 160,
-    "hp_growth": 1.055
+    "hp_growth": 1.055,
+    "enemy_limit": 50,
+    "beginner_first_clear_target": 0.05,
+    "beginner_failure_wave_target": 30,
+    "hp_curve": [
+      {
+        "wave": 1,
+        "multiplier": 1.0
+      },
+      {
+        "wave": 20,
+        "multiplier": 1.0
+      },
+      {
+        "wave": 28,
+        "multiplier": 24.0
+      },
+      {
+        "wave": 40,
+        "multiplier": 22.0
+      },
+      {
+        "wave": 100,
+        "multiplier": 4.0
+      }
+    ]
   }
 }

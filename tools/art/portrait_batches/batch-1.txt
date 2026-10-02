@@ -1,0 +1,23 @@
+Create a production-ready STATIC GAME PORTRAIT CUTOUT SHEET for a medieval fantasy mercenary defense game. This sheet contains DIFFERENT character identities, NOT successive animation frames. Match the referenced polished small pixel-art game character style: charming compact anatomy, excellent readable silhouette and equipment, crisp outlined detailed colored pixel clusters, warm light from upper left, three-quarter front view facing slightly right. Each is a separate full-body standing cutout, no environmental context.
+
+LAYOUT IS STRICT: exactly 4 columns by 4 rows, reading order left to right then top to bottom. Every cell has identical dimensions and contains exactly ONE fully visible subject. Each subject is centered, feet aligned near 85% cell height, body including weapon occupies about 65% of cell height and stays inside middle 70% of cell width. Never touch adjacent cells. Leave wide clean margins. SOLID PURE #FF00FF MAGENTA throughout all empty pixels and between every subject. NO floor shadows, NO gradient, NO gridlines, NO cell borders, NO text, NO letters, NO labels or numbers, NO extra people. Do not use magenta within the subjects themselves. The reference establishes rendering style ONLY; do not repeat its human swordsman for other roles or creature types. Every identity must have distinct silhouette, clothes, equipment and species as described. Do not crop wings, antennae, horns, staffs or feet.
+
+Subjects by exact grid slot:
+Row 1, column 1: red-tabard human swordsman, short sword, steel breastplate.
+Row 1, column 2: green hooded human archer with curved longbow, quiver.
+Row 1, column 3: purple young human wizard, pointed hat, orb staff.
+Row 1, column 4: gold-robed bald martial monk, cloth wraps and prayer beads.
+Row 2, column 1: ivory and gold human priest with holy staff.
+Row 2, column 2: green cloaked plague alchemist with potion satchel and mask.
+Row 2, column 3: blue silver royal lancer with tall spear and steel helm.
+Row 2, column 4: dark green rune archer with silver longbow and hood.
+Row 3, column 1: broad orange armored orc-like war drummer with strapped drum.
+Row 3, column 2: white fur lynx mount and tiny ice ranger rider, ice-blue scarf.
+Row 3, column 3: massive gray plate armored guardian with iron mace.
+Row 3, column 4: magenta armored female dual-sword dancer.
+Row 4, column 1: old blue-robed floating sage with glowing spellbook.
+Row 4, column 2: gold-garbed goblin merchant shaman holding a small golden totem.
+Row 4, column 3: volcanic stone giant with orange lava cracks and enormous hammer.
+Row 4, column 4: purple four-legged ancient winged wyvern.
+
+This is a clean alpha extraction source, not an illustration of a roster UI. Consistent magnification within each species. Maximum available quality. Square aspect ratio.

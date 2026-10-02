@@ -1,0 +1,23 @@
+Create a production-ready STATIC GAME PORTRAIT CUTOUT SHEET for a medieval fantasy mercenary defense game. This sheet contains DIFFERENT character identities, NOT successive animation frames. Match the referenced polished small pixel-art game character style: charming compact anatomy, excellent readable silhouette and equipment, crisp outlined detailed colored pixel clusters, warm light from upper left, three-quarter front view facing slightly right. Each is a separate full-body standing cutout, no environmental context.
+
+LAYOUT IS STRICT: exactly 4 columns by 4 rows, reading order left to right then top to bottom. Every cell has identical dimensions and contains exactly ONE fully visible subject. Each subject is centered, feet aligned near 85% cell height, body including weapon occupies about 65% of cell height and stays inside middle 70% of cell width. Never touch adjacent cells. Leave wide clean margins. SOLID PURE #FF00FF MAGENTA throughout all empty pixels and between every subject. NO floor shadows, NO gradient, NO gridlines, NO cell borders, NO text, NO letters, NO labels or numbers, NO extra people. Do not use magenta within the subjects themselves. The reference establishes rendering style ONLY; do not repeat its human swordsman for other roles or creature types. Every identity must have distinct silhouette, clothes, equipment and species as described. Do not crop wings, antennae, horns, staffs or feet.
+
+Subjects by exact grid slot:
+Row 1, column 1: weathered brown pirate musketeer with long flintlock rifle and tricorn hat.
+Row 1, column 2: violet spirit shaman with raven feather staff.
+Row 1, column 3: small cyan living crystal blob with crystalline arms.
+Row 1, column 4: tan desert nomad spear thrower with red sash.
+Row 2, column 1: olive-green human bombardier alchemist with round glass grenades.
+Row 2, column 2: silver plate paladin, ivory cloak, large warhammer.
+Row 2, column 3: olive hooded poison mist elder with censer staff.
+Row 2, column 4: steel-blue lightning archer with white feathered helmet.
+Row 3, column 1: ice-blue female dancing fencer, white hair, twin ice blades.
+Row 3, column 2: crimson armored army commander with a tall standard.
+Row 3, column 3: charcoal masked assassin with paired black curved swords.
+Row 3, column 4: gold sun priestess with ornate halo crown and sun scepter.
+Row 4, column 1: lavender star mage with pointed ceremonial hat and crescent staff.
+Row 4, column 2: moss-green antlered forest guardian beast, branches growing on back.
+Row 4, column 3: colossal blue storm king in ornate plate with thunder hammer.
+Row 4, column 4: violet spider queen monster with ornate crown and eight legs.
+
+This is a clean alpha extraction source, not an illustration of a roster UI. Consistent magnification within each species. Maximum available quality. Square aspect ratio.

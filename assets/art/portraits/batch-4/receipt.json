@@ -1,0 +1,36 @@
+{
+  "pipeline": "sprite-gen slice-sheet",
+  "sprite_gen_version": "2.17.0",
+  "batch": 4,
+  "ids": [
+    "n15",
+    "n16",
+    "n17",
+    "n18",
+    "n19",
+    "n20",
+    "n21",
+    "n22",
+    "n23",
+    "n24",
+    "n25",
+    "n26",
+    "n27",
+    "n28",
+    "n29",
+    "n30"
+  ],
+  "alpha_bounds_check": "passed",
+  "canvas": [
+    384,
+    256
+  ],
+  "baseline_y": 236,
+  "target_height": 208,
+  "manual_visual_review": {
+    "source_sheet": "all catalog identities inspected in six source sheets",
+    "extracted_output": "automated nonempty alpha and no canvas boundary contact for every output; wide and ornate samples visually inspected"
+  },
+  "generation_route": "conversation image_gen",
+  "image_model_id": "not exposed"
+}
