@@ -1,0 +1,9 @@
+{
+  "name": "project-rd-web-qa",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Playwright browser checks for the Godot Web preview",
+  "devDependencies": {
+    "playwright": "1.57.0"
+  }
+}

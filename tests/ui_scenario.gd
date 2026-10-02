@@ -13,24 +13,26 @@ func _run() -> void:
 	game = packed.instantiate()
 	root.add_child(game)
 	await _frames(4)
+	var ui_font: FontFile = game.theme.default_font
+	_check(not ui_font.allow_system_fallback and ["⚔", "◈", "✦", "Ⅱ"].all(func(symbol): return ui_font.has_char(symbol.unicode_at(0)) or ui_font.fallbacks.any(func(font): return font.has_char(symbol.unicode_at(0)))), "bundled fonts cover every HUD symbol without host fonts")
 	await _capture("menu")
 
 	# Android와 같은 터치 입력 전파 중 화면을 교체하는 경로를 검사한다.
-	await _touch(Vector2(360, 950))
+	await _touch(_action_center("guide"))
 	_check(game.panel_name == "guide", "touch opens guide from menu")
-	await _touch(Vector2(640, 336))
+	await _touch(_action_center("close_panel"))
 	_check(game.panel_name.is_empty(), "touch closes guide without removing a node during propagation")
-	await _touch(Vector2(360, 715))
+	await _touch(_action_center("new_game"))
 	if game.panel_name == "confirm_new":
-		await _tap(Vector2(360, 721))
+		await _tap(_action_center("confirm_new"))
 	await _frames(3)
 	_check(game.mode == "battle", "new game enters battle")
 	_check(game.sim.units.is_empty() and game.sim.gold == 150, "new battle starts empty with summon gold")
 	await _capture("battle_empty")
 
-	await _tap(Vector2(183, 206))
+	await _tap(_action_center("pause"))
 	for _i in range(3):
-		await _tap(Vector2(360, 1058))
+		await _tap(_action_center("summon"))
 	_check(game.sim.units.size() == 3, "three real summon button presses create three units")
 	_check(game.sim.gold == 0, "three summons spend the starting gold")
 	var first_run_units: Array = game.sim.units.duplicate(true)
@@ -41,11 +43,20 @@ func _run() -> void:
 	await _frames(8)
 	_check(is_equal_approx(game.sim.time, initial_time), "paused simulation time remains fixed")
 	for expected in [2, 3, 5, 1]:
-		await _tap(Vector2(66, 206))
+		await _tap(_action_center("speed"))
 		_check(game.sim.speed == expected, "speed button cycles to x%d" % expected)
 	await _capture("battle_paused")
 
 	var board: Control = game.board
+	for cell in range(36):
+		var col := cell / 6
+		var row := cell % 6
+		var poly: PackedVector2Array = board._cell_polygon(col, row)
+		_check(poly[1] - poly[0] == Vector2(86, 0) and poly[3] - poly[0] == Vector2(0, 86), "cell %d is an axis-aligned 86px square" % cell)
+		_check(board.screen_to_cell(board.ground_to_screen(Vector2(col + 0.5, row + 0.5))) == cell, "cell %d input center matches drawing" % cell)
+	_check(board.global_position + board.ground_to_screen(Vector2.ZERO) == Vector2(102, 354), "grid aligns with the full-screen orthographic map")
+	_check(board.screen_to_cell(board.ground_to_screen(Vector2(6, 3))) == -1, "right boundary does not select an invalid column")
+	_check(board.screen_to_cell(board.ground_to_screen(Vector2(3, 6))) == -1, "bottom boundary does not select an invalid row")
 	if game.selected >= 0:
 		await _tap(_cell_screen(board, int(game.sim.unit_by_id(game.selected).cell)))
 	var first_id: int = int(game.sim.units[0].id)
@@ -67,32 +78,39 @@ func _run() -> void:
 	await _drag(drag_start, Vector2(10, 300))
 	_check(_unit_layout_matches(before_invalid_drag), "drag released outside the board leaves placement unchanged")
 	await _capture("battle_placed")
-	await _tap(Vector2(183, 206))
+	await _tap(_action_center("pause"))
 	_check(not game.sim.pause_reasons.has("user"), "resume button clears user pause")
 
-	await _tap(Vector2(400, 206))
+	await _tap(_action_center("codex"))
 	_check(game.panel_name == "codex" and not game.sim.pause_reasons.has("settings"), "codex opens without pausing")
 	# 원본 텍스처 크기로 최소 크기가 고정되어 글자를 덮는 회귀를 검사한다.
-	for portrait in game.overlay.find_children("*", "TextureRect", true, false):
+	var portraits: Array[Node] = game.overlay.find_children("CatalogPortrait_*", "TextureRect", true, false)
+	_check(portraits.size() == game.sim.catalog.units.size(), "every catalog unit has a portrait")
+	for portrait in portraits:
 		_check(portrait.size.x <= 88.0 and portrait.size.y <= 96.0, "codex portraits stay inside the reserved row space")
 	await _capture("codex")
-	await _tap(Vector2(639, 326))
+	await _tap(_action_center("close_panel"))
 
-	await _tap(Vector2(522, 206))
+	await _tap(_action_center("recipes"))
 	_check(game.panel_name == "recipes" and not game.sim.pause_reasons.has("settings"), "recipes open without pausing")
 	var protected_layout: Array = game.sim.units.duplicate(true)
 	await _tap(Vector2(360, 800))
 	_check(_unit_layout_matches(protected_layout), "recipe overlay consumes taps above the board")
 	await _capture("recipes")
-	await _tap(Vector2(639, 326))
+	await _tap(_action_center("close_panel"))
 
-	await _tap(Vector2(132, 1158))
+	await _tap(_action_center("upgrade"))
 	_check(game.panel_name == "upgrade" and not game.sim.pause_reasons.has("settings"), "upgrade panel opens without pausing")
+	var before_covered_drag: Array = game.sim.units.duplicate(true)
+	await _drag(_cell_screen(board, int(game.sim.unit_by_id(first_id).cell)), _cell_screen(board, 4))
+	_check(_unit_layout_matches(before_covered_drag), "captured mouse drag onto popup preserves placement")
+	await _touch_drag(_cell_screen(board, int(game.sim.unit_by_id(first_id).cell)), _cell_screen(board, 4))
+	_check(_unit_layout_matches(before_covered_drag), "captured touch drag onto popup preserves placement")
 	var upgrade_time: float = game.sim.time
 	await _frames(10)
 	_check(game.sim.time > upgrade_time, "simulation advances while upgrade panel is open")
 	await _capture("upgrade")
-	await _tap(Vector2(183, 206))
+	await _tap(_action_center("pause"))
 	game.sim.gold = 79
 	await _frames(20)
 	var upgrade_button := _find_button("강화   ◈ 80")
@@ -100,10 +118,10 @@ func _run() -> void:
 	game.sim.gold = 80
 	await _frames(20)
 	_check(upgrade_button != null and not upgrade_button.disabled, "upgrade becomes affordable without reopening the panel")
-	await _tap(Vector2(639, 660))
+	await _tap(_action_center("close_panel"))
 
 	game.sim.gold = 99
-	await _tap(Vector2(360, 1158))
+	await _tap(_action_center("gamble"))
 	await _frames(20)
 	var gamble_button := _find_button("계약   ◈ 100")
 	_check(gamble_button != null and gamble_button.disabled, "gamble is disabled below its price")
@@ -111,44 +129,44 @@ func _run() -> void:
 	await _frames(20)
 	_check(gamble_button != null and not gamble_button.disabled, "gamble becomes affordable while its panel stays open")
 	await _capture("gamble")
-	await _tap(Vector2(639, 660))
-	await _tap(Vector2(183, 206))
+	await _tap(_action_center("close_panel"))
+	await _tap(_action_center("pause"))
 
-	await _tap(Vector2(303, 206))
+	await _tap(_action_center("guide"))
 	_check(game.panel_name == "guide" and not game.sim.pause_reasons.has("settings"), "guide opens without pausing")
-	await _tap(Vector2(639, 326))
+	await _tap(_action_center("close_panel"))
 
-	await _tap(Vector2(183, 206))
+	await _tap(_action_center("pause"))
 	_check(game.sim.pause_reasons.has("user"), "pause before checking settings pause stacking")
-	await _tap(Vector2(648, 206))
+	await _tap(_action_center("settings"))
 	_check(game.panel_name == "settings" and game.sim.pause_reasons.has("settings"), "settings adds its independent pause reason")
 	await _capture("settings")
-	await _tap(Vector2(360, 810))
+	await _tap(_action_center("close_panel"))
 	_check(game.panel_name.is_empty() and not game.sim.pause_reasons.has("settings"), "settings close clears only settings pause")
 	_check(game.sim.pause_reasons.has("user"), "closing settings preserves user pause state")
 
 	var saved_units: Array = game.sim.units.duplicate(true)
-	await _tap(Vector2(648, 206))
-	await _tap(Vector2(360, 898))
+	await _tap(_action_center("settings"))
+	await _tap(_action_center("save_menu"))
 	_check(game.mode == "menu", "settings save action returns to menu")
 	_check(not game.store.load_run().is_empty(), "settings menu action stores a resumable run")
 	await _capture("menu_saved")
-	await _tap(Vector2(360, 805))
+	await _tap(_action_center("continue"))
 	_check(game.mode == "battle" and game.sim.units.size() == saved_units.size(), "resume restores the saved battle")
 	_check(_unit_layout_matches(saved_units), "resume restores unit ids, kinds, and cells")
 	_check(game.sim.pause_reasons.has("user"), "resume restores in user-paused state")
 	await _capture("battle_resumed")
-	await _tap(Vector2(648, 206))
-	await _tap(Vector2(360, 898))
-	await _tap(Vector2(360, 715))
+	await _tap(_action_center("settings"))
+	await _tap(_action_center("save_menu"))
+	await _tap(_action_center("new_game"))
 	_check(game.panel_name == "confirm_new", "new game asks before replacing a saved battle")
-	await _tap(Vector2(360, 815))
+	await _tap(_action_center("cancel_new"))
 	_check(game.mode == "menu" and game.panel_name.is_empty(), "cancel keeps the existing save on menu")
-	await _tap(Vector2(360, 805))
+	await _tap(_action_center("continue"))
 	_check(_unit_layout_matches(saved_units), "cancel preserves the saved unit layout")
 
 	# 실제 재료를 얻은 전투에서 조합 버튼을 누른다.
-	await _tap(Vector2(522, 206))
+	await _tap(_action_center("recipes"))
 	var combine_button: Button = null
 	for node in game.overlay.find_children("*", "Button", true, false):
 		if node.text == "조합" and not node.disabled:
@@ -161,8 +179,8 @@ func _run() -> void:
 		_check(game.sim.units.size() == before_count - 1, "real combine button consumes two materials into one")
 		_check(not game.sim.unit_by_id(game.selected).is_empty() and int(game.sim.catalog.units[game.sim.unit_by_id(game.selected).kind].tier) == 2, "real combine produces the exact higher tier")
 	await _capture("combined")
-	await _tap(Vector2(639, 326))
-	await _tap(Vector2(586, 1158))
+	await _tap(_action_center("close_panel"))
+	await _tap(_action_center("special"))
 	_check(game.panel_name == "special", "special-monster panel opens through the bottom action")
 	var locked := 0
 	for node in game.overlay.find_children("*", "Button", true, false):
@@ -196,10 +214,10 @@ func _run() -> void:
 	_check(game.store._write("run.json", legacy), "legacy crowded fixture is written into isolated UI store")
 	game._show_menu()
 	_check(not game.resume_data.is_empty() and game.store.last_error.is_empty(), "menu accepts migrated legacy crowd defeat as a resumable result")
-	await _tap(Vector2(360, 715))
+	await _tap(_action_center("new_game"))
 	_check(game.panel_name == "confirm_new", "legacy crowd save still requires overwrite confirmation")
-	await _tap(Vector2(360, 815))
-	await _tap(Vector2(360, 805))
+	await _tap(_action_center("cancel_new"))
+	await _tap(_action_center("continue"))
 	_check(game.panel_name == "result" and game.sim.enemies.size() == 55 and game.sim.result == "defeat", "continue shows crowd migration result with all original enemies")
 	_check(game.store.profile.best_wave >= 31 and game.store.profile.ended_runs.get(legacy.run_id) == "defeat", "migration records reached wave and ended run exactly once")
 	print("UI_TEST_REPORT ", JSON.stringify({"checks": checks, "failed": errors.size(), "errors": errors}))
@@ -291,3 +309,33 @@ func _find_button(text_value: String) -> Button:
 		if node.text == text_value:
 			return node
 	return null
+
+func _action_center(action: String) -> Vector2:
+	for node in game.find_children("*", "Button", true, false):
+		if node.is_visible_in_tree() and node.get_meta("qa_action", "") == action:
+			return node.global_position + node.size / 2.0
+	_check(false, "visible action exists: " + action)
+	return Vector2(-100, -100)
+
+func _touch_drag(start: Vector2, finish: Vector2) -> void:
+	var press := InputEventScreenTouch.new()
+	press.position = start
+	press.index = 0
+	press.pressed = true
+	Input.parse_input_event(press)
+	Input.flush_buffered_events()
+	await _frames(2)
+	var motion := InputEventScreenDrag.new()
+	motion.position = finish
+	motion.relative = finish - start
+	motion.index = 0
+	Input.parse_input_event(motion)
+	Input.flush_buffered_events()
+	await _frames(2)
+	var release := InputEventScreenTouch.new()
+	release.position = finish
+	release.index = 0
+	release.pressed = false
+	Input.parse_input_event(release)
+	Input.flush_buffered_events()
+	await _frames(2)

@@ -1,0 +1,87 @@
+name: Web preview
+
+on:
+  push:
+    branches:
+      - feat/ortho-reference-web
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: project-rd-pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .godot-tools/4.7.2-stable
+            .godot-tools/downloads/4.7.2-stable
+            artifacts/user-data/godot/export_templates/4.7.2.stable
+          key: godot-web-4.7.2-stable-templates-v1
+      - name: Install pinned Godot and Web export templates
+        run: bash scripts/web-setup.sh
+      - name: Verify game rules and saves
+        run: bash scripts/mvp-check.sh
+      - name: Export the Web build
+        run: bash scripts/web-export.sh artifacts/web
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools/web/package-lock.json
+      - name: Install browser test dependency
+        run: npm ci --prefix tools/web
+      - name: Install Chromium for browser QA
+        run: tools/web/node_modules/.bin/playwright install --with-deps chromium
+      - name: Run the preview in a local HTTP server
+        run: |
+          python3 scripts/web-serve.py --directory artifacts/web > artifacts/web-server.log 2>&1 &
+          echo "$!" > artifacts/web-server.pid
+          for attempt in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:4173/ > /dev/null
+      - name: Exercise browser gameplay and persistence
+        run: node tools/web/browser-qa.cjs --base-url http://127.0.0.1:4173/ --output artifacts/web-qa
+      - name: Stop the local preview server
+        if: always()
+        run: if [ -f artifacts/web-server.pid ]; then kill "$(cat artifacts/web-server.pid)" 2>/dev/null || true; fi
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-preview-qa
+          path: |
+            artifacts/web-qa/
+            artifacts/logs/web-export.log
+            artifacts/web-server.log
+          if-no-files-found: ignore
+          retention-days: 14
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts/web
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/ortho-reference-web'
+    needs: build-and-test
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - id: deployment
+        uses: actions/deploy-pages@v4

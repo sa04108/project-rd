@@ -64,6 +64,13 @@ def main() -> int:
         run("shell", "input", "tap", str(x), str(y))
         time.sleep(settle)
 
+    def action(name: str, settle: float = 0.65) -> None:
+        # Godot이 관측한 실제 버튼 중심으로 Android 터치를 보낸다.
+        button = state()["buttons"][name]
+        if button["disabled"]:
+            raise AssertionError(f"disabled action: {name}")
+        tap(round(button["x"] + button["width"] / 2), round(button["y"] + button["height"] / 2), settle)
+
     def hierarchy(filename: str) -> tuple[int, str, set[str]]:
         run("shell", "uiautomator", "dump", "/sdcard/window.xml", timeout=30)
         run("pull", "/sdcard/window.xml", str(args.output / filename))
@@ -158,31 +165,31 @@ def main() -> int:
         raise AssertionError("System UI ANR overlay remains after the single Wait action")
     expect(menu_nodes > 0 and app_is_foreground(), "Android QA 앱이 포그라운드에 표시됨")
     verify_capture("menu.png", "실제 Android 앱 메뉴 화면 캡처")
-    tap(360, 710)
+    action("new_game")
     wait_for(lambda s: s.get("mode") == "battle", "전투 진입")
     run("shell", "input", "keyevent", "4")
     back_settings = wait_for(lambda s: s.get("panel_name") == "settings", "전투 중 Android 뒤로가기 설정 패널")
     expect(back_settings.get("mode") == "battle", "전투 중 뒤로가기로 설정 패널 열기")
     run("shell", "input", "keyevent", "4")
     wait_for(lambda s: s.get("panel_name") == "", "두 번째 뒤로가기로 설정 패널 닫기")
-    tap(180, 206)
+    action("pause")
     paused = wait_for(lambda s: s.get("pause_reasons", {}).get("user") is True, "사용자 일시정지")
     expect(paused.get("result") == "active", "일시정지 중 전투 유지")
     for _ in range(3):
-        tap(360, 1058, 0.35)
+        action("summon", 0.35)
     current = wait_for(lambda s: len(s.get("units", [])) == 3, "용병 3회 소환")
     expect(len(current["units"]) == 3, "일시정지 뒤 시작 골드로 용병 3명 소환")
     expect(current["gold"] == 0, "시작 골드만으로 세 번 소환 후 골드 0")
-    tap(65, 206)
+    action("speed")
     speed = wait_for(lambda s: s.get("speed") == 2, "배속 전환")
     expect(speed.get("pause_reasons", {}).get("user") is True, "일시정지 상태에서 배속 변경")
-    tap(510, 205)
+    action("recipes")
     panel = wait_for(lambda s: s.get("panel_name") == "recipes", "조합법 패널")
     expect(panel.get("mode") == "battle", "조합법 패널에서 전투 장면 유지")
     recipe_nodes, _, _ = hierarchy("window-recipes.xml")
     expect(recipe_nodes > 0, "UIAutomator 조합 패널 계층 덤프 캡처")
     verify_capture("battle-recipes.png", "실제 Android 조합 패널 화면 캡처")
-    tap(640, 336)
+    action("close_panel")
     wait_for(lambda s: s.get("panel_name") == "", "패널 닫기")
 
     # 셀 0과 1에 둔 용병을 드래그 교환하고, 앱 백그라운드 시간은 전투에 반영되지 않는지 본다.
@@ -191,12 +198,14 @@ def main() -> int:
     before_ids = {cell: unit_id for unit_id, cell in before_units.items()}
     expected_units = dict(before_units)
     expected_units[before_ids[0]], expected_units[before_ids[1]] = 1, 0
-    run("shell", "input", "swipe", "190", "380", "190", "454", "650")
+    cells = {cell["cell"]: cell for cell in state()["cell_centers"]}
+    run("shell", "input", "swipe", str(round(cells[0]["x"])), str(round(cells[0]["y"])),
+        str(round(cells[1]["x"])), str(round(cells[1]["y"])), "650")
     moved = wait_for(lambda s: {int(unit["id"]): int(unit["cell"]) for unit in s.get("units", [])} == expected_units,
                      "용병 두 칸 교환")
     after_units = {int(unit["id"]): int(unit["cell"]) for unit in moved.get("units", [])}
     expect(after_units == expected_units, f"드래그로 정확한 두 용병 교환: {after_units}")
-    tap(180, 206)
+    action("pause")
     active = wait_for(lambda s: not s.get("pause_reasons", {}).get("user", False), "전투 재개")
     run("shell", "input", "keyevent", "3")
     background = wait_for(lambda s: s.get("pause_reasons", {}).get("background") is True,
@@ -214,9 +223,9 @@ def main() -> int:
     verify_capture("battle-resumed.png", "백그라운드 복귀 전투 화면 캡처")
 
     # 설정 화면에서 저장 후 메뉴로 이동하고, 이어하기와 프로세스 재실행 저장을 검증한다.
-    tap(647, 206)
+    action("settings")
     wait_for(lambda s: s.get("panel_name") == "settings", "설정 패널")
-    tap(360, 898)
+    action("save_menu")
     menu = wait_for(lambda s: s.get("mode") == "menu", "저장 후 메뉴")
     expect(menu.get("snapshot_exists") is True, "저장 후 메뉴에서 스냅샷 존재")
     expect(len(menu.get("units", [])) == 3, "메뉴 진입 전 QA 관측에 용병 세 명 유지")
@@ -227,7 +236,7 @@ def main() -> int:
            "저장 스냅샷의 골드와 세 용병 확인")
     menu_nodes, _, _ = hierarchy("window-saved-menu.xml")
     expect(menu_nodes > 0, "저장 메뉴 UI 계층 덤프 캡처")
-    tap(360, 805)
+    action("continue")
     battle = wait_for(lambda s: s.get("mode") == "battle", "이어하기 전투")
     def unit_summary(value: dict) -> list[tuple[int, str, int]]:
         return sorted((int(unit["id"]), str(unit["kind"]), int(unit["cell"])) for unit in value.get("units", []))
@@ -247,7 +256,7 @@ def main() -> int:
     expect("" == restarted.get("save_error", ""), "프로세스 재시작 뒤 저장 오류 없음")
     restart_nodes, _, _ = hierarchy("window-process-restart.xml")
     expect(restart_nodes > 0, "재실행 메뉴 UI 계층 덤프 캡처")
-    tap(360, 805)
+    action("continue")
     after_restart = wait_for(lambda s: s.get("mode") == "battle", "재시작 뒤 이어하기")
     expect(unit_summary(after_restart) == unit_summary(saved_run), "강제 종료 뒤 ID·종류·배치 저장 복원")
     for field in ("gold", "lives", "wave", "speed"):

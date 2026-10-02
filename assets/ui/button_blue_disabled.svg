@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="64" viewBox="0 0 96 64">
+<defs><linearGradient id="enamel" x2="0" y2="1"><stop stop-color="#455465"/><stop offset=".48" stop-color="#455465"/><stop offset="1" stop-color="#303d4d"/></linearGradient><linearGradient id="rim" x2="0" y2="1"><stop stop-color="#aaa18b"/><stop offset=".45" stop-color="#82795d"/><stop offset="1" stop-color="#303d4d"/></linearGradient><linearGradient id="shine" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".27"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+<path d="M13 2H83L94 13V51L83 62H13L2 51V13Z" fill="url(#rim)" stroke="#342319" stroke-width="2"/>
+<path d="M15 6H81L90 15V49L81 58H15L6 49V15Z" fill="url(#enamel)" stroke="#82795d" stroke-width="1.5"/>
+<path d="M17 9H79L87 17V25H9V17Z" fill="url(#shine)"/>
+<path d="M12 15V13L16 9H80L84 13V15M12 49V51L16 55H80L84 51V49" fill="none" stroke="#aaa18b" stroke-opacity=".78" stroke-width="1"/>
+<path d="M7 18L12 13M89 18L84 13M7 46L12 51M89 46L84 51" stroke="#aaa18b" stroke-width="1.4"/>
+<path d="M3 32l5-4v8zM93 32l-5-4v8z" fill="#82795d" stroke="#47331d" stroke-width=".8"/>
+<circle cx="15" cy="14" r="1.5" fill="#aaa18b"/><circle cx="81" cy="14" r="1.5" fill="#aaa18b"/><circle cx="15" cy="50" r="1.5" fill="#aaa18b"/><circle cx="81" cy="50" r="1.5" fill="#aaa18b"/>
+</svg>

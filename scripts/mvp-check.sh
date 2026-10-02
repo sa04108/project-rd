@@ -2,15 +2,16 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
-GODOT="${GODOT_BIN:-$ROOT/.godot-tools/4.4.1-stable/godot}"
-[[ -x "$GODOT" ]] || { echo 'Godot 4.4.1 실행 파일을 GODOT_BIN으로 지정하세요.' >&2; exit 1; }
+VERSION="$(tr -d '\r\n' < "$ROOT/.godot-version")"
+GODOT="${GODOT_BIN:-$ROOT/.godot-tools/$VERSION/godot}"
+[[ -x "$GODOT" ]] || { echo "Godot $VERSION 실행 파일을 GODOT_BIN으로 지정하세요." >&2; exit 1; }
 export XDG_DATA_HOME="$ROOT/artifacts/user-data"
 export XDG_CONFIG_HOME="$ROOT/artifacts/user-config"
 export XDG_CACHE_HOME="$ROOT/artifacts/user-cache"
 export PATH="$ROOT/.godot-tools/os/usr/bin:$PATH"
 mkdir -p artifacts/logs "$XDG_DATA_HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME"
 touch artifacts/.gdignore
-[[ "$("$GODOT" --version)" == 4.4.1.stable.* ]] || { echo 'Godot 4.4.1이 필요합니다.' >&2; exit 1; }
+[[ "$("$GODOT" --version)" == "${VERSION%-stable}.stable."* ]] || { echo "Godot $VERSION 버전이 필요합니다." >&2; exit 1; }
 run() {
   local label="$1"; shift
   local rc=0

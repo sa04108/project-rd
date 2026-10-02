@@ -9,7 +9,7 @@ if [[ -z "$GODOT_VERSION" ]]; then
 	if [[ -f "$ROOT/.godot-version" ]]; then
 		GODOT_VERSION="$(tr -d '\r\n' < "$ROOT/.godot-version")"
 	else
-		GODOT_VERSION="4.4.1-stable"
+		GODOT_VERSION="4.7.2-stable"
 	fi
 fi
 GODOT="$ROOT/.godot-tools/$GODOT_VERSION/godot"
@@ -24,7 +24,7 @@ export PATH="$SDK_ROOT/platform-tools:$SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
 [[ -x "$GODOT" && -x "$SDK_ROOT/platform-tools/adb" ]]
 mkdir -p "$ROOT/artifacts/android" "$ROOT/artifacts/logs" "$XDG_CONFIG_HOME/godot"
-python3 - "$XDG_CONFIG_HOME/godot/editor_settings-4.4.tres" "$SDK_ROOT" "$JAVA_HOME" <<'PYSETTINGS'
+python3 - "$XDG_CONFIG_HOME/godot/editor_settings-4.7.tres" "$SDK_ROOT" "$JAVA_HOME" <<'PYSETTINGS'
 from pathlib import Path
 import sys
 

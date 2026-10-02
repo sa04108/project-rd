@@ -10,7 +10,7 @@ Every family atlas uses 256×256 RGBA frames and provides six frames each for id
 
 The manifest distinguishes planned catalog entries, generated atlases, sprite-gen automatic checks, and recorded visual inspection. All visual inspection in this task was performed by coding agents using image-viewing tools; no human review is claimed. The receipt field retains the legacy name `human_visual_review`, but its reviewed notes describe that agent inspection. Automated reports do not certify visual review. All seven final atlases were visually inspected after extraction. Quadruped and dragon rows were re-extracted with component segmentation to remove visible boundary fragments; the blob attack row was regenerated without the detached flame. No detached artifacts remained in the final reviewed sheets. The humanoid idle row remains nearly static and retains sprite-gen's low-motion warning (score 95). Blob's final attack report still records 28 edge pixels (score 99); its replacement pseudopod is visibly attached, and that warning remains recorded. Individual review notes are stored in each family's `pipeline-receipt.json`. The aggregate manifest retains humanoid as `generated_unreviewed`; the other six have `auto_checks_passed` status. Visual inspection notes remain separate from those generated statuses.
 
-Environment art is tracked separately. `assets/art/backgrounds/guild.png` is the menu background and `assets/art/backgrounds/battlefield.png` is the battle background. Their presence is recorded as generated, not as per-entry character coverage.
+Environment art is tracked separately. `assets/art/backgrounds/guild.png` is the menu background and `assets/art/orthographic/battle-map.png` is the current full-screen orthographic battle background. The former `assets/art/backgrounds/battlefield.png` is retained as historical source art and is no longer rendered. Their presence is recorded as generated, not as per-entry character coverage.
 
 ## Generate and import a family
 
@@ -44,3 +44,11 @@ Each of the 87 catalog entries also has a distinct identity portrait under `asse
 Batch receipts must record the IDs in reading order, exact prompts, source PNG, and extraction report. Do not count an ID until its individual extracted file exists and passes the extraction checks. Distinct per-entry portraits are tracked separately from shared animated family sheets.
 
 All six source sheets were visually inspected. `tools/art/portrait_batches/import_batch.py` runs canonical extraction and rejects empty alpha or any canvas-edge contact for every result; the 384-pixel width preserves broad creatures and weapons. Wide/ornate extracted samples were also inspected. Portraits contain full character art; no joint drawing remains in the runtime. Raw batch sheets and exact prompt packets are retained, while duplicate per-batch cutouts and regenerable frame caches are ignored by Git.
+
+## 정투영 전장과 UI
+
+최신 사용자의 정투영 지시에 따라 `assets/art/orthographic/battle-map.png`를 생성했다. 원본 941×1672 PNG와 정확한 프롬프트를 함께 보존한다. 그림에 격자·문구를 굽지 않고 런타임에서 동일한 86×86칸을 그린다. 새 건물·기물은 소실점 없는 탑뷰로 제작했다. 기존 캐릭터 스프라이트와 애니메이션은 재사용하며 새 애니메이션 생성은 수행하지 않았다.
+
+`assets/ui/`의 SVG는 직접 작성한 벡터 장식이다. 금속 테두리·청색 버튼·양피지 패널의 9분할 크기 조절을 지원한다. UI에 등장하는 HP·비용·웨이브 등 문구와 수치는 이미지에 포함하지 않는다. 대화 이미지 도구의 구체적인 모델 식별자는 이번에도 노출되지 않았으며 최상위 모델 검증을 주장하지 않는다.
+
+Web에서 시스템 글꼴에 의존하지 않도록 DejaVu Sans를 `assets/fonts/GuildSymbols.ttf`에 함께 배포한다. 원본 Debian fonts-dejavu-core 저작권·라이선스는 `GuildSymbols-LICENSE.txt`에 보존한다. 기존 한국어 글꼴에 없는 ⚔·◈·✦·Ⅱ를 이 명시적 fallback으로 표시한다.

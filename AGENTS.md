@@ -52,8 +52,8 @@ Git worktree unless the user explicitly requests one.
 
 - Use the standard GDScript Godot release pinned in `.godot-version`; do not
   upgrade implicitly. This repository initially had no Godot project or version
-  metadata, so 4.4.1-stable was selected from the supplied setup guide. Confirm
-  compatibility when the actual project is introduced. C# requires a separate
+  metadata; the user explicitly selected 4.7.2-stable for the current project.
+  Keep engine and export templates on the same pinned release. C# requires a separate
   .NET engine and SDK setup; the standard binary cannot validate C# games.
 - The engine is `.godot-tools/<version>/godot`, not the system `godot` (which
   currently has a different version). `bash scripts/cloud-install.sh` installs
