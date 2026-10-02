@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
-[ext_resource type="Script" path="res://game/main.gd" id="1"]
-[node name="GuildGame" type="Control"]
+[gd_scene format=3 uid="uid://c4f2eirfrt0vg"]
+
+[ext_resource type="Script" uid="uid://ug4r1ka5veer" path="res://game/main.gd" id="1"]
+
+[node name="GuildGame" type="Control" unique_id=825313779]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
