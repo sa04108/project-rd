@@ -3,15 +3,15 @@ name: Web preview
 on:
   push:
     branches:
-      - feat/ortho-reference-web
+      - '**'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: project-rd-pages
-  cancel-in-progress: true
+  group: project-rd-web-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build-and-test:
@@ -56,7 +56,9 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:4173/ > /dev/null
       - name: Exercise browser gameplay and persistence
-        run: node tools/web/browser-qa.cjs --base-url http://127.0.0.1:4173/ --output artifacts/web-qa
+        run: |
+          CHROMIUM_PATH="$(node -e 'process.stdout.write(require("./tools/web/node_modules/playwright").chromium.executablePath())')" \
+            node tools/web/browser-qa.cjs --base-url http://127.0.0.1:4173/ --output artifacts/web-qa
       - name: Stop the local preview server
         if: always()
         run: if [ -f artifacts/web-server.pid ]; then kill "$(cat artifacts/web-server.pid)" 2>/dev/null || true; fi
@@ -76,9 +78,12 @@ jobs:
           path: artifacts/web
 
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/ortho-reference-web'
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: build-and-test
     runs-on: ubuntu-24.04
+    concurrency:
+      group: project-rd-pages
+      cancel-in-progress: false
     permissions:
       pages: write
       id-token: write

@@ -176,7 +176,8 @@ func _clear_screen() -> void:
 
 func _show_menu() -> void:
 	if mode == "battle":
-		_save()
+		if not _save():
+			return
 		sim.set_pause("menu", true)
 	mode = "menu"
 	_clear_screen()
@@ -666,6 +667,8 @@ func _write_qa_state() -> void:
 		"pause_reasons": sim.pause_reasons.duplicate(), "units": sim.units.duplicate(true),
 		"enemy_count": sim.enemies.size(), "selected": selected, "save_error": store.last_error,
 		"snapshot_exists": FileAccess.file_exists(store.directory.path_join("run.json")),
+		"save_snapshot": resume_data.duplicate(true) if mode == "menu" else {},
+		"save_profile": store.profile.duplicate(true) if mode == "menu" else {},
 		"android_qa": android_qa, "session_id": qa_session, "process_id": OS.get_process_id(), "frame_size": [get_viewport_rect().size.x, get_viewport_rect().size.y],
 		"art_ready": visuals.ready_count() == 87 and visuals.portraits.size() == 87}
 	state.buttons = {}
@@ -692,16 +695,16 @@ func _notification(what: int) -> void:
 	if store == null:
 		return
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		_save()
-		get_tree().quit()
+		if _save():
+			get_tree().quit()
 	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		_handle_back()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
-		sim.set_pause("background", true)
+		sim.set_pause("background" if what == NOTIFICATION_APPLICATION_FOCUS_OUT else "suspended", true)
 		_save()
 		_write_qa_state()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_APPLICATION_RESUMED:
-		sim.set_pause("background", false)
+		sim.set_pause("background" if what == NOTIFICATION_APPLICATION_FOCUS_IN else "suspended", false)
 		_write_qa_state()
 
 func _unhandled_key_input(event: InputEvent) -> void:

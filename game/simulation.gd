@@ -122,6 +122,8 @@ func move_unit(id: int, cell: int) -> Dictionary:
 	var unit := unit_by_id(id)
 	if unit.is_empty():
 		return _fail("선택한 용병이 없습니다")
+	if int(unit.cell) == cell:
+		return {"ok": true, "reason": "이미 같은 칸에 있습니다"}
 	var other := unit_at(cell)
 	if not other.is_empty():
 		other.cell = unit.cell
