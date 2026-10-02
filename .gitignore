@@ -15,3 +15,8 @@ export_credentials.cfg
 .mono/
 data_*/
 mono_crash.*.json
+
+# 검증용 엔진과 실행 산출물은 배포 소스에서 제외한다.
+.godot-tools/
+artifacts/
+tools/web/node_modules/

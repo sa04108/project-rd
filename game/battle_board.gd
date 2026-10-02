@@ -6,9 +6,18 @@ signal cell_dragged(unit_id: int, cell: int)
 const CELL_SIZE := 86.0
 const GRID_ORIGIN := Vector2(102, 130)
 const VisualAssets = preload("res://game/visual_assets.gd")
+const CombatVisuals = preload("res://game/combat_visuals.gd")
 var visuals = VisualAssets.new()
+var combat_visuals = CombatVisuals.new()
 
-var simulation: Object
+var simulation: Object:
+	set(value):
+		if simulation != null and simulation.attack_presented.is_connected(_on_attack):
+			simulation.attack_presented.disconnect(_on_attack)
+		simulation = value
+		combat_visuals.reset(value)
+		if simulation != null:
+			simulation.attack_presented.connect(_on_attack)
 var selected_id: int = -1
 var reduced_motion: bool = false
 var blocked_screen_rects: Array[Rect2] = []
@@ -30,6 +39,9 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	queue_redraw()
+
+func _on_attack(event: Dictionary) -> void:
+	combat_visuals.record(event)
 
 func ground_to_screen(point: Vector2) -> Vector2:
 	# 두 축에 같은 배율을 적용해 모든 칸과 사거리를 정투영으로 유지한다.
@@ -72,11 +84,13 @@ func _cell_polygon(col: int, row: int) -> PackedVector2Array:
 func _draw() -> void:
 	if size.x <= 0.0 or size.y <= 0.0:
 		return
+	if simulation != null:
+		combat_visuals.sync(simulation)
 	_draw_field()
 	_draw_selected_range()
-	_draw_effects()
 	_draw_enemies()
 	_draw_units()
+	_draw_effects()
 	_draw_markers()
 
 func _draw_field() -> void:
@@ -122,17 +136,8 @@ func _range_fill(c: Vector2, xa: Vector2, ya: Vector2) -> PackedVector2Array:
 	return pts
 
 func _draw_effects() -> void:
-	if simulation == null or not simulation.get("effects") is Array:
-		return
-	for effect in simulation.effects:
-		var from_point := Vector2(effect.get("from", [0.0, 0.0])[0], effect.get("from", [0.0, 0.0])[1])
-		var to_point := Vector2(effect.get("to", [0.0, 0.0])[0], effect.get("to", [0.0, 0.0])[1])
-		var a := ground_to_screen(from_point)
-		var b := ground_to_screen(to_point)
-		var color := Color(String(effect.get("color", "#f4d178")))
-		draw_line(a, b, Color(color, 0.26), 3.0, true)
-		draw_line(a, b, color, 1.3, true)
-		draw_circle(b, 3.0, color)
+	if simulation != null:
+		combat_visuals.draw_shots(self, simulation, reduced_motion)
 
 func _draw_enemies() -> void:
 	if simulation == null:
@@ -165,23 +170,24 @@ func _draw_units() -> void:
 		_draw_shadow(p, 11.0)
 		if is_selected:
 			draw_arc(p, 21.0, 0, TAU, 48, Color("fff0a1"), 2.3, true)
-		var elapsed := float(def.interval) - float(unit.cooldown)
-		var attacking := not reduced_motion and float(unit.cooldown) > 0.0 and elapsed < minf(0.65, float(def.interval))
-		_draw_character(p, String(unit.kind), tint, true, "attack" if attacking else "idle", elapsed if attacking else _animation_time() + cell * 0.17, 1.0 + tier * 0.035)
+		var pose: Dictionary = combat_visuals.pose(unit, simulation, reduced_motion)
+		var stance: Dictionary = combat_visuals.transform_pose(pose)
+		# 개별 원화를 발 기준으로 기울이고 복원한다. 새 고유 프레임으로 가장하지 않는다.
+		draw_set_transform(p + stance.offset, stance.rotation, stance.scale)
+		_draw_character(Vector2.ZERO, String(unit.kind), tint, true, "idle", 0.0, 1.0 + tier * 0.035)
+		draw_set_transform(Vector2.ZERO)
+		combat_visuals.draw_preparation(self, p, pose, tint)
 		for star in range(tier):
 			var star_pos := p + Vector2((star - (tier - 1) * 0.5) * 6.0, -CELL_SIZE * 0.76)
 			_draw_star(star_pos, maxf(size.x / 180.0, 2.2), Color("ffe08a"))
 
 func _draw_character(p: Vector2, identity: String, tint: Color, ally: bool, state: String, clock: float, scale_factor: float) -> void:
-	# 용병은 개별 원화를 사용하고, 대기 호흡과 공격 이동은 전체 텍스처에 적용한다.
+	# 용병 정체성은 개별 원화로 보존한다. 공격 자세와 효과는 표시 계층에서 처리한다.
 	var portrait: Texture2D = visuals.portrait(identity) if ally else null
 	if portrait != null:
 		var height := CELL_SIZE * 0.76 * scale_factor
 		var width := height * portrait.get_width() / portrait.get_height()
-		var motion := Vector2.ZERO
-		if not reduced_motion:
-			motion = Vector2(4.0 * sin(minf(clock / 0.65, 1.0) * PI), 0) if state == "attack" else Vector2(0, -sin(clock * 2.6) * 1.1)
-		draw_texture_rect(portrait, Rect2(p + motion - Vector2(width * 0.5, height * 0.92), Vector2(width, height)), false)
+		draw_texture_rect(portrait, Rect2(p - Vector2(width * 0.5, height * 0.92), Vector2(width, height)), false)
 		return
 	var sprite: Dictionary = visuals.frame(identity, state, 0.0 if reduced_motion else clock)
 	if sprite.is_empty():

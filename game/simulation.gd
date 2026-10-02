@@ -1,5 +1,8 @@
 extends RefCounted
 
+# 피해 확정 시 표시 계층에 값만 전달한다. 저장·판정·난수에는 관여하지 않는다.
+signal attack_presented(event: Dictionary)
+
 const Catalog = preload("res://game/catalog.gd")
 var catalog = Catalog.new()
 var rng := RandomNumberGenerator.new()
@@ -119,6 +122,8 @@ func move_unit(id: int, cell: int) -> Dictionary:
 	var unit := unit_by_id(id)
 	if unit.is_empty():
 		return _fail("선택한 용병이 없습니다")
+	if int(unit.cell) == cell:
+		return {"ok": true, "reason": "이미 같은 칸에 있습니다"}
 	var other := unit_at(cell)
 	if not other.is_empty():
 		other.cell = unit.cell
@@ -334,6 +339,7 @@ func _tick(delta: float) -> void:
 				apply_cc(enemy, definition)
 		if effects.size() < 90:
 			effects.append({"from": [origin.x, origin.y], "to": [destination.x, destination.y], "color": definition.color, "life": 0.22})
+		attack_presented.emit({"unit_id": int(unit.id), "kind": str(unit.kind), "target_id": int(target.id), "from": origin, "to": destination, "time": time, "color": str(definition.color)})
 	# 같은 틱의 사망 확정 뒤 마왕 승리, 살아 있는 적의 탈출 순으로 처리한다.
 	var final_dead := false
 	for enemy in enemies.duplicate():

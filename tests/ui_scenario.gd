@@ -28,6 +28,24 @@ func _run() -> void:
 	await _frames(3)
 	_check(game.mode == "battle", "new game enters battle")
 	_check(game.sim.units.is_empty() and game.sim.gold == 150, "new battle starts empty with summon gold")
+
+	# 최소 320px 폭에서도 모든 주요 버튼은 44px 이상의 입력 영역을 갖는다.
+	var action_rects: Array[Rect2] = []
+	for action in ["speed", "pause", "guide", "codex", "settings", "recipes", "summon", "upgrade", "gamble", "special"]:
+		var target: Control = null
+		for node in game.find_children("*", "Button", true, false):
+			if node.is_visible_in_tree() and node.get_meta("qa_action", "") == action:
+				target = node
+				break
+		_check(target != null, "touch action exists: " + action)
+		if target == null:
+			continue
+		var rect := target.get_global_rect()
+		_check(rect.size.x * 320.0 / 720.0 >= 44.0 and rect.size.y * 320.0 / 720.0 >= 44.0, "minimum-width touch target: " + action)
+		_check(Rect2(0, 0, 720, 1280).encloses(rect), "touch target remains inside portrait canvas: " + action)
+		for prior in action_rects:
+			_check(not rect.intersects(prior), "main touch targets do not overlap: " + action)
+		action_rects.append(rect)
 	await _capture("battle_empty")
 
 	await _tap(_action_center("pause"))
@@ -77,6 +95,11 @@ func _run() -> void:
 	var drag_start := _cell_screen(board, 35)
 	await _drag(drag_start, Vector2(10, 300))
 	_check(_unit_layout_matches(before_invalid_drag), "drag released outside the board leaves placement unchanged")
+	var touch_from: int = int(game.sim.unit_by_id(first_id).cell)
+	await _touch_drag(_cell_screen(board, touch_from), _cell_screen(board, 4))
+	_check(int(game.sim.unit_by_id(first_id).cell) == 4, "unblocked touch drag moves the intended unit at current window scale")
+	await _touch_drag(_cell_screen(board, 4), _cell_screen(board, touch_from))
+	_check(int(game.sim.unit_by_id(first_id).cell) == touch_from, "touch drag restores placement after scaled-input check")
 	await _capture("battle_placed")
 	await _tap(_action_center("pause"))
 	_check(not game.sim.pause_reasons.has("user"), "resume button clears user pause")
@@ -116,7 +139,7 @@ func _run() -> void:
 	var upgrade_button := _find_button("강화   ◈ 80")
 	_check(upgrade_button != null and upgrade_button.disabled, "upgrade is disabled below its price")
 	game.sim.gold = 80
-	await _frames(20)
+	await _wait_until(func(): return upgrade_button != null and not upgrade_button.disabled)
 	_check(upgrade_button != null and not upgrade_button.disabled, "upgrade becomes affordable without reopening the panel")
 	await _tap(_action_center("close_panel"))
 
@@ -126,7 +149,7 @@ func _run() -> void:
 	var gamble_button := _find_button("계약   ◈ 100")
 	_check(gamble_button != null and gamble_button.disabled, "gamble is disabled below its price")
 	game.sim.gold = 100
-	await _frames(20)
+	await _wait_until(func(): return gamble_button != null and not gamble_button.disabled)
 	_check(gamble_button != null and not gamble_button.disabled, "gamble becomes affordable while its panel stays open")
 	await _capture("gamble")
 	await _tap(_action_center("close_panel"))
@@ -255,7 +278,8 @@ func _touch(position: Vector2) -> void:
 	Input.emulate_mouse_from_touch = true
 	for pressed in [true, false]:
 		var event := InputEventScreenTouch.new()
-		event.position = position
+		# 터치 이벤트는 창 좌표이므로 레터박스/배율을 반영한다.
+		event.position = root.get_final_transform() * position
 		event.index = 0
 		event.pressed = pressed
 		Input.parse_input_event(event)
@@ -319,23 +343,29 @@ func _action_center(action: String) -> Vector2:
 
 func _touch_drag(start: Vector2, finish: Vector2) -> void:
 	var press := InputEventScreenTouch.new()
-	press.position = start
+	press.position = root.get_final_transform() * start
 	press.index = 0
 	press.pressed = true
 	Input.parse_input_event(press)
 	Input.flush_buffered_events()
 	await _frames(2)
 	var motion := InputEventScreenDrag.new()
-	motion.position = finish
-	motion.relative = finish - start
+	motion.position = root.get_final_transform() * finish
+	motion.relative = (root.get_final_transform() * finish) - (root.get_final_transform() * start)
 	motion.index = 0
 	Input.parse_input_event(motion)
 	Input.flush_buffered_events()
 	await _frames(2)
 	var release := InputEventScreenTouch.new()
-	release.position = finish
+	release.position = root.get_final_transform() * finish
 	release.index = 0
 	release.pressed = false
 	Input.parse_input_event(release)
 	Input.flush_buffered_events()
 	await _frames(2)
+
+func _wait_until(predicate: Callable, timeout_ms: int = 1000) -> void:
+	# 고정 프레임 수 대신 실제 갱신 조건을 제한 시간 안에서 관찰한다.
+	var deadline := Time.get_ticks_msec() + timeout_ms
+	while not predicate.call() and Time.get_ticks_msec() < deadline:
+		await process_frame

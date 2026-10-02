@@ -176,7 +176,8 @@ func _clear_screen() -> void:
 
 func _show_menu() -> void:
 	if mode == "battle":
-		_save()
+		if not _save():
+			return
 		sim.set_pause("menu", true)
 	mode = "menu"
 	_clear_screen()
@@ -237,7 +238,7 @@ func _show_battle() -> void:
 	labels.lives = _label(screen, "", Vector2(37, 27), 110, 23, Color("ff9584"))
 	labels.wave = _label(screen, "", Vector2(245, 29), 220, 20, INK)
 	labels.gold = _label(screen, "", Vector2(509, 28), 116, 22, GOLD)
-	labels.speed = _button(screen, "×1", Rect2(642, 19, 57, 49), func(): sim.cycle_speed(); _mark_dirty(); _refresh(), false, "speed")
+	labels.speed = _button(screen, "×1", Rect2(472, 72, 108, 100), func(): sim.cycle_speed(); _mark_dirty(); _refresh(), false, "speed")
 	var banner := TextureRect.new()
 	banner.texture = UiSkin.banner_texture()
 	banner.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -248,13 +249,13 @@ func _show_battle() -> void:
 	screen.add_child(banner)
 	var guild := _label(screen, "길드", Vector2(41, 191), 58, 17, GOLD)
 	guild.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	labels.pause = _button(screen, "Ⅱ", Rect2(639, 82, 60, 59), _toggle_pause, false, "pause")
-	_button(screen, "가이드", Rect2(552, 82, 78, 59), func(): _open_panel("guide"), false, "guide").add_theme_font_size_override("font_size", 16)
-	_button(screen, "도감", Rect2(552, 151, 78, 54), func(): _open_panel("codex"), false, "codex").add_theme_font_size_override("font_size", 17)
-	_button(screen, "설정", Rect2(639, 151, 60, 54), func(): _open_panel("settings"), false, "settings").add_theme_font_size_override("font_size", 16)
-	_button(screen, "조합법", Rect2(586, 216, 113, 50), func(): _open_panel("recipes"), false, "recipes").add_theme_font_size_override("font_size", 17)
-	_panel(screen, Rect2(209, 274, 303, 43), INK, GOLD, "dark")
-	labels.clock = _label(screen, "", Vector2(220, 281), 281, 15, PALE)
+	labels.pause = _button(screen, "Ⅱ", Rect2(590, 72, 108, 100), _toggle_pause, false, "pause")
+	_button(screen, "가이드", Rect2(354, 72, 108, 100), func(): _open_panel("guide"), false, "guide").add_theme_font_size_override("font_size", 16)
+	_button(screen, "도감", Rect2(354, 180, 108, 100), func(): _open_panel("codex"), false, "codex").add_theme_font_size_override("font_size", 17)
+	_button(screen, "설정", Rect2(472, 180, 108, 100), func(): _open_panel("settings"), false, "settings").add_theme_font_size_override("font_size", 16)
+	_button(screen, "조합법", Rect2(590, 180, 108, 100), func(): _open_panel("recipes"), false, "recipes").add_theme_font_size_override("font_size", 17)
+	_panel(screen, Rect2(209, 292, 303, 43), INK, GOLD, "dark")
+	labels.clock = _label(screen, "", Vector2(220, 299), 281, 15, PALE)
 	labels.clock.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	board = BattleBoard.new()
 	board.position = Vector2(0, 224)
@@ -270,14 +271,14 @@ func _show_battle() -> void:
 	labels.selection.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	labels.detail = _label(screen, "", Vector2(176, 980), 368, 13, MUTED)
 	labels.detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	labels.summon = _button(screen, "", Rect2(229, 1034, 262, 83), _summon, true, "summon")
+	labels.summon = _button(screen, "", Rect2(229, 1030, 262, 100), _summon, true, "summon")
 	labels.summon.add_theme_font_size_override("font_size", 24)
-	_panel(screen, Rect2(225, 1120, 270, 35), INK, GOLD, "dark")
-	labels.count = _label(screen, "", Vector2(234, 1126), 252, 13, PALE)
+	_panel(screen, Rect2(225, 1132, 270, 35), INK, GOLD, "dark")
+	labels.count = _label(screen, "", Vector2(234, 1138), 252, 13, PALE)
 	labels.count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_button(screen, "↑ 업그레이드", Rect2(27, 1160, 216, 63), func(): _open_panel("upgrade"), false, "upgrade")
-	_button(screen, "✦ 도박", Rect2(252, 1160, 216, 63), func(): _open_panel("gamble"), false, "gamble")
-	_button(screen, "특수몬스터", Rect2(477, 1160, 216, 63), func(): _open_panel("special"), false, "special")
+	_button(screen, "↑ 업그레이드", Rect2(27, 1172, 216, 100), func(): _open_panel("upgrade"), false, "upgrade")
+	_button(screen, "✦ 도박", Rect2(252, 1172, 216, 100), func(): _open_panel("gamble"), false, "gamble")
+	_button(screen, "특수몬스터", Rect2(477, 1172, 216, 100), func(): _open_panel("special"), false, "special")
 	_refresh()
 
 func _cell_pressed(cell: int) -> void:
@@ -623,6 +624,12 @@ func _toast(message: String) -> void:
 	if not is_instance_valid(toast_label):
 		toast_label = _label(self, "", Vector2(30, 1235), 660, 19, GOLD)
 		toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		toast_label.add_theme_stylebox_override("normal", _style(INK, GOLD, 1, 3))
+	toast_label.position = Vector2(166, 950) if mode == "battle" else Vector2(30, 1180)
+	toast_label.size = Vector2(388, 62) if mode == "battle" else Vector2(660, 62)
+	toast_label.show()
 	toast_label.text = message
 	toast_until = wall_time + 3.0
 	move_child(toast_label, get_child_count() - 1)
@@ -649,6 +656,7 @@ func _process(delta: float) -> void:
 		_refresh()
 	if is_instance_valid(toast_label) and wall_time > toast_until:
 		toast_label.text = ""
+		toast_label.hide()
 
 func _observe_result() -> void:
 	if mode == "battle" and sim.result != "active":
@@ -694,16 +702,16 @@ func _notification(what: int) -> void:
 	if store == null:
 		return
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		_save()
-		get_tree().quit()
+		if _save():
+			get_tree().quit()
 	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		_handle_back()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
-		sim.set_pause("background", true)
+		sim.set_pause("background" if what == NOTIFICATION_APPLICATION_FOCUS_OUT else "suspended", true)
 		_save()
 		_write_qa_state()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_APPLICATION_RESUMED:
-		sim.set_pause("background", false)
+		sim.set_pause("background" if what == NOTIFICATION_APPLICATION_FOCUS_IN else "suspended", false)
 		_write_qa_state()
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -776,6 +784,9 @@ func run_automation_tests() -> bool:
 	var art: Dictionary = load("res://tests/art_suite.gd").run_all()
 	report.passed += art.passed
 	report.failed.append_array(art.failed)
+	var animation: Dictionary = load("res://tests/animation_suite.gd").run_all()
+	report.passed += animation.passed
+	report.failed.append_array(animation.failed)
 	print("MVP_TEST_REPORT ", JSON.stringify(report))
 	return report.failed.is_empty()
 

@@ -12,6 +12,8 @@ static func run_all() -> Dictionary:
         _test_result_and_developer_run_records,
         _test_snapshot_rejects_invalid_state_atomically,
         _test_snapshot_just_before_spawn,
+        _test_empty_json_is_quarantined,
+        _test_restart_and_interrupted_result,
     ]
     var failed: Array[String] = []
     for test_case in cases:
@@ -22,6 +24,67 @@ static func run_all() -> Dictionary:
 
 static func _directory() -> String:
     return "user://save-tests/run_%d" % Time.get_ticks_usec()
+
+static func _test_empty_json_is_quarantined() -> String:
+    var directory: String = _directory()
+    var initial: Variant = SAVE_STORE.new(directory)
+    for filename in ["profile.json", "run.json"]:
+        if not _write_json(directory.path_join(filename), {}):
+            return "empty JSON fixture must be writable"
+    var store: Variant = SAVE_STORE.new(directory)
+    if store.last_error.is_empty() or FileAccess.file_exists(directory.path_join("profile.json")):
+        return "empty profile must report corruption and preserve the original in quarantine"
+    if not store.load_run().is_empty() or store.last_error.is_empty() or FileAccess.file_exists(directory.path_join("run.json")):
+        return "empty run must report corruption and be quarantined"
+    if DirAccess.get_files_at(directory).size() != 2:
+        return "both empty JSON originals must remain quarantined"
+    return ""
+
+static func _test_restart_and_interrupted_result() -> String:
+    var directory: String = _directory()
+    var store: Variant = SAVE_STORE.new(directory)
+    var sim: Variant = _new_sim(72)
+    sim.summon()
+    sim.advance(2.2)
+    if not store.save_run(sim):
+        return "pre-restart run must save"
+    var old_snapshot: Dictionary = sim.snapshot()
+    var restarted: Variant = SAVE_STORE.new(directory)
+    var restored: Variant = SIMULATION.new()
+    if not restored.restore(restarted.load_run()) or not _same_saved_value(restored.snapshot(), old_snapshot):
+        return "new store and simulation must restore all persistent state without offline progress"
+    if not restored.pause_reasons.has("user"):
+        return "restart must require explicit resume"
+    restored.result = "defeat"
+    if not restarted.save_run(restored):
+        return "terminal result must save"
+    # 종료 기록 저장 직후 스냅샷 삭제 전 중단된 상태를 재현한다.
+    if not _write_json(directory.path_join("run.json"), old_snapshot):
+        return "stale snapshot fixture must write"
+    var after_interrupt: Variant = SAVE_STORE.new(directory)
+    if not after_interrupt.load_run().is_empty():
+        return "persisted terminal run ID must prevent resurrection from a stale snapshot"
+    return ""
+
+static func _same_saved_value(actual: Variant, expected: Variant) -> bool:
+    # JSON의 정수/실수 변환과 소수 직렬화 오차만 허용한다.
+    if (actual is int or actual is float) and (expected is int or expected is float):
+        return absf(float(actual) - float(expected)) < 0.0000000001
+    if actual is Dictionary and expected is Dictionary:
+        if actual.size() != expected.size():
+            return false
+        for key in expected:
+            if not actual.has(key) or not _same_saved_value(actual[key], expected[key]):
+                return false
+        return true
+    if actual is Array and expected is Array:
+        if actual.size() != expected.size():
+            return false
+        for index in range(expected.size()):
+            if not _same_saved_value(actual[index], expected[index]):
+                return false
+        return true
+    return actual == expected
 
 static func _new_sim(seed_value: int = 123) -> Variant:
     var sim: Variant = SIMULATION.new()

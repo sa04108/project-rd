@@ -8,5 +8,8 @@ func _init() -> void:
 	var art: Dictionary = preload("res://tests/art_suite.gd").run_all()
 	report.passed += art.passed
 	report.failed.append_array(art.failed)
+	var animation: Dictionary = preload("res://tests/animation_suite.gd").run_all()
+	report.passed += animation.passed
+	report.failed.append_array(animation.failed)
 	print("MVP_TEST_REPORT ", JSON.stringify(report))
 	quit(0 if report.failed.is_empty() else 1)

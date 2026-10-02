@@ -66,7 +66,7 @@ func _read(filename: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {}
 	var value = JSON.parse_string(FileAccess.get_file_as_string(path))
-	if not value is Dictionary:
+	if not value is Dictionary or value.is_empty():
 		last_error = "저장 파일을 읽을 수 없습니다. 원본을 보존했습니다."
 		mark_corrupt(filename)
 		return {}

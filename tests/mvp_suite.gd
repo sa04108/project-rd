@@ -9,6 +9,7 @@ static func run_all() -> Dictionary:
         _test_column_major_summon,
         _test_move_swap_preserves_cooldown,
         _test_full_board_economy_is_atomic,
+        _test_insufficient_gold_is_atomic,
         _test_recipe_matching_and_anchor,
         _test_range_and_target_priority,
         _test_gamble_tier_coverage,
@@ -82,6 +83,10 @@ static func _test_move_swap_preserves_cooldown() -> String:
         return "occupied-cell move did not swap positions"
     if not is_equal_approx(first.get("cooldown", -1.0), 0.37) or not is_equal_approx(second.get("cooldown", -1.0), 0.82):
         return "moving units must preserve both attack cooldowns"
+    var revision_before_same_cell: int = sim.revision
+    var same_cell: Dictionary = sim.move_unit(first.id, first.cell)
+    if not same_cell.get("ok", false) or sim.revision != revision_before_same_cell or first.cell != 1 or second.cell != 0:
+        return "moving to the current cell must be a no-op without changing revision"
     return ""
 
 static func _test_full_board_economy_is_atomic() -> String:
@@ -98,6 +103,23 @@ static func _test_full_board_economy_is_atomic() -> String:
     var gamble_result: Dictionary = sim.gamble(2)
     if gamble_result.get("ok", true) or sim.gold != old_gold or sim.rng.state != old_rng:
         return "full-board gamble must fail without spending gold or advancing RNG"
+    return ""
+
+static func _test_insufficient_gold_is_atomic() -> String:
+    var sim: Variant = _new_sim()
+    sim.gold = 0
+    var unit_before: int = sim.units.size()
+    var old_rng: int = sim.rng.state
+    var old_revision: int = sim.revision
+    var summon_result: Dictionary = sim.summon()
+    if summon_result.get("ok", true) or sim.gold != 0 or sim.units.size() != unit_before or sim.rng.state != old_rng or sim.revision != old_revision:
+        return "insufficient-gold summon must not charge, create, draw, or revise"
+    var gamble_result: Dictionary = sim.gamble(2)
+    if gamble_result.get("ok", true) or sim.gold != 0 or sim.units.size() != unit_before or sim.rng.state != old_rng or sim.revision != old_revision:
+        return "insufficient-gold gamble must not charge, create, draw, or revise"
+    var upgrade_result: Dictionary = sim.upgrade(1)
+    if upgrade_result.get("ok", true) or sim.gold != 0 or sim.upgrades["1"] != 0 or sim.revision != old_revision:
+        return "insufficient-gold upgrade must not charge or change the upgrade"
     return ""
 
 static func _test_recipe_matching_and_anchor() -> String:
@@ -402,6 +424,10 @@ static func _test_final_boss_and_terminal_order() -> String:
         return "final boss death must win even when another enemy escapes in the same tick"
     var lives_after: int = sim.lives
     var time_after: float = sim.time
+    var terminal_speed: int = sim.speed
+    var terminal_revision: int = sim.revision
+    if sim.cycle_speed() != terminal_speed or sim.speed != terminal_speed or sim.revision != terminal_revision:
+        return "terminal result must ignore speed-cycle input without revising state"
     sim.advance(10.0)
     if sim.lives != lives_after or not is_equal_approx(sim.time, time_after):
         return "terminal result must freeze subsequent game simulation"
@@ -415,6 +441,14 @@ static func _test_final_boss_and_terminal_order() -> String:
     sim.advance(0.04)
     if sim.result != "defeat" or sim.lives != 19:
         return "final boss escape must immediately cause defeat and subtract exactly one life"
+    sim = _new_sim()
+    sim.lives = 1
+    sim.enemies.clear()
+    var normal: Dictionary = sim.add_enemy("n01", 1)
+    normal.progress = 26.0
+    sim.advance(0.04)
+    if sim.result != "defeat" or sim.lives != 0 or not sim.enemies.is_empty():
+        return "the last normal enemy escape must reduce lives to zero and cause defeat"
     return ""
 
 static func _test_final_hold_and_cleanup_rewards() -> String:
