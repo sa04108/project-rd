@@ -9,6 +9,9 @@ export XDG_DATA_HOME="$ROOT/artifacts/user-data"
 export XDG_CONFIG_HOME="$ROOT/artifacts/user-config"
 export XDG_CACHE_HOME="$ROOT/artifacts/user-cache"
 export PATH="$ROOT/.godot-tools/os/usr/bin:$PATH"
+for tool in rg timeout; do
+  command -v "$tool" >/dev/null || { echo "필수 검사 도구가 없습니다: $tool" >&2; exit 1; }
+done
 mkdir -p artifacts/logs "$XDG_DATA_HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME"
 touch artifacts/.gdignore
 [[ "$("$GODOT" --version)" == "${VERSION%-stable}.stable."* ]] || { echo "Godot $VERSION 버전이 필요합니다." >&2; exit 1; }

@@ -20,6 +20,10 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+      - name: Install native check dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ripgrep
       - uses: actions/cache@v4
         with:
           path: |
@@ -63,7 +67,7 @@ jobs:
           name: web-preview-qa
           path: |
             artifacts/web-qa/
-            artifacts/logs/web-export.log
+            artifacts/logs/*.log
             artifacts/web-server.log
           if-no-files-found: ignore
           retention-days: 14

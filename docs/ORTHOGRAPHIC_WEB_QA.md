@@ -32,6 +32,8 @@ Godot의 네이티브 메뉴·전장·업그레이드·도감·조합·특수·�
 
 ## 배포와 남은 검증
 
+첫 GitHub 실행기 검사에서 `rg: command not found`로 중단되어 워크플로에 `ripgrep` 설치를 추가했다. 검사 스크립트도 의존성이 없으면 실행 전 실패하도록 바꿨다. 수정 후 로컬 `bash scripts/mvp-check.sh`는 import·29개 규칙 검사·smoke를 통과했고, `rg`가 없는 환경에서는 PASS 없이 exit 1로 종료함을 확인했다. 검사 로그 전체를 CI 증거에 포함한다.
+
 Pages 빌드/검사/배포 워크플로는 `.github/workflows/web-preview.yml`이다. 저장소의 Pages가 아직 비활성이고 연결 토큰으로 활성화 요청 시 GitHub가 `403 Resource not accessible by integration`을 반환했다. 일반 워크플로 `GITHUB_TOKEN`도 사이트 최초 활성화를 할 수 없다. 저장소 Settings → Pages → Source를 GitHub Actions로 지정해야 공개 배포를 완료할 수 있다. 공개 URL 접속 성공을 주장하지 않는다.
 
 이번 엔진·UI 변경 이후 Android APK 검증, 물리 Android의 GPU·노치·발열·장시간 플레이, 다른 브라우저 및 실제 음향 검증은 남아 있다. 사람 첫 플레이 통계도 아직 없으며 5% 클리어 목표는 유지한다. 출시 제목·소개·스토리·사운드는 [남은 항목](REMAINING.md)에 정리한다.
