@@ -666,6 +666,8 @@ func _write_qa_state() -> void:
 		"pause_reasons": sim.pause_reasons.duplicate(), "units": sim.units.duplicate(true),
 		"enemy_count": sim.enemies.size(), "selected": selected, "save_error": store.last_error,
 		"snapshot_exists": FileAccess.file_exists(store.directory.path_join("run.json")),
+		"save_snapshot": resume_data.duplicate(true) if mode == "menu" else {},
+		"save_profile": store.profile.duplicate(true) if mode == "menu" else {},
 		"android_qa": android_qa, "session_id": qa_session, "process_id": OS.get_process_id(), "frame_size": [get_viewport_rect().size.x, get_viewport_rect().size.y],
 		"art_ready": visuals.ready_count() == 87 and visuals.portraits.size() == 87}
 	state.buttons = {}

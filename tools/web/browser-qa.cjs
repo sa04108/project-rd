@@ -53,6 +53,64 @@ async function waitFor(page, predicate, timeout, label) {
   throw new Error(`Timed out waiting for ${label}; last bridge state: ${JSON.stringify(last)}`);
 }
 
+async function persistedSave(page, timeout) {
+  // 엔진 메모리를 건드리지 않고 실제 IndexedDB에 확정된 QA 저장만 읽습니다.
+  let timer;
+  try {
+    return await Promise.race([page.evaluate(async () => {
+      const result = {};
+      for (const info of await indexedDB.databases()) {
+        if (!info.name?.startsWith('/userfs')) continue;
+        const db = await new Promise((resolve, reject) => {
+          const request = indexedDB.open(info.name);
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+        try {
+          if (!db.objectStoreNames.contains('FILE_DATA')) continue;
+          await new Promise((resolve, reject) => {
+            const transaction = db.transaction('FILE_DATA', 'readonly');
+            transaction.oncomplete = resolve;
+            transaction.onabort = () => reject(transaction.error || new Error('IndexedDB read aborted'));
+            transaction.onerror = () => reject(transaction.error);
+            const request = transaction.objectStore('FILE_DATA').openCursor();
+            request.onsuccess = () => {
+              const cursor = request.result;
+              if (!cursor) return;
+              const key = String(cursor.key);
+              for (const [field, filename] of [['run', 'run.json'], ['profile', 'profile.json']]) {
+                if (key.endsWith(`/web-qa/${filename}`)) {
+                  result[field] = JSON.parse(new TextDecoder().decode(cursor.value.contents));
+                }
+              }
+              cursor.continue();
+            };
+          });
+        } finally {
+          db.close();
+        }
+      }
+      return result;
+    }), new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`Timed out reading IndexedDB after ${timeout}ms`)), timeout);
+    })]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function waitForPersistedSave(page, expected, timeout) {
+  const started = Date.now();
+  const wanted = JSON.stringify(canonical(expected));
+  let actual;
+  while (Date.now() - started < timeout) {
+    actual = await persistedSave(page, Math.max(1, timeout - (Date.now() - started)));
+    if (JSON.stringify(canonical(actual)) === wanted) return { waited_ms: Date.now() - started, run_id: actual.run.run_id };
+    await page.waitForTimeout(100);
+  }
+  throw new Error(`Persistent save did not commit before reload: ${JSON.stringify({ waited_ms: Date.now() - started, expected, actual })}`);
+}
+
 async function clickLogical(page, x, y) {
   const frame = await state(page);
   const logicalWidth = Number(frame.frame_size?.[0] || 720);
@@ -204,6 +262,7 @@ async function main() {
   });
   const failures = [];
   const captures = [];
+  let persistence;
   const context = await browser.newContext({ viewport: { width: 720, height: 1280 }, deviceScaleFactor: 1, hasTouch: true });
   const page = await context.newPage();
   page.on('pageerror', error => failures.push(`pageerror: ${error.message}`));
@@ -282,6 +341,9 @@ async function main() {
     await clickButton(page, 'save_menu');
     const menuAfterSave = await waitFor(page, s => s.mode === 'menu', options.timeout, 'save and return to menu');
     if (!menuAfterSave.snapshot_exists || menuAfterSave.save_error) throw new Error(`Save failed: ${menuAfterSave.save_error}`);
+    if (!menuAfterSave.save_snapshot?.run_id || !menuAfterSave.save_profile?.schema) throw new Error('Saved run/profile observation is missing');
+    // 파일 존재만으로 비동기 영구 저장의 완료를 가정하지 않습니다. 동기화를 강제하지 않습니다.
+    persistence = await waitForPersistedSave(page, { run: menuAfterSave.save_snapshot, profile: menuAfterSave.save_profile }, options.timeout);
     const saved = {
       gold: menuAfterSave.gold,
       lives: menuAfterSave.lives,
@@ -293,7 +355,7 @@ async function main() {
     await clickButton(page, 'continue');
     let resumed = await waitFor(page, s => s.mode === 'battle', options.timeout, 'continue saved game');
     if (resumed.gold !== saved.gold || resumed.units.length !== saved.units.length || Math.abs(resumed.time - saved.time) > 0.01 || resumed.speed !== saved.speed) {
-      throw new Error('Continue did not restore saved gold, units, time, and speed');
+      throw new Error(`Continue did not restore saved fields: ${JSON.stringify({ saved, resumed })}`);
     }
     if (Object.keys(resumed.pause_reasons || {}).length === 0) throw new Error('Continue should restore the run paused');
     if (JSON.stringify(canonical(resumed.units)) !== JSON.stringify(saved.units)) throw new Error('Continue did not restore every unit field');
@@ -303,10 +365,15 @@ async function main() {
     await page.reload({ waitUntil: 'domcontentloaded', timeout: options.timeout });
     const restartedMenu = await waitFor(page, s => s.mode === 'menu' && s.session_id !== oldSession, options.timeout, 'fresh browser session');
     if (!restartedMenu.snapshot_exists) throw new Error('Browser reload lost the saved snapshot');
+    for (const field of ['save_snapshot', 'save_profile']) {
+      if (JSON.stringify(canonical(restartedMenu[field])) !== JSON.stringify(canonical(menuAfterSave[field]))) {
+        throw new Error(`Browser reload changed ${field}: ${JSON.stringify({ expected: menuAfterSave[field], actual: restartedMenu[field] })}`);
+      }
+    }
     await clickButton(page, 'continue');
     resumed = await waitFor(page, s => s.mode === 'battle', options.timeout, 'resume after browser reload');
     if (resumed.gold !== saved.gold || resumed.lives !== saved.lives || resumed.wave !== saved.wave || resumed.units.length !== saved.units.length || Math.abs(resumed.time - saved.time) > 0.01 || resumed.speed !== saved.speed) {
-      throw new Error('Browser reload resume did not restore the saved run fields');
+      throw new Error(`Browser reload resume did not restore the saved run fields: ${JSON.stringify({ saved, resumed })}`);
     }
     if (Object.keys(resumed.pause_reasons || {}).length === 0) throw new Error('Browser reload resume should remain paused');
     if (JSON.stringify(canonical(resumed.units)) !== JSON.stringify(saved.units)) throw new Error('Browser reload did not restore every unit field');
@@ -357,7 +424,8 @@ async function main() {
       browser: 'Chromium via Playwright',
       browser_version: browser.version(),
       playwright_version: require('playwright/package.json').version,
-      checks: ['QA bridge gated by query flag', 'initial art and frame ready', 'new run and three summons', 'pause freezes simulation', 'speed cycle 1→2→3→5→1', 'unit relocation', 'guide/codex/recipe panels', 'save-menu-continue', 'browser reload and persistent restore', 'desktop, mobile-touch, and wide viewport input', 'public URL omits QA bridge', 'all screenshots contain visible pixel diversity'],
+      checks: ['QA bridge gated by query flag', 'initial art and frame ready', 'new run and three summons', 'pause freezes simulation', 'speed cycle 1→2→3→5→1', 'unit relocation', 'guide/codex/recipe panels', 'IndexedDB commits complete run and profile without forced sync', 'save-menu-continue', 'browser reload and persistent restore', 'desktop, mobile-touch, and wide viewport input', 'public URL omits QA bridge', 'all screenshots contain visible pixel diversity'],
+      persistence,
       final_state: resumed,
       screenshots: captures,
       browser_errors: failures,
@@ -365,7 +433,7 @@ async function main() {
     fs.writeFileSync(path.join(outDir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`);
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   } catch (error) {
-    const report = { result: 'fail', error: error.stack || String(error), browser_errors: failures, screenshots: captures };
+    const report = { result: 'fail', error: error.stack || String(error), persistence, last_state: await state(page).catch(() => null), browser_errors: failures, screenshots: captures };
     fs.writeFileSync(path.join(outDir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`);
     process.stderr.write(`${JSON.stringify(report, null, 2)}\n`);
     process.exitCode = 1;
