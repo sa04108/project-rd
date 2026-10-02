@@ -774,6 +774,9 @@ func run_automation_tests() -> bool:
 	var art: Dictionary = load("res://tests/art_suite.gd").run_all()
 	report.passed += art.passed
 	report.failed.append_array(art.failed)
+	var animation: Dictionary = load("res://tests/animation_suite.gd").run_all()
+	report.passed += animation.passed
+	report.failed.append_array(animation.failed)
 	print("MVP_TEST_REPORT ", JSON.stringify(report))
 	return report.failed.is_empty()
 

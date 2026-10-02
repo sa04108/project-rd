@@ -1,5 +1,8 @@
 extends RefCounted
 
+# 피해 확정 시 표시 계층에 값만 전달한다. 저장·판정·난수에는 관여하지 않는다.
+signal attack_presented(event: Dictionary)
+
 const Catalog = preload("res://game/catalog.gd")
 var catalog = Catalog.new()
 var rng := RandomNumberGenerator.new()
@@ -334,6 +337,7 @@ func _tick(delta: float) -> void:
 				apply_cc(enemy, definition)
 		if effects.size() < 90:
 			effects.append({"from": [origin.x, origin.y], "to": [destination.x, destination.y], "color": definition.color, "life": 0.22})
+		attack_presented.emit({"unit_id": int(unit.id), "kind": str(unit.kind), "target_id": int(target.id), "from": origin, "to": destination, "time": time, "color": str(definition.color)})
 	# 같은 틱의 사망 확정 뒤 마왕 승리, 살아 있는 적의 탈출 순으로 처리한다.
 	var final_dead := false
 	for enemy in enemies.duplicate():

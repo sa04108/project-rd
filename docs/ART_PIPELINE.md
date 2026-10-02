@@ -4,7 +4,7 @@ Character animation is produced through the documented [`aldegad/sprite-gen`](ht
 
 ## Runtime coverage
 
-`tools/art/build_manifest.py` reads the source catalogs and writes all 87 identities: 34 units, 40 normal enemies, 10 bosses, and 3 special enemies. Each identity maps explicitly to one of seven shared family atlases: humanoid, heavy, quadruped, multi, floating, blob, or dragon. Per-entry tint and catalog identity remain planned identity metadata; they do not count as unique character art. All 87 distinct portraits are installed. The codex uses each identity’s portrait; the 34 battlefield allies also use these individual textures with whole-image breathing/attack translation. Enemies use the seven family frame animations with per-entry tint. Individual enemy frame animation for all 53 identities is still shared, not unique.
+`tools/art/build_manifest.py` reads the source catalogs and writes all 87 identities: 34 units, 40 normal enemies, 10 bosses, and 3 special enemies. Each identity maps explicitly to one of seven shared family atlases: humanoid, heavy, quadruped, multi, floating, blob, or dragon. Per-entry tint and catalog identity remain planned identity metadata; they do not count as unique character art. All 87 distinct portraits are installed. The codex uses each identity’s portrait; the 34 battlefield allies retain these individual textures. Combat presentation now applies event-synchronized, role-specific procedural poses and separate weapon/projectile/impact effects; this does not constitute new per-identity animation frames (see COMBAT_ANIMATION_QA.md). Enemies use the seven family frame animations with per-entry tint. Individual enemy frame animation for all 53 identities is still shared, not unique.
 
 Every family atlas uses 256×256 RGBA frames and provides six frames each for idle, walk, and attack. Runtime files live at `assets/art/families/<family>/sprite-sheet-alpha.png` and `assets/art/families/<family>/manifest.json`. Raw prompts, references, and generated rows remain in `sprite_run/`, which contains `.gdignore` so Godot will not import or export the large source work files.
 
@@ -52,3 +52,11 @@ All six source sheets were visually inspected. `tools/art/portrait_batches/impor
 `assets/ui/`의 SVG는 직접 작성한 벡터 장식이다. 금속 테두리·청색 버튼·양피지 패널의 9분할 크기 조절을 지원한다. UI에 등장하는 HP·비용·웨이브 등 문구와 수치는 이미지에 포함하지 않는다. 대화 이미지 도구의 구체적인 모델 식별자는 이번에도 노출되지 않았으며 최상위 모델 검증을 주장하지 않는다.
 
 Web에서 시스템 글꼴에 의존하지 않도록 DejaVu Sans를 `assets/fonts/GuildSymbols.ttf`에 함께 배포한다. 원본 Debian fonts-dejavu-core 저작권·라이선스는 `GuildSymbols-LICENSE.txt`에 보존한다. 기존 한국어 글꼴에 없는 ⚔·◈·✦·Ⅱ를 이 명시적 fallback으로 표시한다.
+
+## 후속 제작 경로 지시
+
+사용자는 sprite-gen 자체의 이미지 API 전송을 사용하지 않고 준비 단계에서 만든 중간 프롬프트와
+레이아웃 가이드만 추출하도록 지시했다. 본인 작업의 `prompts/<state>.txt`와 가이드를 대화 이미지
+생성 도구에 전달하며 GPT/Grok API 키 설정·외부 이미지 API 호출·유료서비스를 사용하지 않는다.
+최상위 이미지 모델 검증 불가 문제는 별도 제약이고 하위모델 승인을 뜻하지 않는다.
+이번 전투 효과 보강에서는 새 이미지/프레임을 생성하지 않았고 실제 생성 프롬프트 사용을 주장하지 않는다.
