@@ -53,6 +53,12 @@
     "zh_CN": "切换速度 · ×1 / ×2 / ×3 / ×5",
     "ja": "速度変更 · ×1 / ×2 / ×3 / ×5"
   },
+  "battle.wave.current": {
+    "en": "Wave: %d/100",
+    "ko": "웨이브: %d/100",
+    "zh_CN": "波次: %d/100",
+    "ja": "ウェーブ: %d/100"
+  },
   "battle.wave.reached": {
     "en": "Wave Reached  %d / 100",
     "ko": "도달 웨이브  %d / 100",
@@ -60,10 +66,10 @@
     "ja": "到達ウェーブ  %d / 100"
   },
   "catalog.codex.title": {
-    "en": "Guild Codex",
-    "ko": "길드 기록관",
-    "zh_CN": "公会图鉴",
-    "ja": "ギルド図鑑"
+    "en": "Records",
+    "ko": "기록",
+    "zh_CN": "记录",
+    "ja": "記録"
   },
   "catalog.enemies.tab": {
     "en": "Enemies %d",
@@ -624,10 +630,10 @@
     "ja": "今は挑戦できません"
   },
   "menu.codex.open": {
-    "en": "Codex",
-    "ko": "도감",
-    "zh_CN": "图鉴",
-    "ja": "図鑑"
+    "en": "Records",
+    "ko": "기록",
+    "zh_CN": "记录",
+    "ja": "記録"
   },
   "menu.continue": {
     "en": "Continue",
