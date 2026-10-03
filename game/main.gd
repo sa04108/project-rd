@@ -223,12 +223,18 @@ func _battle_action(text_value: String, rect: Rect2, callback: Callable, action:
 	button.set_meta("caption", caption)
 	return button
 
+func _retire_ui(control: Control) -> void:
+	# 숨김 처리의 내부 마우스 release가 누르고 있던 버튼을 실행하지 않게 한다.
+	for button in control.find_children("*", "BaseButton", true, false):
+		button.disabled = true
+	# 입력 이벤트 전파가 끝날 때까지 노드는 트리에 남겨 둔다.
+	control.hide()
+	control.queue_free()
+
 func _clear_screen() -> void:
 	_close_panel()
 	if is_instance_valid(screen):
-		# 터치 이벤트 전파가 끝날 때까지 트리 안에 두고 화면만 즉시 숨긴다.
-		screen.hide()
-		screen.queue_free()
+		_retire_ui(screen)
 	screen = Control.new()
 	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(screen)
@@ -466,8 +472,7 @@ func _close_panel() -> void:
 		board.blocked_screen_rects.clear()
 	if is_instance_valid(overlay):
 		# 버튼 콜백 안에서 제거하면 Android의 후속 can_process 검사가 실패한다.
-		overlay.hide()
-		overlay.queue_free()
+		_retire_ui(overlay)
 	overlay = null
 	_restore_modal_focus()
 	panel_name = ""
@@ -677,6 +682,7 @@ func _catalog_header(body: VBoxContainer, identity: String, title: String, statu
 	_catalog_text(heading, title, 28, GOLD)
 	if not status.is_empty():
 		var badge := _catalog_text(heading, status, 24, MUTED)
+		badge.name = "DiscoveryBadge"
 		badge.custom_minimum_size.x = 72
 		badge.size_flags_horizontal = Control.SIZE_SHRINK_END
 	return details
@@ -732,6 +738,7 @@ func _recipes_panel(panel: Control) -> void:
 		button.disabled = not recipe in available or mode != "battle" or sim.result != "active"
 
 func _codex_panel(panel: Control) -> void:
+	var units_tab := codex_tab == "units"
 	_button(panel, "용병 %d" % sim.catalog.units.size(), Rect2(20, 70, 285, 100), func(): codex_tab = "units"; _open_panel("codex", true), codex_tab == "units", "codex_units")
 	_button(panel, "적 %d" % sim.catalog.enemies.size(), Rect2(322, 70, 306, 100), func(): codex_tab = "enemies"; _open_panel("codex", true), codex_tab == "enemies", "codex_enemies")
 	if codex_tab == "units":
@@ -754,15 +761,40 @@ func _codex_panel(panel: Control) -> void:
 		var found: bool = store.profile.units.has(id) or sim.discovered_units.has(id) if codex_tab == "units" else store.profile.enemies.has(id) or sim.discovered_enemies.has(id)
 		var title: String = "%s  %s" % ["★".repeat(int(definition.tier)), definition.name] if codex_tab == "units" else str(definition.name)
 		var details := _catalog_header(body, id, title, "발견" if found else "미발견")
+		var badge := details.find_child("DiscoveryBadge", true, false) as Label
+		var kill_label: Label
+		var shown := {"found": found, "kills": _codex_kills(id) if not units_tab else 0}
 		if codex_tab == "units":
 			_unit_summary(details, definition)
 			_unit_base_stats(body, definition)
 			_catalog_text(body, definition.description, 24, MUTED)
 		else:
 			_catalog_text(details, "기본 체력 %d · 처치 ◈ %d" % [definition.hp, definition.reward], 24, PALE)
-			_catalog_text(body, "기본 이동 %.0f초 · 누적 처치 %d" % [definition.travel, store.profile.kills.get(id, 0)], 24, MUTED)
+			kill_label = _catalog_text(body, "기본 이동 %.0f초 · 누적 처치 %d" % [definition.travel, shown.kills], 24, MUTED)
 			if definition.kind == "special":
 				_catalog_text(body, "%d웨이브 완료 후 해금" % definition.unlock, 24, MUTED)
+		# 행을 다시 만들지 않고 변경된 기록만 갱신해 스크롤과 입력 상태를 보존한다.
+		var update := func():
+			var discovered: bool = store.profile.units.has(id) or sim.discovered_units.has(id) if units_tab else store.profile.enemies.has(id) or sim.discovered_enemies.has(id)
+			if discovered != bool(shown.found):
+				shown.found = discovered
+				badge.text = "발견" if discovered else "미발견"
+			if kill_label != null:
+				var count := _codex_kills(id)
+				if count != int(shown.kills):
+					shown.kills = count
+					kill_label.text = "기본 이동 %.0f초 · 누적 처치 %d" % [definition.travel, count]
+		dynamic.append(update)
+
+func _codex_kills(identity: String) -> int:
+	# 프로필에 반영된 이번 판의 상한을 빼서 자동 저장 전후에도 중복 합산하지 않는다.
+	var total := int(store.profile.kills.get(identity, 0))
+	if store.profile.ended_runs.has(sim.run_id):
+		return total
+	var pending := int(sim.kills.get(identity, 0))
+	if store.profile.run_counts.has(sim.run_id):
+		pending -= int(store.profile.run_counts[sim.run_id].get(identity, 0))
+	return total + maxi(0, pending)
 
 func _portrait(parent: Control, identity: String, position_value: Vector2, dimensions: Vector2) -> void:
 	var texture: Texture2D = visuals.portrait(identity)
