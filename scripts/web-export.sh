@@ -160,3 +160,8 @@ if updated != html:
             temporary.unlink()
 print(f"Web export verified: {root} ({stage}, persistentPaths={paths})")
 PY
+
+# 같은 스테이지의 두 탭이 각각 오래된 IDBFS 사본을 쓰지 않도록 엔진 시작을 보호한다.
+python3 "$ROOT/scripts/web-patch-session-lock.py" "$DEST/index.html"
+# 비동기 IDBFS 조회 도중 소유권을 잃은 경우에도 새 쓰기 거래를 만들지 않는다.
+python3 "$ROOT/scripts/web-patch-session-runtime.py" "$DEST/index.js"
