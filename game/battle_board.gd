@@ -12,9 +12,11 @@ const Simulation = preload("res://game/simulation.gd")
 const VisualAssets = preload("res://game/visual_assets.gd")
 const CombatVisuals = preload("res://game/combat_visuals.gd")
 const EncounterVisuals = preload("res://game/encounter_visuals.gd")
+const RetainedBoardShapes = preload("res://game/retained_board_shapes.gd")
 var visuals = VisualAssets.new()
 var combat_visuals = CombatVisuals.new()
 var encounter_visuals = EncounterVisuals.new()
+var _shape_meshes := RetainedBoardShapes.new()
 
 var simulation: Object:
 	set(value):
@@ -210,16 +212,9 @@ func _draw_selected_range() -> void:
 			var a := TAU * i / 64.0
 			pts.append(c + x_axis * cos(a) + y_axis * sin(a))
 		pts.append(pts[0])
-		draw_colored_polygon(_range_fill(c, x_axis, y_axis), Color(0.29, 0.78, 0.92, 0.11))
+		draw_mesh(_shape_meshes.range_fill, null, Transform2D(x_axis, y_axis, c), Color(0.29, 0.78, 0.92, 0.11))
 		draw_polyline(pts, Color(0.55, 0.89, 0.95, 0.65), 2.0, true)
 		break
-
-func _range_fill(c: Vector2, xa: Vector2, ya: Vector2) -> PackedVector2Array:
-	var pts := PackedVector2Array()
-	for i in range(48):
-		var a := TAU * i / 48.0
-		pts.append(c + xa * cos(a) + ya * sin(a))
-	return pts
 
 func _draw_effects() -> void:
 	if simulation != null:
@@ -337,22 +332,10 @@ func _draw_character(p: Vector2, identity: String, tint: Color, ally: bool, stat
 	draw_texture_rect_region(sprite.texture, rect, sprite.region, modulation)
 
 func _draw_star(center: Vector2, radius: float, color: Color) -> void:
-	var points := PackedVector2Array()
-	for i in range(10):
-		var angle := -PI * 0.5 + TAU * i / 10.0
-		var r := radius if i % 2 == 0 else radius * 0.45
-		points.append(center + Vector2(cos(angle), sin(angle)) * r)
-	draw_colored_polygon(points, color)
+	draw_mesh(_shape_meshes.star, null, Transform2D(Vector2(radius, 0), Vector2(0, radius), center), color)
 
 func _draw_shadow(p: Vector2, r: float) -> void:
-	draw_colored_polygon(_oval_points(p + Vector2(0, 4), Vector2(r, r * 0.40)), Color(0, 0, 0, 0.32))
-
-func _oval_points(center: Vector2, radii: Vector2) -> PackedVector2Array:
-	var points := PackedVector2Array()
-	for i in range(24):
-		var angle := TAU * i / 24.0
-		points.append(center + Vector2(cos(angle) * radii.x, sin(angle) * radii.y))
-	return points
+	draw_mesh(_shape_meshes.shadow, null, Transform2D(Vector2(r, 0), Vector2(0, r * 0.40), p + Vector2(0, 4)), Color(0, 0, 0, 0.32))
 
 func _draw_markers() -> void:
 	# 출발과 도착은 같은 북서쪽 성문이며 별도 출구나 글자는 만들지 않는다.
