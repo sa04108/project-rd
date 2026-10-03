@@ -4,6 +4,6 @@
   "version": "1.0.0",
   "description": "Playwright browser checks for the Godot Web preview",
   "devDependencies": {
-    "playwright": "1.57.0"
+    "playwright": "1.60.0"
   }
 }

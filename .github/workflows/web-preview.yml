@@ -45,6 +45,9 @@ jobs:
       - name: Install browser test dependency
         run: npm ci --prefix tools/web
       - name: Install Chromium for browser QA
+        timeout-minutes: 10
+        env:
+          DEBUG: pw:install
         run: tools/web/node_modules/.bin/playwright install --with-deps chromium
       - name: Run the preview in a local HTTP server
         run: |
