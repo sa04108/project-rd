@@ -9,6 +9,7 @@ const Simulation = preload("res://game/simulation.gd")
 const SaveStore = preload("res://game/save_store.gd")
 const AudioDirector = preload("res://game/audio_director.gd")
 const BattleBoard = preload("res://game/battle_board.gd")
+const PlacementFeedback = preload("res://game/placement_feedback.gd")
 const MENU_BACKGROUND = preload("res://assets/art/backgrounds/guild.png")
 const FONT = preload("res://assets/fonts/GuildSans.otf")
 const SYMBOL_FONT = preload("res://assets/fonts/GuildSymbols.ttf")
@@ -50,6 +51,10 @@ var qa_max_frame_msec := 0.0
 var qa_frames_over_50_msec := 0
 var web_qa := false
 var qa_session := str(Time.get_unix_time_from_system()) + "-" + str(Time.get_ticks_usec())
+var modal_focus_controls: Array[Dictionary] = []
+var modal_previous_focus: Control
+var web_input_canvas: JavaScriptObject
+var web_touch_cancel_callback: JavaScriptObject
 
 func _ready() -> void:
 	get_tree().auto_accept_quit = false
@@ -76,6 +81,7 @@ func _ready() -> void:
 	else:
 		store = SaveStore.new()
 	_setup_sound()
+	_setup_web_input()
 	_show_menu()
 	_write_qa_state()
 	if "--capture-battle" in OS.get_cmdline_user_args():
@@ -93,6 +99,27 @@ func _ready() -> void:
 		_refresh()
 	if "--capture-panel" in OS.get_cmdline_user_args():
 		_open_panel("recipes")
+
+func _setup_web_input() -> void:
+	if not OS.has_feature("web"):
+		return
+	# 고정 Web 엔진은 touchcancel을 일반 touchend로 전달하므로 먼저 취소한다.
+	# 캡처 단계는 캔버스의 엔진 리스너보다 앞서며, 해당 손가락만 취소한다.
+	var document := JavaScriptBridge.get_interface("document")
+	web_input_canvas = document.getElementById("canvas")
+	if web_input_canvas == null:
+		return
+	web_touch_cancel_callback = JavaScriptBridge.create_callback(_on_web_touch_cancel)
+	web_input_canvas.addEventListener("touchcancel", web_touch_cancel_callback, true)
+
+func _on_web_touch_cancel(arguments: Array) -> void:
+	if arguments.is_empty() or not is_instance_valid(board):
+		return
+	var event: JavaScriptObject = arguments[0]
+	var touches: JavaScriptObject = event.changedTouches
+	for index in range(int(touches.length)):
+		var touch: JavaScriptObject = touches.item(index)
+		board.cancel_touch(int(touch.identifier))
 
 func _style(fill: Color, border: Color = Color.TRANSPARENT, width: int = 1, radius: int = 9) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
@@ -113,7 +140,7 @@ func _panel(parent: Node, rect: Rect2, _color: Color = INK, _border: Color = GOL
 	parent.add_child(panel)
 	return panel
 
-func _label(parent: Node, text_value: String, pos: Vector2, width: float, font_size: int = 22, color: Color = PALE) -> Label:
+func _label(parent: Node, text_value: String, pos: Vector2, width: float, font_size: int = 22, color: Color = PALE, wrap: bool = false) -> Label:
 	var label := Label.new()
 	var ancestor := parent
 	while ancestor != null:
@@ -124,6 +151,9 @@ func _label(parent: Node, text_value: String, pos: Vector2, width: float, font_s
 				elif color == GOLD: color = Color("725019")
 			break
 		ancestor = ancestor.get_parent()
+	# 긴 문장은 트리에 들어가기 전에 줄바꿈을 설정해 최소 폭이 커지는 것을 막는다.
+	if wrap:
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.text = text_value
 	label.position = pos
 	label.size = Vector2(width, font_size + 14)
@@ -139,7 +169,7 @@ func _label(parent: Node, text_value: String, pos: Vector2, width: float, font_s
 	return label
 
 func _paragraph(parent: Node, text_value: String, rect: Rect2, font_size: int = 18, color: Color = MUTED) -> Label:
-	var label := _label(parent, text_value, rect.position, rect.size.x, font_size, color)
+	var label := _label(parent, text_value, rect.position, rect.size.x, font_size, color, true)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.size = rect.size
 	return label
@@ -158,7 +188,7 @@ func _button(parent: Node, text_value: String, rect: Rect2, callback: Callable, 
 	button.add_theme_color_override("font_hover_color", INK if accent else Color.WHITE)
 	button.add_theme_color_override("font_pressed_color", PALE)
 	button.add_theme_color_override("font_disabled_color", Color("b5ac8d"))
-	button.add_theme_font_size_override("font_size", 20)
+	button.add_theme_font_size_override("font_size", 26)
 	button.pressed.connect(func():
 		var sound_serial: int = audio.ui_play_serial
 		callback.call()
@@ -334,10 +364,10 @@ func _show_battle() -> void:
 	board.cell_dragged.connect(_cell_dragged)
 	screen.add_child(board)
 	screen.move_child(board, 0)
-	labels.selection_panel = _panel(screen, Rect2(161, 945, 398, 69), INK, GOLD, "brass")
-	labels.selection = _label(labels.selection_panel, "", Vector2(15, 5), 368, 19, PALE)
+	labels.selection_panel = _panel(screen, Rect2(28, 934, 664, 88), INK, GOLD, "brass")
+	labels.selection = _label(labels.selection_panel, "", Vector2(15, 4), 634, 28, PALE)
 	labels.selection.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	labels.detail = _label(labels.selection_panel, "", Vector2(15, 35), 368, 13, MUTED)
+	labels.detail = _label(labels.selection_panel, "", Vector2(15, 44), 634, 22, MUTED)
 	labels.detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# 하단의 소환 중심 배치와 강화·도박·특수몬스터 순서는 그대로 유지한다.
 	labels.summon = _battle_action("", Rect2(229, 1030, 262, 100), _summon, "summon", "summon")
@@ -425,24 +455,66 @@ func _refresh() -> void:
 	else:
 		var definition: Dictionary = sim.catalog.units[unit.kind]
 		labels.selection.text = "%s  %s" % ["★".repeat(int(definition.tier)), definition.name]
-		labels.detail.text = "공격 %.0f   사거리 %.1f   %s" % [sim.attack_damage(unit), definition.range, definition.role]
+		var coverage: String = PlacementFeedback.attack_coverage(float(definition.range), sim.cell_position(int(unit.cell)))
+		var attack_note: String = str(definition.role)
+		if coverage == "none":
+			attack_note = "직접 공격 불가"
+		elif coverage == "tangent":
+			attack_note = "직접 공격 접점이 좁음"
+		labels.detail.text = "공격 %.0f   사거리 %.1f   %s" % [sim.attack_damage(unit), definition.range, attack_note]
+		labels.detail.add_theme_color_override("font_color", Color("ffe365") if coverage != "reachable" else MUTED)
 	board.selected_id = selected
 	for update in dynamic:
 		update.call()
 
 func _close_panel() -> void:
 	if is_instance_valid(board):
+		board.cancel_pointer()
 		board.blocked_screen_rects.clear()
 	if is_instance_valid(overlay):
 		# 버튼 콜백 안에서 제거하면 Android의 후속 can_process 검사가 실패한다.
 		overlay.hide()
 		overlay.queue_free()
 	overlay = null
+	_restore_modal_focus()
 	panel_name = ""
 	dynamic.clear()
 	sim.set_pause("settings", false)
 
+func _capture_modal_focus() -> void:
+	# 마우스 차단막뿐 아니라 Tab·Enter도 현재 모달 안에서만 동작한다.
+	var focused := get_viewport().gui_get_focus_owner()
+	modal_previous_focus = focused if is_instance_valid(focused) and screen.is_ancestor_of(focused) else null
+	for node in screen.find_children("*", "Control", true, false):
+		var control := node as Control
+		if control.focus_mode != Control.FOCUS_NONE:
+			modal_focus_controls.append({"control": control, "mode": control.focus_mode})
+			control.focus_mode = Control.FOCUS_NONE
+	var first: Control = null
+	for node in overlay.find_children("*", "Control", true, false):
+		var control := node as Control
+		if control.focus_mode == Control.FOCUS_NONE or not control.is_visible_in_tree() or (control is BaseButton and control.disabled):
+			continue
+		if first == null or control.get_meta("qa_action", "") == "cancel_new":
+			first = control
+	if first != null:
+		first.grab_focus()
+
+func _restore_modal_focus() -> void:
+	for entry in modal_focus_controls:
+		if is_instance_valid(entry.control):
+			entry.control.focus_mode = entry.mode
+	modal_focus_controls.clear()
+	if is_instance_valid(modal_previous_focus) and modal_previous_focus.is_visible_in_tree() and not modal_previous_focus.is_queued_for_deletion():
+		modal_previous_focus.grab_focus()
+	modal_previous_focus = null
+
 func _open_panel(kind: String, force: bool = false) -> void:
+	var recipe_scroll := -1
+	if force and kind == "recipes" and panel_name == kind and is_instance_valid(overlay):
+		for scroller in overlay.find_children("*", "ScrollContainer", true, false):
+			recipe_scroll = scroller.scroll_vertical
+			break
 	if kind == panel_name and not force:
 		_close_panel()
 		return
@@ -459,14 +531,20 @@ func _open_panel(kind: String, force: bool = false) -> void:
 		overlay.add_child(shade)
 	var large := kind in ["recipes", "codex", "guide", "settings", "result", "confirm_new"]
 	var top := 235.0 if kind == "settings" else (303.0 if large else 637.0)
-	var panel := _panel(overlay, Rect2(35, top, 650, 810 if kind == "settings" else (694 if large else 360)), Color("172b39"), GOLD)
+	var body_height := 810.0 if kind == "settings" else (694.0 if large else 360.0)
+	if kind in ["upgrade", "special"]:
+		body_height = 526.0 if kind == "upgrade" else 417.0
+		top = 997.0 - body_height
+	# 본문과 하단 HUD 위치를 보존하면서 닫기 버튼을 위한 머리말만 위로 확장한다.
+	var panel := _panel(overlay, Rect2(35, top - 44.0, 650, body_height + 44.0), Color("172b39"), GOLD)
 	if is_instance_valid(board):
 		board.blocked_screen_rects.assign([Rect2(0, 0, 720, 1280) if kind in ["settings", "result", "confirm_new"] else panel.get_global_rect()])
 	var titles := {"upgrade": "길드 공방 · 공통 공격력 강화", "gamble": "운명의 계약 · 영입 도전", "special": "특수몬스터 · 보상형 적", "recipes": "조합 도감", "codex": "길드 기록관", "settings": "설정", "guide": "전투 가이드", "result": "마왕 격파" if sim.result == "victory" else "전투 종료", "confirm_new": "새로운 출정"}
-	var heading := _panel(panel, Rect2(9, 5, 632, 60), INK, GOLD, "blue")
-	_label(heading, titles[kind], Vector2(20, 12), 540, 23, PALE)
+	var heading := _panel(panel, Rect2(9, 5, 632, 100), INK, GOLD, "blue")
+	_label(heading, titles[kind], Vector2(20, 31), 500, 26, PALE)
+	var close_button: Button
 	if kind != "result":
-		_button(panel, "×", Rect2(576, 10, 57, 47), _close_panel, false, "close_panel")
+		close_button = _button(panel, "×", Rect2(540, 5, 100, 100), _close_panel, false, "close_panel")
 	match kind:
 		"upgrade": _upgrade_panel(panel)
 		"gamble": _gamble_panel(panel)
@@ -480,21 +558,30 @@ func _open_panel(kind: String, force: bool = false) -> void:
 		"result": _result_panel(panel)
 		"confirm_new":
 			_paragraph(panel, "진행 중인 전투가 있습니다. 새 게임을 시작하면 이번 판의 배치와 골드를 잃습니다.", Rect2(38, 140, 560, 150), 25, PALE)
-			_button(panel, "새 게임 시작", Rect2(75, 380, 500, 75), _start_new, true, "confirm_new")
-			_button(panel, "이어하기 유지", Rect2(75, 480, 500, 65), _close_panel, false, "cancel_new")
+			_button(panel, "새 게임 시작", Rect2(75, 360, 500, 100), _start_new, true, "confirm_new")
+			_button(panel, "이어하기 유지", Rect2(75, 480, 500, 100), _close_panel, false, "cancel_new")
+	if kind in ["settings", "result", "confirm_new"] or mode == "menu":
+		_capture_modal_focus()
+
+	for child in panel.get_children():
+		if child is Control and child != heading and child != close_button:
+			child.position.y += 44.0
+	if recipe_scroll >= 0:
+		# 거래로 버튼 상태를 다시 만들어도 사용자가 보고 있던 레시피 위치를 유지한다.
+		for scroller in overlay.find_children("*", "ScrollContainer", true, false):
+			scroller.set_deferred("scroll_vertical", recipe_scroll)
 
 func _upgrade_panel(panel: Control) -> void:
 	for tier in range(1, 5):
-		var x := 16 + (tier - 1) * 157
+		var x := 20 + ((tier - 1) % 2) * 312
+		var y := 72 + ((tier - 1) / 2) * 226
 		var level: int = sim.upgrades[str(tier)]
-		var card := _panel(panel, Rect2(x, 76, 148, 269))
-		var stars := _label(card, "★".repeat(tier), Vector2(8, 12), 132, 19, GOLD)
-		stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		_portrait(card, ["u02", "u07", "u12", "u17"][tier - 1], Vector2(17, 44), Vector2(114, 99))
-		_label(card, "%d성 용병 +%d" % [tier, level], Vector2(16, 148), 126, 16, INK)
-		_label(card, "공격 +%d%%" % roundi(level * float(sim.catalog.rules.T.upgrade_factor) * 100), Vector2(16, 178), 126, 15, MUTED)
-		var button := _button(card, "최대 강화" if level >= 10 else "강화   ◈ %d" % sim.upgrade_cost(tier), Rect2(8, 220, 132, 40), func(): _transaction(sim.upgrade(tier), true), true)
-		button.add_theme_font_size_override("font_size", 15)
+		var card := _panel(panel, Rect2(x, y, 298, 214))
+		_label(card, "%s +%d" % ["★".repeat(tier), level], Vector2(90, 14), 194, 26, GOLD)
+		_portrait(card, ["u02", "u07", "u12", "u15"][tier - 1], Vector2(10, 8), Vector2(72, 84))
+		_label(card, "공격 +%d%%" % roundi(level * float(sim.catalog.rules.T.upgrade_factor) * 100), Vector2(90, 62), 194, 22, MUTED)
+		var button := _button(card, "최대 강화" if level >= 10 else "강화   ◈ %d" % sim.upgrade_cost(tier), Rect2(8, 106, 282, 100), func(): _transaction(sim.upgrade(tier), true), true)
+		button.add_theme_font_size_override("font_size", 26)
 		var update := func(): button.disabled = sim.gold < sim.upgrade_cost(tier) or int(sim.upgrades[str(tier)]) >= 10 or sim.result != "active"
 		dynamic.append(update)
 		update.call()
@@ -507,7 +594,7 @@ func _gamble_panel(panel: Control) -> void:
 		_label(panel, "★".repeat(tier) + " 도전", Vector2(x + 53, 86), 240, 27, GOLD)
 		_label(panel, "성공 확률  %d%%" % roundi(rule.chance * 100), Vector2(x + 38, 139), 260, 22, PALE)
 		_label(panel, "실패 시 보상 없음", Vector2(x + 52, 181), 250, 18, MUTED)
-		var button := _button(panel, "계약   ◈ %d" % int(rule.cost), Rect2(x + 14, 234, 269, 69), func(): _transaction(sim.gamble(tier), true), true)
+		var button := _button(panel, "계약   ◈ %d" % int(rule.cost), Rect2(x + 14, 224, 269, 100), func(): _transaction(sim.gamble(tier), true), true)
 		var update := func(): button.disabled = sim.gold < rule.cost or sim.first_empty() < 0 or sim.result != "active"
 		dynamic.append(update)
 		update.call()
@@ -517,13 +604,13 @@ func _special_panel(panel: Control) -> void:
 		var id: String = ["s10", "s30", "s60"][index]
 		var definition: Dictionary = sim.catalog.enemies[id]
 		var x := 14 + index * 209
-		var card := _panel(panel, Rect2(x, 74, 201, 270))
-		_label(card, definition.name, Vector2(12, 9), 181, 20, GOLD)
-		_portrait(card, id, Vector2(38, 36), Vector2(126, 100))
-		_label(card, "처치 ◈ %d" % definition.reward, Vector2(16, 139), 181, 18, INK)
-		var status := _label(card, "", Vector2(12, 174), 183, 15, MUTED)
-		var button := _button(card, "무료 소환", Rect2(10, 218, 181, 43), func(): _transaction(sim.summon_special(id), true))
-		button.add_theme_font_size_override("font_size", 18)
+		var card := _panel(panel, Rect2(x, 74, 201, 327))
+		_label(card, definition.name, Vector2(12, 8), 181, 24, GOLD)
+		_portrait(card, id, Vector2(38, 48), Vector2(126, 84))
+		_label(card, "처치 ◈ %d" % definition.reward, Vector2(16, 139), 181, 22, INK)
+		var status := _label(card, "", Vector2(12, 177), 183, 20, MUTED)
+		var button := _button(card, "무료 소환", Rect2(10, 218, 181, 100), func(): _transaction(sim.summon_special(id), true))
+		button.add_theme_font_size_override("font_size", 24)
 		var update := func():
 			var left: float = maxf(0, float(sim.cooldowns.get(id, 0)) - sim.time)
 			status.text = "%d웨이브 완료 후" % definition.unlock if sim.wave <= definition.unlock else ("대기 %d게임초" % ceili(left) if left > 0 else "처치하고 보상 획득")
@@ -572,7 +659,7 @@ func _recipes_panel(panel: Control) -> void:
 		if not materials.is_empty():
 			target = int(sim.unit_by_id(anchor).cell) if anchor >= 0 else int(materials[0].cell)
 		_label(row, "재료 부족" if target < 0 else "결과 위치  %d열 %d행" % [target / 6 + 1, target % 6 + 1], Vector2(105, 113), 346, 15, MUTED)
-		var button := _button(row, "조합", Rect2(462, 47, 119, 72), func():
+		var button := _button(row, "조합", Rect2(462, 36, 119, 100), func():
 			var response: Dictionary = sim.combine(recipe.id, anchor)
 			if response.ok:
 				selected = int(response.unit_id)
@@ -580,15 +667,15 @@ func _recipes_panel(panel: Control) -> void:
 		button.disabled = target < 0 or mode != "battle" or sim.result != "active"
 
 func _codex_panel(panel: Control) -> void:
-	_button(panel, "용병 %d" % sim.catalog.units.size(), Rect2(20, 70, 285, 49), func(): codex_tab = "units"; _open_panel("codex", true), codex_tab == "units", "codex_units")
-	_button(panel, "적 %d" % sim.catalog.enemies.size(), Rect2(322, 70, 306, 49), func(): codex_tab = "enemies"; _open_panel("codex", true), codex_tab == "enemies", "codex_enemies")
-	var top := 133.0
+	_button(panel, "용병 %d" % sim.catalog.units.size(), Rect2(20, 70, 285, 100), func(): codex_tab = "units"; _open_panel("codex", true), codex_tab == "units", "codex_units")
+	_button(panel, "적 %d" % sim.catalog.enemies.size(), Rect2(322, 70, 306, 100), func(): codex_tab = "enemies"; _open_panel("codex", true), codex_tab == "enemies", "codex_enemies")
+	var top := 184.0
 	if codex_tab == "enemies":
 		var filters := ["all", "normal", "boss", "special"]
 		var names := ["전체", "일반", "보스", "특수"]
 		for index in range(4):
-			_button(panel, names[index], Rect2(20 + index * 154, 130, 145, 43), func(): enemy_filter = filters[index]; _open_panel("codex", true), enemy_filter == filters[index], "codex_filter_" + filters[index])
-		top = 187
+			_button(panel, names[index], Rect2(20 + index * 154, 182, 145, 100), func(): enemy_filter = filters[index]; _open_panel("codex", true), enemy_filter == filters[index], "codex_filter_" + filters[index])
+		top = 296
 	var list := _scroll(panel, top)
 	var definitions: Dictionary = sim.catalog.units if codex_tab == "units" else sim.catalog.enemies
 	for id in definitions:
@@ -630,15 +717,16 @@ func _guide_panel(panel: Control) -> void:
 	for entry in [
 		["01  소환하고 전열을 갖추세요", "시작 골드로 1성 용병 세 명을 소환할 수 있습니다. 적을 처치해 골드를 얻고, 첫 빈칸부터 열 우선으로 채웁니다."],
 		["02  사거리와 배치가 전략입니다", "용병을 누르면 정보를 확인합니다. 이동할 용병을 목적지 칸까지 드래그하세요. 점유된 칸은 교환합니다. 아군은 다치지 않으며 배치한 자리에서 공격합니다."],
+		["배치 주의 · 직접 공격과 지원", "짧은 사거리 용병은 길에 가까운 바깥쪽 칸이 유리합니다. 선택 정보에 직접 공격 불가·접점이 좁음이 표시되면 배치를 확인하세요. 직접 공격이 닿지 않아도 범위 안 아군을 돕는 지원 효과는 유지됩니다."],
 		["03  조합으로 전력을 높이세요", "조합법 창에서 정확한 재료와 결과 칸을 확인한 뒤 조합합니다. 드래그만으로 조합되지는 않습니다. 강화는 해당 성급 전체에 적용됩니다."],
 		["04  100웨이브, 마왕을 처치하세요", "일반 웨이브는 30게임초마다 시작됩니다. 적은 한 바퀴를 돌면 탈출하며 목숨이 1 줄어듭니다. 100웨이브 마왕은 처치하면 승리, 탈출하면 즉시 패배합니다. 전장에 모든 종류의 적을 합쳐 %d마리가 모이면 즉시 패배합니다." % sim.enemy_limit()],
 		["05  위험을 감수하고 골드를 버세요", "특수몬스터는 아군이 아닌 보상형 적입니다. 10·30·60웨이브 완료 후 해금되며 종류마다 300게임초의 재소환 대기가 있습니다."],
 		["06  쉬어갈 때는 일시정지", "배속은 ×1·×2·×3·×5로 순환합니다. 설정만 자동 정지하며 다른 창을 열어도 전투는 계속됩니다. 이어하기는 정지된 상태로 복원됩니다."]]:
 		var row := Control.new()
-		row.custom_minimum_size = Vector2(590, 160)
+		row.custom_minimum_size = Vector2(590, 300)
 		list.add_child(row)
-		_label(row, entry[0], Vector2(10, 5), 570, 22, GOLD)
-		_paragraph(row, entry[1], Rect2(10, 49, 570, 105), 20, PALE)
+		_label(row, entry[0], Vector2(10, 5), 570, 30, GOLD)
+		_paragraph(row, entry[1], Rect2(10, 55, 570, 235), 26, PALE)
 
 func _settings_panel(panel: Control) -> void:
 	_label(panel, "전투가 정지되었습니다" if mode == "battle" else "길드 환경설정", Vector2(30, 78), 600, 18, MUTED)
@@ -648,7 +736,7 @@ func _settings_panel(panel: Control) -> void:
 		_label(panel, "배경음악" if index == 0 else "효과음", Vector2(35, y + 8), 175, 24, PALE)
 		var slider := HSlider.new()
 		slider.position = Vector2(215, y)
-		slider.size = Vector2(350, 58)
+		slider.size = Vector2(350, 100)
 		slider.min_value = 0
 		slider.max_value = 1
 		slider.step = 0.05
@@ -660,22 +748,22 @@ func _settings_panel(panel: Control) -> void:
 			if not store.save_settings(): _toast(store.last_error))
 		panel.add_child(slider)
 		_label(panel, "0 = 끔", Vector2(565, y + 15), 80, 15, MUTED)
-	var vibration := _settings_toggle(panel, "진동", 346, bool(store.profile.settings.haptics), "haptics")
+	var vibration := _settings_toggle(panel, "진동", 344, bool(store.profile.settings.haptics), "haptics")
 	vibration.toggled.connect(func(value):
 		audio.play_ui()
 		audio.set_haptics(value)
 		store.profile.settings.haptics = value
 		if not store.save_settings(): _toast(store.last_error))
-	var motion := _settings_toggle(panel, "동작 연출 줄이기", 430, store.profile.settings.reduced_motion, "reduced_motion")
+	var motion := _settings_toggle(panel, "동작 연출 줄이기", 454, store.profile.settings.reduced_motion, "reduced_motion")
 	motion.toggled.connect(func(value):
 		audio.play_ui()
 		store.profile.settings.reduced_motion = value
 		if is_instance_valid(board): board.set("reduced_motion", value)
 		if not store.save_settings(): _toast(store.last_error))
-	_label(panel, "진동: 켤 때 · 목숨 감소 · 클리어 / 지원 기기에서 동작", Vector2(35, 525), 590, 17, MUTED)
-	_button(panel, "전투로 돌아가기" if mode == "battle" else "닫기", Rect2(35, 580, 579, 80), _close_panel, true, "close_panel")
+	_label(panel, "진동: 켤 때 · 목숨 감소 · 클리어 / 지원 기기에서 동작", Vector2(35, 558), 590, 15, MUTED)
+	_button(panel, "전투로 돌아가기" if mode == "battle" else "닫기", Rect2(35, 592, 579, 100), _close_panel, true, "close_panel")
 	if mode == "battle":
-		_button(panel, "저장 후 메인 메뉴", Rect2(35, 684, 579, 80), func():
+		_button(panel, "저장 후 메인 메뉴", Rect2(35, 704, 579, 100), func():
 			if _save(): _show_menu(), false, "save_menu")
 
 func _settings_toggle(panel: Control, title: String, y: float, enabled: bool, action: String) -> CheckButton:
@@ -684,7 +772,7 @@ func _settings_toggle(panel: Control, title: String, y: float, enabled: bool, ac
 	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color"]:
 		toggle.add_theme_color_override(state, INK)
 	toggle.position = Vector2(34, y)
-	toggle.size = Vector2(570, 75)
+	toggle.size = Vector2(570, 100)
 	toggle.button_pressed = enabled
 	toggle.set_meta("qa_action", action)
 	panel.add_child(toggle)
@@ -698,7 +786,7 @@ func _result_panel(panel: Control) -> void:
 	if sim.result == "defeat":
 		tip = "적을 묶는 동안 화력을 높이세요. 조합과 성급 강화로 밀린 적을 처치할 수 있습니다." if sim.enemies.size() >= sim.enemy_limit() else "일시정지 중 조합과 재배치를 활용하세요. 짧은 사거리 용병은 길 가장자리가 유리합니다."
 	_paragraph(panel, tip, Rect2(64, 403, 535, 95), 20, MUTED)
-	_button(panel, "메인 메뉴", Rect2(62, 523, 526, 80), func():
+	_button(panel, "메인 메뉴", Rect2(62, 523, 526, 100), func():
 		if _save(): _show_menu(), true, "result_menu")
 
 func _toast(message: String) -> void:
@@ -820,6 +908,8 @@ func _notification(what: int) -> void:
 	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		_handle_back()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
+		if is_instance_valid(board):
+			board.cancel_pointer()
 		sim.set_pause("background" if what == NOTIFICATION_APPLICATION_FOCUS_OUT else "suspended", true)
 		_sync_audio()
 		_save()
@@ -883,6 +973,10 @@ func run_automation_tests() -> bool:
 	return report.failed.is_empty()
 
 func _exit_tree() -> void:
+	if web_input_canvas != null and web_touch_cancel_callback != null:
+		web_input_canvas.removeEventListener("touchcancel", web_touch_cancel_callback, true)
+	web_touch_cancel_callback = null
+	web_input_canvas = null
 	dynamic.clear()
 
 func _draw_battle_background() -> void:

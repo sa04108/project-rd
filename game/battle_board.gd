@@ -48,6 +48,7 @@ var _pressed_unit: int = -1
 var _press_cell: int = -1
 var _dragging := false
 var _pointer_down := false
+var _touch_index := -1
 var _last_pointer := Vector2.ZERO
 var _pointer_origin := Vector2.ZERO
 
@@ -391,19 +392,39 @@ func _draw_glow(center: Vector2, color: Color, radius: float) -> void:
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
-		if event.pressed:
+		if event.canceled:
+			cancel_touch(event.index)
+		elif event.pressed and not _pointer_down:
 			_begin_pointer(event.position)
-		else:
+			_touch_index = event.index
+		elif not event.pressed and event.index == _touch_index:
 			_end_pointer(event.position)
 	elif event is InputEventScreenDrag:
-		_move_pointer(event.position)
-	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		if event.pressed:
+		if event.index == _touch_index:
+			_move_pointer(event.position)
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.device != InputEvent.DEVICE_ID_EMULATION and _touch_index < 0:
+		# 터치가 만드는 합성 마우스는 원래 터치와 중복 처리하지 않는다.
+		if event.pressed and not _pointer_down:
 			_begin_pointer(event.position)
-		else:
+		elif not event.pressed:
 			_end_pointer(event.position)
-	elif event is InputEventMouseMotion and _pointer_down:
+	elif event is InputEventMouseMotion and event.device != InputEvent.DEVICE_ID_EMULATION and _touch_index < 0 and _pointer_down:
 		_move_pointer(event.position)
+
+func cancel_touch(index: int) -> void:
+	if index == _touch_index:
+		cancel_pointer()
+
+func cancel_pointer() -> void:
+	# 포커스·화면·팝업 전환은 진행 중인 제스처를 확정하지 않고 버린다.
+	_pointer_down = false
+	_touch_index = -1
+	_pressed_unit = -1
+	_press_cell = -1
+	_dragging = false
+	_last_pointer = Vector2.ZERO
+	_pointer_origin = Vector2.ZERO
+	queue_redraw()
 
 func _begin_pointer(pos: Vector2) -> void:
 	_pointer_down = true
@@ -423,24 +444,19 @@ func _move_pointer(pos: Vector2) -> void:
 func _end_pointer(pos: Vector2) -> void:
 	if not _pointer_down:
 		return
-	if not _dragging and _pressed_unit >= 0 and pos.distance_to(_pointer_origin) >= 10.0:
-		_dragging = true
-	_pointer_down = false
+	var unit_id := _pressed_unit
+	var was_dragging := _dragging or (unit_id >= 0 and pos.distance_to(_pointer_origin) >= 10.0)
+	# 이동 신호가 새 팝업을 열더라도 끝난 포인터 상태를 다시 참조하지 않는다.
+	cancel_pointer()
 	# 포인터를 전장이 먼저 잡았어도 UI 위에서 놓으면 배치를 취소한다.
 	for blocked in blocked_screen_rects:
 		if blocked.has_point(get_global_transform() * pos):
-			_pressed_unit = -1
-			_press_cell = -1
-			_dragging = false
 			return
 	var release_cell := screen_to_cell(pos)
-	if _dragging and _pressed_unit >= 0 and release_cell >= 0:
-		cell_dragged.emit(_pressed_unit, release_cell)
-	elif not _dragging and release_cell >= 0:
+	if was_dragging and unit_id >= 0 and release_cell >= 0:
+		cell_dragged.emit(unit_id, release_cell)
+	elif not was_dragging and release_cell >= 0:
 		cell_pressed.emit(release_cell)
-	_pressed_unit = -1
-	_press_cell = -1
-	_dragging = false
 
 func _unit_at_cell(cell: int) -> int:
 	if simulation == null or cell < 0:
