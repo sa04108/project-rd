@@ -19,12 +19,12 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install native check dependency
         run: |
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends ripgrep
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: |
             .godot-tools/4.7.2-stable
@@ -37,9 +37,9 @@ jobs:
         run: bash scripts/mvp-check.sh
       - name: Export the Web build
         run: bash scripts/web-export.sh artifacts/web
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 'node'
           cache: npm
           cache-dependency-path: tools/web/package-lock.json
       - name: Install browser test dependency
@@ -64,7 +64,7 @@ jobs:
         run: if [ -f artifacts/web-server.pid ]; then kill "$(cat artifacts/web-server.pid)" 2>/dev/null || true; fi
       - name: Upload browser evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: web-preview-qa
           path: |
@@ -73,7 +73,7 @@ jobs:
             artifacts/web-server.log
           if-no-files-found: ignore
           retention-days: 14
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: artifacts/web
 
@@ -91,6 +91,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
