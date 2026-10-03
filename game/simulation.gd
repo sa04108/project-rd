@@ -239,7 +239,8 @@ func gamble_chance(tier: int) -> float:
 	return clampf(float(catalog.rules.T.gamble[str(tier)].chance) + Progression.value("gamble_%d" % tier, int(permanent_levels.get("gamble_%d" % tier, 0))), 0.0, 1.0)
 
 func upgrade_cost(tier: int) -> int:
-	return int(catalog.rules.T.upgrade_cost) * tier * (int(upgrades.get(str(tier), 0)) + 1)
+	var base := int(catalog.rules.T.upgrade_base_costs.get(str(tier), -1))
+	return -1 if base < 0 or not upgrades.has(str(tier)) else base * (int(upgrades[str(tier)]) + 1)
 
 func upgrade(tier: int) -> Dictionary:
 	if not _allowed() or not upgrades.has(str(tier)):
