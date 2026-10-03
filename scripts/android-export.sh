@@ -52,7 +52,7 @@ path.write_text("\n".join(lines) + "\n")
 PYSETTINGS
 
 "$GODOT" --headless --editor --path "$ROOT" --quit
-"$GODOT" --headless --path "$ROOT" --export-debug "Android QA Debug" "$ROOT/artifacts/android/project-rd-debug.apk"
+"$GODOT" --headless --path "$ROOT" --export-debug "Android Debug" "$ROOT/artifacts/android/project-rd-debug.apk"
 test -s "$ROOT/artifacts/android/project-rd-debug.apk"
 "$SDK_ROOT/build-tools/35.0.0/aapt" dump badging "$ROOT/artifacts/android/project-rd-debug.apk" | rg -F "package: name='org.projectrd.debug'"
 "$SDK_ROOT/build-tools/35.0.0/aapt" dump badging "$ROOT/artifacts/android/project-rd-debug.apk" | rg -F "launchable-activity:"

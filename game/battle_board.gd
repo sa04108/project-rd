@@ -270,8 +270,8 @@ func _draw_units() -> void:
 			draw_set_transform(Vector2.ZERO)
 		combat_visuals.draw_preparation(self, p, pose, tint)
 		for star in range(tier):
-			var star_pos := p + Vector2((star - (tier - 1) * 0.5) * 6.0, -CELL_SIZE * 0.98)
-			_draw_star(star_pos, maxf(size.x / 180.0, 2.2), Color("ffe08a"))
+			var star_pos := p + Vector2((star - (tier - 1) * 0.5) * 8.0, -CELL_SIZE * 0.98)
+			_draw_star(star_pos, maxf(size.x / 144.0, 2.75), Color("ffe08a"))
 
 func _unit_attack_frame(identity: String, pose: Dictionary) -> Dictionary:
 	if reduced_motion or pose.phase == "idle":

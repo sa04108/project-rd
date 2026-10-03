@@ -11,9 +11,6 @@ var _portrait_used: Dictionary = {}
 var _active_identities: Dictionary = {}
 var _managed_lifecycle := false
 var _access_serial := 0
-var _identity_peak_bytes := 0
-var _identity_loads := 0
-var _identity_evictions := 0
 var entries: Dictionary = {}
 var families: Dictionary = {}
 var portraits: Dictionary = {}
@@ -82,9 +79,7 @@ func identity_frame(identity: String, state: String, clock: float) -> Dictionary
 		# 새 텍스처를 읽기 전에 오래된 소유 참조를 해제해 순간 최고치도 줄인다.
 		_trim_identity_cache(identity, _layout_bytes(resource))
 		resource["texture"] = load(resource.atlas_path)
-		_identity_loads += 1
 		_trim_identity_cache(identity)
-		_identity_peak_bytes = maxi(_identity_peak_bytes, _identity_bytes())
 	if not resource.texture is Texture2D:
 		return {}
 	var sprite := _resource_frame(resource, state, clock, false)
@@ -215,7 +210,6 @@ func _trim_identity_cache(protected: String = "", incoming_bytes: int = 0) -> vo
 		var resource: Dictionary = identity_resources[identity]
 		total -= _texture_bytes(resource.get("texture") as Texture2D)
 		resource.erase("texture")
-		_identity_evictions += 1
 
 func _trim_portraits(protected: String = "") -> void:
 	var total := 0
@@ -232,36 +226,3 @@ func _trim_portraits(protected: String = "") -> void:
 		total -= _texture_bytes(portraits[identity] as Texture2D)
 		portraits[identity] = null
 		_portrait_used.erase(identity)
-
-func runtime_cache_stats() -> Dictionary:
-	# 캐시가 직접 소유한 참조의 추정치다. 드라이버/RSS의 실측치와 구분한다.
-	var stats := {"identity_count": 0, "identity_bytes": 0, "identity_peak_bytes": _identity_peak_bytes,
-		"identity_loads": _identity_loads, "identity_evictions": _identity_evictions,
-		"portrait_count": 0, "portrait_bytes": 0, "family_count": 0, "family_bytes": 0}
-	for resource in identity_resources.values():
-		if resource.get("texture") is Texture2D:
-			stats.identity_count += 1
-			stats.identity_bytes += _texture_bytes(resource.texture)
-	for texture in portraits.values():
-		if texture is Texture2D:
-			stats.portrait_count += 1
-			stats.portrait_bytes += _texture_bytes(texture)
-	for resource in families.values():
-		if resource.get("texture") is Texture2D:
-			stats.family_count += 1
-			stats.family_bytes += _texture_bytes(resource.texture)
-	# 보이는 개체만으로 hard 목표를 넘는 경우도 숨기지 않는다. 강제 퇴거는 깜박임을 만든다.
-	stats.over_hard_budget = int(stats.identity_bytes) > IDENTITY_HARD_BYTES
-	return stats
-
-func ready_count() -> int:
-	# QA의 반복 조회가 모든 대체 아틀라스를 로드하지 않도록 등록 메타데이터만 본다.
-	var count := 0
-	for identity in entries:
-		var family: String = entries[identity].shared_family_resource
-		if not families.has(family):
-			continue
-		var rows: Dictionary = families[family].layout.frame_layout.get("rows", {})
-		if rows.get("idle") is Array and not rows.idle.is_empty():
-			count += 1
-	return count
