@@ -54,6 +54,7 @@ var codex_tab := "units"
 var enemy_filter := "all"
 var catalog_filters = CatalogFilters.new()
 var recipe_filters = CatalogFilters.new()
+var recipe_tracking = RecipeTracking.new()
 var tracking_bar: Control
 var tracked_button_ids: Array[String] = []
 var selection_pointer: Dictionary = {}
@@ -390,6 +391,7 @@ func _show_menu() -> void:
 		if not _save() and not store.read_only:
 			return
 	mode = "menu"
+	recipe_tracking.clear()
 	_sync_audio()
 	_clear_screen()
 	resume_data = store.load_run()
@@ -437,6 +439,7 @@ func _start_new() -> void:
 		_toast(L.text(store.last_error))
 		return
 	sim.new_run(0, store.permanent_levels())
+	recipe_tracking.clear()
 	clock_usec = Time.get_ticks_usec()
 	selected = -1
 	ended_saved = false
@@ -451,6 +454,7 @@ func _resume() -> void:
 	if resume_data.is_empty() or not sim.restore(resume_data):
 		_toast(L.text("error.continue.load_failed"))
 		return
+	recipe_tracking.clear()
 	mode = "battle"
 	clock_usec = Time.get_ticks_usec()
 	selected = -1
@@ -991,19 +995,23 @@ func _catalog_filter_controls(panel: Control, filters, kind: String, y: float) -
 		button.add_theme_font_size_override("font_size", 22)
 
 func _toggle_recipe_tracking(identity: String) -> void:
-	if not store.set_recipe_tracked(identity, not store.is_recipe_tracked(identity)):
-		_toast(L.text(store.last_error))
+	if mode != "battle":
+		return
+	if not recipe_tracking.set_tracked(sim.catalog, identity, not recipe_tracking.is_tracked(identity)):
+		_toast(L.text("recipes.not_found"))
 		return
 	if is_instance_valid(overlay):
-		var button := overlay.find_child("track_" + identity, true, false) as Button
-		if button != null:
-			button.text = L.text("recipes.tracking.stop") if store.is_recipe_tracked(identity) else L.text("recipes.tracking.start")
+		# 자동 추가된 하위 조합도 현재 스크롤 위치에서 곧바로 상태를 갱신한다.
+		for recipe in sim.catalog.recipes:
+			var button := overlay.find_child("track_" + str(recipe.result), true, false) as Button
+			if button != null:
+				button.text = L.text("recipes.tracking.stop") if recipe_tracking.is_tracked(str(recipe.result)) else L.text("recipes.tracking.start")
 	_sync_tracking_buttons()
 
 func _sync_tracking_buttons() -> void:
 	if mode != "battle" or not is_instance_valid(board) or not is_instance_valid(screen):
 		return
-	var ready: Array = RecipeTracking.ready_recipes(sim, store.tracked_recipe_units())
+	var ready: Array = RecipeTracking.ready_recipes(sim, recipe_tracking.tracked_units())
 	var identities: Array[String] = []
 	for recipe in ready:
 		identities.append(str(recipe.result))
@@ -1028,7 +1036,7 @@ func _sync_tracking_buttons() -> void:
 
 func _combine_tracked(identity: String) -> void:
 	# 눌린 뒤 재료가 바뀌거나 추적이 해제됐어도 다른 레시피를 대신 실행하지 않는다.
-	if not store.is_recipe_tracked(identity):
+	if not recipe_tracking.is_tracked(identity):
 		_sync_tracking_buttons()
 		return
 	var recipe: Dictionary = RecipeTracking.available_recipe(sim, identity)
@@ -1089,7 +1097,7 @@ func _recipes_panel(panel: Control) -> void:
 		var materials := _catalog_text(body, " + ".join(material_names), 24, PALE)
 		materials.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		body.move_child(footer, body.get_child_count() - 1)
-		var track := _button(footer, L.text("recipes.tracking.stop") if store.is_recipe_tracked(recipe.result) else L.text("recipes.tracking.start"), Rect2(0, 0, 250, 100), func(): _toggle_recipe_tracking(str(recipe.result)), false, "track_" + recipe.result)
+		var track := _button(footer, L.text("recipes.tracking.stop") if recipe_tracking.is_tracked(recipe.result) else L.text("recipes.tracking.start"), Rect2(0, 0, 250, 100), func(): _toggle_recipe_tracking(str(recipe.result)), false, "track_" + recipe.result)
 		track.custom_minimum_size = Vector2(250, 100)
 		track.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var button := _button(footer, L.text("recipes.merge.button"), Rect2(0, 0, 120, 100), func():
@@ -1129,6 +1137,7 @@ func _codex_panel(panel: Control) -> void:
 		var details := _catalog_header(body, id, title, L.text("catalog.status.discovered") if found else L.text("catalog.status.undiscovered"))
 		var badge := details.find_child("DiscoveryBadge", true, false) as Label
 		var kill_label: Label
+		var base_speed := 0.0
 		var shown := {"found": found, "kills": _codex_kills(id) if not units_tab else 0}
 		if codex_tab == "units":
 			_unit_summary(details, definition)
@@ -1137,7 +1146,8 @@ func _codex_panel(panel: Control) -> void:
 		else:
 			var stats := _gold_line(details, L.text("catalog.enemy.stats") % definition.hp, int(definition.reward), Rect2(), 24, PALE)
 			stats.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			kill_label = _catalog_text(body, L.text("catalog.enemy.progress") % [definition.travel, shown.kills], 24, MUTED)
+			base_speed = float(sim.PATH_LENGTH) / float(definition.travel)
+			kill_label = _catalog_text(body, L.text("catalog.enemy.progress") % [base_speed, shown.kills], 24, MUTED)
 			if definition.kind == "special":
 				_catalog_text(body, L.text("catalog.enemy.unlock_wave") % definition.unlock, 24, MUTED)
 		# 행을 다시 만들지 않고 변경된 기록만 갱신해 스크롤과 입력 상태를 보존한다.
@@ -1150,7 +1160,7 @@ func _codex_panel(panel: Control) -> void:
 				var count := _codex_kills(id)
 				if count != int(shown.kills):
 					shown.kills = count
-					kill_label.text = L.text("catalog.enemy.progress") % [definition.travel, count]
+					kill_label.text = L.text("catalog.enemy.progress") % [base_speed, count]
 		dynamic.append(update)
 	if list.get_child_count() == 0:
 		_catalog_text(list, L.text("catalog.filter.empty"))

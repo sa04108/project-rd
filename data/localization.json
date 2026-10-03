@@ -78,10 +78,10 @@
     "ja": "敵 %d"
   },
   "catalog.enemy.progress": {
-    "en": "Base Travel Time %.0f sec · Defeated %d",
-    "ko": "기본 이동 %.0f초 · 누적 처치 %d",
-    "zh_CN": "基础移动时间 %.0f 秒 · 累计击败 %d",
-    "ja": "基本移動時間 %.0f秒 · 討伐数 %d"
+    "en": "Movement speed %.2f cells/s · Defeated %d",
+    "ko": "이동 속도 %.2f칸/초 · 누적 처치 %d",
+    "zh_CN": "移动速度 %.2f格/秒 · 累计击败 %d",
+    "ja": "移動速度 %.2fマス/秒 · 討伐数 %d"
   },
   "catalog.enemy.stats": {
     "en": "Base HP %d · Bounty",

@@ -8,12 +8,10 @@ var read_only := false
 var _blocked_error := "error.save.unsupported_version"
 var _observed_files: Dictionary = {}
 const Limits = preload("res://game/save_limits.gd")
-var _recipe_results: Dictionary = {}
-const PROFILE_SCHEMA := 3
+const PROFILE_SCHEMA := 4
 const Progression = preload("res://game/permanent_progression.gd")
 var economy: Dictionary:
 	get: return profile.economy
-const Catalog = preload("res://game/catalog.gd")
 const Simulation = preload("res://game/simulation.gd")
 const DEFAULT_SETTINGS := {"language": "en", "music": 0.35, "effects": 0.65, "music_muted": false, "effects_muted": false, "reduced_motion": false, "haptics": false, "music_track": "mist_guard", "ui_sound": "tap"}
 const LEGACY_MUSIC_TRACKS := ["hearth_watch", "mist_guard", "quiet_march"]
@@ -22,9 +20,7 @@ const LEGACY_UI_SOUNDS := ["wood", "tap", "chime"]
 func _init(path: String = "user://") -> void:
 	directory = path
 	DirAccess.make_dir_recursive_absolute(directory)
-	for recipe in Catalog.new().recipes:
-		_recipe_results[str(recipe.result)] = true
-	profile = {"schema": PROFILE_SCHEMA, "preferences": {"recipe_tracking": {"unit_ids": []}}, "economy": _new_economy(), "best_wave": 0, "cleared": false, "settings": DEFAULT_SETTINGS.duplicate(true), "units": {}, "enemies": {}, "kills": {}, "run_counts": {}, "ended_runs": {}}
+	profile = {"schema": PROFILE_SCHEMA, "preferences": {}, "economy": _new_economy(), "best_wave": 0, "cleared": false, "settings": DEFAULT_SETTINGS.duplicate(true), "units": {}, "enemies": {}, "kills": {}, "run_counts": {}, "ended_runs": {}}
 	# 이전 버전이 남긴 복구 파일도 신규 설치로 오인하지 않는다.
 	if not FileAccess.file_exists(directory.path_join("profile.json")):
 		for filename in DirAccess.get_files_at(directory):
@@ -39,18 +35,15 @@ func _init(path: String = "user://") -> void:
 			# 더 최신 앱의 프로필은 손상 파일로 격리하거나 기본값으로 덮어쓰지 않는다.
 			read_only = true
 			last_error = "error.save.unsupported_version"
-		elif _valid_profile(loaded, true):
+		elif _valid_profile(loaded):
 			profile = loaded
 			if profile.schema == 1:
-				profile.preferences = {"recipe_tracking": {"unit_ids": []}}
-			if int(profile.schema) < PROFILE_SCHEMA:
+				profile.preferences = {}
+			if int(profile.schema) < 3:
 				profile.economy = _new_economy()
-				profile.schema = PROFILE_SCHEMA
-			# 콘텐츠에서 삭제된 추적 대상만 제외하며 기록·설정은 보존한다.
-			var retained: Array[String] = []
-			for identity in profile.preferences.recipe_tracking.unit_ids:
-				if _recipe_results.has(identity): retained.append(identity)
-			profile.preferences.recipe_tracking.unit_ids = retained
+			# 이전 영구 추적만 제거하며 경제·기록·나머지 설정은 그대로 보존한다.
+			profile.preferences.erase("recipe_tracking")
+			profile.schema = PROFILE_SCHEMA
 			profile.settings.merge(DEFAULT_SETTINGS, false)
 			# 이전 선택지는 받아들이되 새 고정 오디오 설정으로 옮긴다.
 			profile.settings.music_track = "mist_guard"
@@ -63,14 +56,17 @@ func _future_profile(value: Dictionary) -> bool:
 	var version = value.get("schema")
 	return (version is int or version is float) and is_finite(float(version)) and float(version) > PROFILE_SCHEMA
 
-func _valid_profile(value: Dictionary, allow_removed_tracking: bool = false) -> bool:
+func _valid_profile(value: Dictionary) -> bool:
 	if not Limits.valid(value): return false
 	if not value.has_all(["schema", "best_wave", "cleared", "settings", "units", "enemies", "kills", "run_counts", "ended_runs"]) or not (value.schema is int or value.schema is float):
 		return false
-	if not is_finite(float(value.schema)) or float(value.schema) != floor(float(value.schema)) or not int(value.schema) in [1, 2, PROFILE_SCHEMA]:
+	if not is_finite(float(value.schema)) or float(value.schema) != floor(float(value.schema)) or not int(value.schema) in [1, 2, 3, PROFILE_SCHEMA]:
 		return false
 	if int(value.schema) >= 2:
-		if not value.get("preferences") is Dictionary or not value.preferences.get("recipe_tracking") is Dictionary:
+		if not value.get("preferences") is Dictionary:
+			return false
+	if int(value.schema) in [2, 3]:
+		if not value.preferences.get("recipe_tracking") is Dictionary:
 			return false
 		var tracking: Dictionary = value.preferences.recipe_tracking
 		if not tracking.get("unit_ids") is Array:
@@ -79,10 +75,10 @@ func _valid_profile(value: Dictionary, allow_removed_tracking: bool = false) -> 
 		for identity in tracking.unit_ids:
 			if not identity is String or identity.is_empty() or seen.has(identity):
 				return false
-			if not allow_removed_tracking and not _recipe_results.has(identity):
-				return false
 			seen[identity] = true
-	if int(value.schema) == PROFILE_SCHEMA and not _valid_economy(value.get("economy")):
+	if int(value.schema) == PROFILE_SCHEMA and value.preferences.has("recipe_tracking"):
+		return false
+	if int(value.schema) >= 3 and not _valid_economy(value.get("economy")):
 		return false
 	if not Progression.integer(value.best_wave, 0, 100) or not value.cleared is bool:
 		return false
@@ -254,7 +250,7 @@ func _write(filename: String, value: Dictionary) -> bool:
 			return false
 		var valid: bool = old is Dictionary
 		if valid:
-			valid = _valid_profile(old, true) if filename == "profile.json" else Simulation.new()._valid_snapshot(old)
+			valid = _valid_profile(old) if filename == "profile.json" else Simulation.new()._valid_snapshot(old)
 		if filename == "profile.json" and old is Dictionary and _future_profile(old):
 			read_only = true
 			last_error = "error.save.unsupported_version"
@@ -291,28 +287,6 @@ func load_run() -> Dictionary:
 
 func save_settings() -> bool:
 	return _write("profile.json", profile)
-
-func tracked_recipe_units() -> Array:
-	return profile.preferences.recipe_tracking.unit_ids.duplicate()
-
-func is_recipe_tracked(identity: String) -> bool:
-	return identity in profile.preferences.recipe_tracking.unit_ids
-
-func set_recipe_tracked(identity: String, enabled: bool) -> bool:
-	if not _recipe_results.has(identity):
-		last_error = "recipes.not_found"
-		return false
-	var updated := profile.duplicate(true)
-	var identities: Array = updated.preferences.recipe_tracking.unit_ids
-	if enabled and not identity in identities:
-		identities.append(identity)
-	elif not enabled:
-		identities.erase(identity)
-	# 선입 순서는 배열 순서다. 저장 성공 후에만 UI가 관측하는 프로필을 바꾼다.
-	if not _write("profile.json", updated):
-		return false
-	profile = updated
-	return true
 
 func _new_economy() -> Dictionary:
 	var state := {"schema": 1, "authority": "local", "revision": 0, "wallet": {"diamonds": 0, "total_earned": 0, "total_spent": 0}, "upgrades": Progression.defaults(), "ledger": []}
