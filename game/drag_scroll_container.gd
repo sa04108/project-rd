@@ -44,7 +44,7 @@ func _begin_pointer(kind: String, index: int, position: Vector2) -> void:
 		# 한 손가락 스크롤 중 추가 포인터가 오면 제스처 전체를 안전하게 취소한다.
 		_cancel_pointer()
 		return
-	if not _inside_content(position) or _starts_on_button(position):
+	if not _inside_content(position):
 		return
 	_pointer_kind = kind
 	_pointer_index = index
@@ -55,24 +55,14 @@ func _move_pointer(kind: String, index: int, position: Vector2) -> void:
 	if _pointer_kind != kind or _pointer_index != index:
 		return
 	var distance := _local_position(position).y - _origin.y
-	if not _dragging and absf(distance) >= maxf(float(scroll_deadzone), 10.0):
+	if not _dragging and absf(distance) > maxf(float(scroll_deadzone), 10.0):
 		_dragging = true
-		# 본문에서 시작한 드래그만 버튼의 눌림 상태를 취소하고 스크롤한다.
+		# 임계값을 넘기면 버튼에서 시작한 입력도 클릭 시도를 취소하고 스크롤한다.
 		propagate_notification(Control.NOTIFICATION_SCROLL_BEGIN)
 		scroll_started.emit()
 	if _dragging:
 		scroll_vertical = _initial_scroll - roundi(distance)
 		get_viewport().set_input_as_handled()
-
-func _starts_on_button(position: Vector2) -> bool:
-	for node in find_children("*", "BaseButton", true, false):
-		var button := node as BaseButton
-		if not button.is_visible_in_tree() or button.mouse_filter == Control.MOUSE_FILTER_IGNORE:
-			continue
-		var local: Vector2 = button.get_global_transform_with_canvas().affine_inverse() * position
-		if Rect2(Vector2.ZERO, button.size).has_point(local):
-			return true
-	return false
 
 func _inside_content(position_value: Vector2) -> bool:
 	if vertical_scroll_mode == SCROLL_MODE_DISABLED:

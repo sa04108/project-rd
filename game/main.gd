@@ -875,7 +875,8 @@ func _set_scroll_input_pass(node: Node) -> void:
 	if node is ScrollBar:
 		return
 	if node is BaseButton:
-		node.mouse_filter = Control.MOUSE_FILTER_STOP
+		# 버튼의 release 클릭은 유지하고 부모의 드래그 판정까지 입력을 전달한다.
+		node.mouse_filter = Control.MOUSE_FILTER_PASS
 	elif node is Control and not node is ScrollContainer and node.mouse_filter != Control.MOUSE_FILTER_IGNORE:
 		node.mouse_filter = Control.MOUSE_FILTER_PASS
 	for child in node.get_children():
@@ -938,6 +939,7 @@ func _scroll(panel: Control, top: float = 72.0) -> VBoxContainer:
 	scroller.position = Vector2(18, top)
 	scroller.size = Vector2(614, panel.size.y - top - 68.0)
 	scroller.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroller.scroll_deadzone = 20
 	scroller.scroll_started.connect(_selection_drag_started)
 	panel.add_child(scroller)
 	var list := VBoxContainer.new()
