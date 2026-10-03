@@ -286,7 +286,8 @@
         15,
         20
       ],
-      "unlock_waves": []
+      "unlock_waves": [],
+      "retired": true
     },
     "starting_gold": {
       "kind": "gold",
@@ -343,6 +344,30 @@
         0.14
       ],
       "unlock_waves": []
+    },
+    "battle_speed": {
+      "kind": "speed",
+      "costs": [
+        100,
+        200,
+        300,
+        600,
+        1000
+      ],
+      "values": [
+        3,
+        5,
+        10,
+        15,
+        20
+      ],
+      "unlock_waves": [
+        10,
+        20,
+        40,
+        60,
+        80
+      ]
     }
   },
   "boss_reward": 20

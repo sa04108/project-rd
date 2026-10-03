@@ -10,9 +10,7 @@
     "special_cooldown": 300.0,
     "speeds": [
       1,
-      2,
-      3,
-      5
+      2
     ],
     "deployment_seconds": 5.0,
     "maximum_speed": 20,
@@ -151,7 +149,6 @@
     "boss_reward": 160,
     "hp_growth": 1.055,
     "enemy_limit": 50,
-    "beginner_first_clear_target": 0.05,
     "beginner_failure_wave_target": 30,
     "hp_curve": [
       {

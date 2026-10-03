@@ -1608,10 +1608,10 @@
     "ja": "強化済み"
   },
   "progression.unlock_wave": {
-    "en": "Reach wave %d to unlock",
-    "ko": "최고 %d웨이브 도달 시 해금",
-    "zh_CN": "最高到达第%d波后解锁",
-    "ja": "最高到達ウェーブ%dで解放"
+    "en": "Defeat the wave %d boss to unlock",
+    "ko": "%d웨이브 보스 처치 시 해금",
+    "zh_CN": "击败第%d波首领后解锁",
+    "ja": "ウェーブ%dのボスを倒すと解放"
   },
   "progression.cost_diamonds": {
     "en": "{diamond} × %d",
@@ -1674,10 +1674,10 @@
     "ja": "強化情報が変更されました。もう一度お試しください。"
   },
   "progression.error.locked": {
-    "en": "Reach the required wave first.",
-    "ko": "해금 웨이브에 먼저 도달해야 합니다.",
-    "zh_CN": "请先达到解锁所需波数。",
-    "ja": "解放に必要なウェーブに到達してください。"
+    "en": "Defeat the required boss first.",
+    "ko": "필요한 웨이브의 보스를 먼저 처치해야 합니다.",
+    "zh_CN": "请先击败所需波数的首领。",
+    "ja": "必要なウェーブのボスを倒してください。"
   },
   "progression.error.funds": {
     "en": "Not enough {diamond}.",

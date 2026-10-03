@@ -12,7 +12,7 @@ signal unit_presented(event: Dictionary)
 
 const Catalog = preload("res://game/catalog.gd")
 const Progression = preload("res://game/permanent_progression.gd")
-const SNAPSHOT_SCHEMA := 4
+const SNAPSHOT_SCHEMA := 5
 # 아군 한 칸을 1로 두고 폭 1인 외곽 길의 중심선을 따른다.
 const PATH_SIDE := 7.0
 const PATH_LENGTH := PATH_SIDE * 4.0
@@ -516,7 +516,7 @@ func snapshot() -> Dictionary:
 func restore(saved: Dictionary) -> bool:
 	if not _valid_snapshot(saved):
 		return false
-	permanent_levels = saved.get("permanent_levels", Progression.defaults()).duplicate()
+	permanent_levels = Progression.normalized_levels(saved.get("permanent_levels", Progression.defaults()))
 	deployment_remaining = float(saved.get("deployment_remaining", 0.0))
 	run_id = saved.run_id
 	time = saved.time
@@ -526,11 +526,13 @@ func restore(saved: Dictionary) -> bool:
 	# 횟수가 없던 이전 전투는 업데이트 후 첫 유료 소환부터 비용 증가를 시작한다.
 	paid_summons = int(saved.get("paid_summons", 0))
 	speed = int(saved.speed)
+	if not speed in Progression.speeds(permanent_levels):
+		speed = int(Progression.speeds(permanent_levels).back())
 	result = saved.result
 	result_reason = saved.result_reason
 	units = saved.units.duplicate(true)
 	enemies = saved.enemies.duplicate(true)
-	if int(saved.schema) < SNAPSHOT_SCHEMA:
+	if int(saved.schema) < 4:
 		# 구버전 보스는 저장된 생성 웨이브로 기한을 되살리고 특수 적은 복원 시점부터 잰다.
 		for enemy in enemies:
 			if not _is_timed_enemy(enemy):
@@ -573,7 +575,7 @@ func _valid_snapshot(s: Dictionary) -> bool:
 		return false
 	var snapshot_schema := int(s.schema)
 	var required := ["content_version", "run_id", "time", "wave", "spawn_index", "gold", "speed", "result", "result_reason", "units", "enemies", "upgrades", "cooldowns", "next_id", "rng_state", "rng_seed", "discovered_units", "discovered_enemies", "kills", "developer_run"]
-	if snapshot_schema < SNAPSHOT_SCHEMA:
+	if snapshot_schema < 4:
 		required.append("lives")
 	elif s.has("lives"):
 		return false
@@ -590,24 +592,24 @@ func _valid_snapshot(s: Dictionary) -> bool:
 	var saved_permanent: Dictionary = Progression.defaults()
 	var preparation := 0.0
 	if int(s.schema) >= 2:
-		if not s.has_all(["permanent_levels", "deployment_remaining", "user_paused"]) or not s.user_paused is bool or not Progression.valid_levels(s.permanent_levels): return false
+		if not s.has_all(["permanent_levels", "deployment_remaining", "user_paused"]) or not s.user_paused is bool or not Progression.valid_levels(s.permanent_levels, snapshot_schema < 5): return false
 		if not (s.deployment_remaining is int or s.deployment_remaining is float) or not is_finite(float(s.deployment_remaining)) or s.deployment_remaining < 0.0 or s.deployment_remaining > float(catalog.rules.F.deployment_seconds): return false
-		saved_permanent = s.permanent_levels
+		saved_permanent = Progression.normalized_levels(s.permanent_levels)
 		preparation = float(s.deployment_remaining)
 	elif s.has("permanent_levels") or s.has("deployment_remaining") or s.has("user_paused"):
 		return false
 	var numeric_fields := ["time", "wave", "spawn_index", "gold", "speed", "next_id"]
-	if snapshot_schema < SNAPSHOT_SCHEMA:
+	if snapshot_schema < 4:
 		numeric_fields.append("lives")
 	for key in numeric_fields:
 		if not (s[key] is float or s[key] is int) or not is_finite(float(s[key])):
 			return false
-	if s.wave < 1 or s.wave > 100 or s.time < 0 or s.gold < 0 or s.next_id < 1 or not int(s.speed) in Progression.speeds(saved_permanent):
+	if s.wave < 1 or s.wave > 100 or s.time < 0 or s.gold < 0 or s.next_id < 1 or not int(s.speed) in (Progression.legacy_speeds(saved_permanent) if snapshot_schema < 5 else Progression.speeds(saved_permanent)):
 		return false
-	if snapshot_schema < SNAPSHOT_SCHEMA and (s.lives < 0 or s.lives > 20 + int(Progression.value("extra_lives", int(saved_permanent.extra_lives)))):
+	if snapshot_schema < 4 and (s.lives < 0 or s.lives > 20 + int(Progression.value("extra_lives", int(saved_permanent.extra_lives)))):
 		return false
 	var integral_fields := ["wave", "spawn_index", "gold", "speed", "next_id"]
-	if snapshot_schema < SNAPSHOT_SCHEMA:
+	if snapshot_schema < 4:
 		integral_fields.append("lives")
 	for key in integral_fields:
 		if float(s[key]) != floor(float(s[key])):
@@ -679,7 +681,7 @@ func _valid_snapshot(s: Dictionary) -> bool:
 		if float(enemy.id) != floor(float(enemy.id)) or float(enemy.wave) != floor(float(enemy.wave)) or enemy.wave < 1 or enemy.wave > s.wave or enemy.hp > enemy.max_hp or enemy.slow_until < 0 or enemy.stun_until < 0 or ids.has(int(enemy.id)) or enemy.id < 1 or enemy.id >= s.next_id or enemy.hp <= 0 or enemy.max_hp <= 0 or enemy.progress < 0 or enemy.progress > float(saved_path_length) or enemy.slow < 0 or enemy.slow >= 1:
 			return false
 		var timed: bool = catalog.enemies[enemy.kind].kind in ["boss", "final", "special"]
-		if snapshot_schema < SNAPSHOT_SCHEMA:
+		if snapshot_schema < 4:
 			if enemy.has("deadline"):
 				return false
 		elif timed:

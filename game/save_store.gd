@@ -9,7 +9,7 @@ var _blocked_error := "error.save.unsupported_version"
 var _observed_files: Dictionary = {}
 const Limits = preload("res://game/save_limits.gd")
 const WebPersistence = preload("res://game/web_save_persistence.gd")
-const PROFILE_SCHEMA := 4
+const PROFILE_SCHEMA := 5
 const Progression = preload("res://game/permanent_progression.gd")
 var economy: Dictionary:
 	get: return profile.economy
@@ -22,7 +22,7 @@ func _init(path: String = "user://") -> void:
 	WebPersistence.initialize()
 	directory = path
 	DirAccess.make_dir_recursive_absolute(directory)
-	profile = {"schema": PROFILE_SCHEMA, "preferences": {}, "economy": _new_economy(), "best_wave": 0, "cleared": false, "settings": DEFAULT_SETTINGS.duplicate(true), "units": {}, "enemies": {}, "kills": {}, "run_counts": {}, "ended_runs": {}}
+	profile = {"schema": PROFILE_SCHEMA, "preferences": {}, "cleared_boss_waves": {}, "economy": _new_economy(), "best_wave": 0, "cleared": false, "settings": DEFAULT_SETTINGS.duplicate(true), "units": {}, "enemies": {}, "kills": {}, "run_counts": {}, "ended_runs": {}}
 	# 이전 버전이 남긴 복구 파일도 신규 설치로 오인하지 않는다.
 	if not FileAccess.file_exists(directory.path_join("profile.json")):
 		for filename in DirAccess.get_files_at(directory):
@@ -31,7 +31,7 @@ func _init(path: String = "user://") -> void:
 				break
 	var loaded := _read("profile.json")
 	# 새 전투에서도 알 수 없는 저장을 덮어쓰지 않도록 시작 시 두 파일을 관측한다.
-	_read("run.json")
+	var loaded_run := _read("run.json")
 	if not loaded.is_empty():
 		if _future_profile(loaded):
 			# 더 최신 앱의 프로필은 손상 파일로 격리하거나 기본값으로 덮어쓰지 않는다.
@@ -43,6 +43,9 @@ func _init(path: String = "user://") -> void:
 				profile.preferences = {}
 			if int(profile.schema) < 3:
 				profile.economy = _new_economy()
+			if int(profile.schema) < 5:
+				profile.economy.upgrades = Progression.normalized_levels(profile.economy.upgrades)
+				profile.cleared_boss_waves = _migrate_boss_clears(loaded_run)
 			# 이전 영구 추적만 제거하며 경제·기록·나머지 설정은 그대로 보존한다.
 			profile.preferences.erase("recipe_tracking")
 			profile.schema = PROFILE_SCHEMA
@@ -62,7 +65,7 @@ func _valid_profile(value: Dictionary) -> bool:
 	if not Limits.valid(value): return false
 	if not value.has_all(["schema", "best_wave", "cleared", "settings", "units", "enemies", "kills", "run_counts", "ended_runs"]) or not (value.schema is int or value.schema is float):
 		return false
-	if not is_finite(float(value.schema)) or float(value.schema) != floor(float(value.schema)) or not int(value.schema) in [1, 2, 3, PROFILE_SCHEMA]:
+	if not is_finite(float(value.schema)) or float(value.schema) != floor(float(value.schema)) or not int(value.schema) in [1, 2, 3, 4, PROFILE_SCHEMA]:
 		return false
 	if int(value.schema) >= 2:
 		if not value.get("preferences") is Dictionary:
@@ -78,10 +81,14 @@ func _valid_profile(value: Dictionary) -> bool:
 			if not identity is String or identity.is_empty() or seen.has(identity):
 				return false
 			seen[identity] = true
-	if int(value.schema) == PROFILE_SCHEMA and value.preferences.has("recipe_tracking"):
+	if int(value.schema) >= 4 and value.preferences.has("recipe_tracking"):
 		return false
-	if int(value.schema) >= 3 and not _valid_economy(value.get("economy")):
+	if int(value.schema) >= 3 and not _valid_economy(value.get("economy"), int(value.schema) < 5):
 		return false
+	if int(value.schema) >= 5:
+		if not value.get("cleared_boss_waves") is Dictionary: return false
+		for wave in value.cleared_boss_waves:
+			if not wave in ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100"] or not value.cleared_boss_waves[wave] is bool or not value.cleared_boss_waves[wave]: return false
 	if not Progression.integer(value.best_wave, 0, 100) or not value.cleared is bool:
 		return false
 	for key in ["settings", "units", "enemies", "kills", "run_counts", "ended_runs"]:
@@ -300,12 +307,12 @@ func _new_economy() -> Dictionary:
 	_grant(state, "welcome:v1", "welcome", int(Progression.rules().starter_diamonds))
 	return state
 
-func _valid_economy(value: Variant) -> bool:
+func _valid_economy(value: Variant, allow_legacy: bool = false) -> bool:
 	if not value is Dictionary or not value.has_all(["schema", "authority", "revision", "wallet", "upgrades", "ledger"]):
 		return false
 	if not Progression.integer(value.schema, 1, 1) or value.authority != "local" or not Progression.integer(value.revision):
 		return false
-	if not Progression.valid_levels(value.upgrades) or not value.ledger is Array or value.ledger.size() != int(value.revision):
+	if not Progression.valid_levels(value.upgrades, allow_legacy) or not value.ledger is Array or value.ledger.size() != int(value.revision):
 		return false
 	if not value.wallet is Dictionary or not value.wallet.has_all(["diamonds", "total_earned", "total_spent"]):
 		return false
@@ -326,7 +333,7 @@ func _valid_economy(value: Variant) -> bool:
 			if entry.id != "purchase:%d" % (index + 1) or int(entry.delta) >= 0: return false
 			var identity: Variant = entry.get("upgrade_id")
 			if not identity is String or not levels.has(identity) or not Progression.integer(entry.get("level_after"), 1, Progression.max_level(identity)): return false
-			if int(entry.level_after) != int(levels[identity]) + 1: return false
+			if int(entry.level_after) != Progression.current_level(levels, identity) + 1: return false
 			levels[identity] = int(entry.level_after)
 			spent -= int(entry.delta)
 		else:
@@ -343,7 +350,7 @@ func _valid_economy(value: Variant) -> bool:
 		balance += int(entry.delta)
 		if balance < 0 or balance > Progression.MAX_DIAMONDS or balance != int(entry.balance_after): return false
 	for identity in levels:
-		if int(levels[identity]) != int(value.upgrades[identity]): return false
+		if int(levels[identity]) != int(value.upgrades.get(identity, 0)): return false
 	return balance == int(value.wallet.diamonds) and earned == int(value.wallet.total_earned) and spent == int(value.wallet.total_spent)
 
 func _grant(state: Dictionary, identity: String, kind: String, amount: int, details: Dictionary = {}) -> void:
@@ -364,18 +371,40 @@ func diamond_balance() -> int:
 func permanent_levels() -> Dictionary:
 	return profile.economy.upgrades.duplicate()
 
+func _record_boss_clears(target: Dictionary, counts: Dictionary) -> void:
+	for wave in range(10, 101, 10):
+		if int(counts.get("b%d" % wave, 0)) > 0:
+			target[str(wave)] = true
+
+func _migrate_boss_clears(loaded_run: Dictionary) -> Dictionary:
+	var cleared: Dictionary = {}
+	# 전체 처치수에는 개발 판도 있으므로 정상 종료 원장에 연결된 기록만 승계한다.
+	for entry in profile.economy.ledger:
+		if entry.kind == "run":
+			_record_boss_clears(cleared, profile.run_counts.get(str(entry.run_id), {}))
+	if not loaded_run.is_empty() and Simulation.new()._valid_snapshot(loaded_run) and not bool(loaded_run.developer_run):
+		_record_boss_clears(cleared, loaded_run.kills)
+	return cleared
+
+func upgrade_unlocked(identity: String, level: int) -> bool:
+	var required := Progression.unlock_wave(identity, level)
+	if required <= 0: return true
+	if identity == "battle_speed":
+		return bool(profile.cleared_boss_waves.get(str(required), false))
+	return int(profile.best_wave) >= required
+
 func purchase_permanent(identity: String, expected_level: int, expected_revision: int) -> Dictionary:
 	if read_only:
 		return {"ok": false, "error": _blocked_error}
 	if not profile.economy.upgrades.has(identity) or bool(Progression.definition(identity).get("retired", false)):
 		return {"ok": false, "error": "progression.error.unavailable"}
-	var level := int(profile.economy.upgrades[identity])
+	var level := Progression.current_level(profile.economy.upgrades, identity)
 	if expected_level != level or expected_revision != int(profile.economy.revision):
 		return {"ok": false, "error": "progression.error.stale"}
 	var price := Progression.cost(identity, level)
 	if price < 0:
 		return {"ok": false, "error": "progression.maxed"}
-	if int(profile.best_wave) < Progression.unlock_wave(identity, level):
+	if not upgrade_unlocked(identity, level):
 		return {"ok": false, "error": "progression.error.locked"}
 	if diamond_balance() < price:
 		return {"ok": false, "error": "progression.error.funds"}
@@ -401,6 +430,7 @@ func run_diamond_reward(sim) -> int:
 
 func _record_permanent_progress(updated: Dictionary, sim) -> void:
 	if sim.developer_run: return
+	_record_boss_clears(updated.cleared_boss_waves, sim.kills)
 	updated.best_wave = maxi(int(updated.best_wave), sim.wave)
 	for milestone in range(10, 101, 10):
 		if int(updated.best_wave) >= milestone:

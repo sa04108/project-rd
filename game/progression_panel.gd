@@ -25,7 +25,7 @@ static func build(host, panel: Control) -> void:
 	_append_upgrade(host, panel, list, "double_summon", levels, revision)
 	_append_category(host, list, "progression.category.expedition")
 	_append_upgrade(host, panel, list, "starting_gold", levels, revision)
-	_append_upgrade(host, panel, list, "speed", levels, revision)
+	_append_upgrade(host, panel, list, "battle_speed", levels, revision)
 	var rewards_note: RichTextLabel = host._diamond_text(list, L.text("progression.rewards.note"), Rect2(), 22, MUTED)
 	rewards_note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
@@ -36,7 +36,7 @@ static func _append_upgrade(host, panel: Control, list: VBoxContainer, identity:
 	var definition: Dictionary = Progression.definition(identity)
 	if definition.is_empty() or bool(definition.get("retired", false)):
 		return
-	var current_level := int(levels.get(identity, 0))
+	var current_level := Progression.current_level(levels, identity)
 	var maximum := Progression.max_level(identity)
 	var body: VBoxContainer = host._catalog_row(list, identity)
 	host._catalog_text(body, _title(identity, int(definition.get("tier", 0))), 26, GOLD)
@@ -52,7 +52,7 @@ static func _append_upgrade(host, panel: Control, list: VBoxContainer, identity:
 		var next_effect := _effect(host, identity, definition, levels, current_level + 1)
 		host._catalog_text(body, L.text("progression.current_next") % [current_effect, next_effect], 23, PALE)
 	var required_wave := Progression.unlock_wave(identity, current_level)
-	var wave_locked := required_wave > 0 and int(host.store.profile.best_wave) < required_wave
+	var wave_locked: bool = not host.store.upgrade_unlocked(identity, current_level)
 	if wave_locked:
 		host._catalog_text(body, L.text("progression.unlock_wave") % required_wave, 20, MUTED)
 	if not maxed:
@@ -82,7 +82,7 @@ static func _title(identity: String, tier: int) -> String:
 			return L.text("progression.attack.title") % tier
 		"gamble_2", "gamble_3":
 			return L.text("progression.gamble.title") % tier
-		"speed":
+		"speed", "battle_speed":
 			return L.text("progression.speed.title")
 		"starting_gold":
 			return L.text("progression.starting_gold.title")
@@ -100,7 +100,7 @@ static func _effect(host, identity: String, definition: Dictionary, levels: Dict
 			var base_chance := float(host.sim.catalog.rules.T.gamble[str(tier)].chance)
 			return L.text("progression.effect.gamble_chance") % roundi((base_chance + value) * 100.0)
 		"speed":
-			var maximum_speed := 5
+			var maximum_speed := 2
 			if level > 0:
 				maximum_speed = int(value)
 			else:
