@@ -653,7 +653,7 @@ func _catalog_row(list: VBoxContainer, identity: String) -> VBoxContainer:
 	margin.add_child(body)
 	return body
 
-func _catalog_text(parent: Container, text_value: String, font_size: int = 22, color: Color = PALE) -> Label:
+func _catalog_text(parent: Container, text_value: String, font_size: int = 24, color: Color = PALE) -> Label:
 	var label := _label(parent, text_value, Vector2.ZERO, 0, font_size, color)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return label
@@ -674,18 +674,21 @@ func _catalog_header(body: VBoxContainer, identity: String, title: String, statu
 	var heading := HBoxContainer.new()
 	heading.add_theme_constant_override("separation", 8)
 	details.add_child(heading)
-	_catalog_text(heading, title, 24, GOLD)
+	_catalog_text(heading, title, 28, GOLD)
 	if not status.is_empty():
-		var badge := _catalog_text(heading, status, 18, MUTED)
-		badge.custom_minimum_size.x = 60
+		var badge := _catalog_text(heading, status, 24, MUTED)
+		badge.custom_minimum_size.x = 72
 		badge.size_flags_horizontal = Control.SIZE_SHRINK_END
 	return details
 
 func _unit_summary(parent: Container, definition: Dictionary) -> void:
-	_catalog_text(parent, UnitDescription.attack_type(definition), 22, PALE)
+	_catalog_text(parent, UnitDescription.attack_type(definition), 24, PALE)
 	var abilities: String = UnitDescription.abilities(definition)
 	if not abilities.is_empty():
-		_catalog_text(parent, abilities, 20, MUTED)
+		_catalog_text(parent, abilities, 24, MUTED)
+
+func _unit_base_stats(parent: Container, definition: Dictionary) -> void:
+	_catalog_text(parent, "기본 능력 · 공격 %d\n사거리 %.1f · 주기 %s초" % [definition.damage, definition.range, String.num(float(definition.interval), 2)], 24, PALE)
 
 func _recipe_anchor(recipe: Dictionary) -> int:
 	var unit: Dictionary = sim.unit_by_id(selected)
@@ -706,6 +709,7 @@ func _recipes_panel(panel: Control) -> void:
 		var body := _catalog_row(list, recipe.result)
 		var details := _catalog_header(body, recipe.result, "%s  %s" % ["★".repeat(int(result_def.tier)), result_def.name])
 		_unit_summary(details, result_def)
+		_unit_base_stats(body, result_def)
 		var footer := HBoxContainer.new()
 		footer.add_theme_constant_override("separation", 16)
 		body.add_child(footer)
@@ -716,7 +720,7 @@ func _recipes_panel(panel: Control) -> void:
 				if unit.kind == id:
 					owned += 1
 			material_names.append("%s %d/%d" % [sim.catalog.units[id].name, owned, recipe.ingredients[id]])
-		var materials := _catalog_text(footer, " + ".join(material_names), 22, PALE)
+		var materials := _catalog_text(footer, " + ".join(material_names), 24, PALE)
 		materials.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var button := _button(footer, "조합", Rect2(0, 0, 120, 100), func():
 			var response: Dictionary = sim.combine(recipe.id, _recipe_anchor(recipe))
@@ -752,13 +756,13 @@ func _codex_panel(panel: Control) -> void:
 		var details := _catalog_header(body, id, title, "발견" if found else "미발견")
 		if codex_tab == "units":
 			_unit_summary(details, definition)
-			_catalog_text(body, "공격 %d · 사거리 %.1f · 주기 %.1f초" % [definition.damage, definition.range, definition.interval], 22, PALE)
-			_catalog_text(body, definition.description, 20, MUTED)
+			_unit_base_stats(body, definition)
+			_catalog_text(body, definition.description, 24, MUTED)
 		else:
-			_catalog_text(details, "기본 체력 %d · 처치 ◈ %d" % [definition.hp, definition.reward], 22, PALE)
-			_catalog_text(body, "기본 이동 %.0f초 · 누적 처치 %d" % [definition.travel, store.profile.kills.get(id, 0)], 22, MUTED)
+			_catalog_text(details, "기본 체력 %d · 처치 ◈ %d" % [definition.hp, definition.reward], 24, PALE)
+			_catalog_text(body, "기본 이동 %.0f초 · 누적 처치 %d" % [definition.travel, store.profile.kills.get(id, 0)], 24, MUTED)
 			if definition.kind == "special":
-				_catalog_text(body, "%d웨이브 완료 후 해금" % definition.unlock, 20, MUTED)
+				_catalog_text(body, "%d웨이브 완료 후 해금" % definition.unlock, 24, MUTED)
 
 func _portrait(parent: Control, identity: String, position_value: Vector2, dimensions: Vector2) -> void:
 	var texture: Texture2D = visuals.portrait(identity)
