@@ -5,6 +5,9 @@ var last_error := ""
 var profile: Dictionary = {}
 var corrupt_files: Dictionary = {}
 var read_only := false
+var _blocked_error := "error.save.unsupported_version"
+var _observed_files: Dictionary = {}
+const Limits = preload("res://game/save_limits.gd")
 var _recipe_results: Dictionary = {}
 const PROFILE_SCHEMA := 3
 const Progression = preload("res://game/permanent_progression.gd")
@@ -22,7 +25,15 @@ func _init(path: String = "user://") -> void:
 	for recipe in Catalog.new().recipes:
 		_recipe_results[str(recipe.result)] = true
 	profile = {"schema": PROFILE_SCHEMA, "preferences": {"recipe_tracking": {"unit_ids": []}}, "economy": _new_economy(), "best_wave": 0, "cleared": false, "settings": DEFAULT_SETTINGS.duplicate(true), "units": {}, "enemies": {}, "kills": {}, "run_counts": {}, "ended_runs": {}}
+	# 이전 버전이 남긴 복구 파일도 신규 설치로 오인하지 않는다.
+	if not FileAccess.file_exists(directory.path_join("profile.json")):
+		for filename in DirAccess.get_files_at(directory):
+			if filename == "profile.json.bak" or filename.begins_with("profile.json.corrupt-"):
+				_block("error.save.profile_invalid")
+				break
 	var loaded := _read("profile.json")
+	# 새 전투에서도 알 수 없는 저장을 덮어쓰지 않도록 시작 시 두 파일을 관측한다.
+	_read("run.json")
 	if not loaded.is_empty():
 		if _future_profile(loaded):
 			# 더 최신 앱의 프로필은 손상 파일로 격리하거나 기본값으로 덮어쓰지 않는다.
@@ -53,6 +64,7 @@ func _future_profile(value: Dictionary) -> bool:
 	return (version is int or version is float) and is_finite(float(version)) and float(version) > PROFILE_SCHEMA
 
 func _valid_profile(value: Dictionary, allow_removed_tracking: bool = false) -> bool:
+	if not Limits.valid(value): return false
 	if not value.has_all(["schema", "best_wave", "cleared", "settings", "units", "enemies", "kills", "run_counts", "ended_runs"]) or not (value.schema is int or value.schema is float):
 		return false
 	if not is_finite(float(value.schema)) or float(value.schema) != floor(float(value.schema)) or not int(value.schema) in [1, 2, PROFILE_SCHEMA]:
@@ -115,28 +127,104 @@ func _valid_counts(counts: Dictionary) -> bool:
 			return false
 	return true
 
+func _block(error: String) -> void:
+	read_only = true
+	_blocked_error = error
+	last_error = error
+
 func mark_corrupt(filename: String) -> void:
 	corrupt_files[filename] = true
 	var path := directory.path_join(filename)
-	if FileAccess.file_exists(path):
+	if filename == "profile.json":
+		# 원본을 남겨 재시작을 신규 설치로 오인하여 시작 재화를 다시 지급하지 않는다.
+		_block("error.save.profile_invalid")
+		if FileAccess.file_exists(path):
+			var quarantine := path + ".corrupt-" + str(_observed_files.get(filename, "unknown"))
+			if not FileAccess.file_exists(quarantine) and DirAccess.copy_absolute(path, quarantine) != OK:
+				last_error = "error.save.quarantine_failed"
+	elif FileAccess.file_exists(path):
 		var quarantine := path + ".corrupt-%d-%d" % [Time.get_unix_time_from_system(), Time.get_ticks_usec()]
 		if DirAccess.rename_absolute(path, quarantine) != OK:
-			last_error = "error.save.quarantine_failed"
+			_block("error.save.quarantine_failed")
+		else:
+			_observed_files[filename] = "missing"
 
-func _read(filename: String) -> Dictionary:
+func _file_state(filename: String) -> Dictionary:
 	var path := directory.path_join(filename)
-	if not FileAccess.file_exists(path):
+	if not FileAccess.file_exists(path): return {"hash": "missing", "text": "", "exists": false}
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		_block("error.save.read_failed")
 		return {}
-	var value = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var length := file.get_length()
+	if length > Limits.MAX_FILE_BYTES:
+		file.close()
+		_block("error.save.capacity")
+		return {}
+	var bytes := file.get_buffer(length)
+	var error := file.get_error()
+	file.close()
+	if bytes.size() != length or error != OK:
+		_block("error.save.read_failed")
+		return {}
+	var hashing := HashingContext.new()
+	hashing.start(HashingContext.HASH_SHA256)
+	hashing.update(bytes)
+	return {"hash": hashing.finish().hex_encode(), "text": bytes.get_string_from_utf8(), "exists": true}
+
+func _current(filename: String) -> Dictionary:
+	var state := _file_state(filename)
+	if state.is_empty(): return {}
+	if _observed_files.has(filename) and _observed_files[filename] != state.hash:
+		# 단일 파일시스템의 오래된 인스턴스를 차단한다. 프로세스 간 원자적 잠금은 아니다.
+		_block("error.save.conflict")
+		return {}
+	if not _observed_files.has(filename): _observed_files[filename] = state.hash
+	return state
+
+func _decode(filename: String, state: Dictionary) -> Dictionary:
+	if state.is_empty() or not state.exists: return {}
+	if not Limits.text_depth_valid(state.text):
+		_block("error.save.capacity")
+		return {}
+	var value: Variant = JSON.parse_string(state.text)
+	if value is Dictionary:
+		var version: Variant = value.get("schema")
+		var maximum := PROFILE_SCHEMA if filename == "profile.json" else 2
+		if (version is int or version is float) and is_finite(float(version)) and float(version) > maximum:
+			_block("error.save.unsupported_version")
+			return value
+		if not Limits.valid(value):
+			_block("error.save.capacity")
+			return {}
 	if not value is Dictionary or value.is_empty():
 		last_error = "error.save.read_failed"
 		mark_corrupt(filename)
 		return {}
 	return value
 
-func _write(filename: String, value: Dictionary) -> bool:
+func _read(filename: String) -> Dictionary:
+	return _decode(filename, _current(filename))
+
+func _preflight() -> bool:
 	if read_only:
-		last_error = "error.save.unsupported_version"
+		last_error = _blocked_error
+		return false
+	for filename in ["profile.json", "run.json"]:
+		var state := _current(filename)
+		if state.is_empty(): return false
+		_decode(filename, state)
+		if read_only: return false
+	return true
+
+func _write(filename: String, value: Dictionary) -> bool:
+	if not _preflight(): return false
+	if not Limits.valid(value):
+		_block("error.save.capacity")
+		return false
+	var encoded := JSON.stringify(value)
+	if encoded.to_utf8_buffer().size() > Limits.MAX_FILE_BYTES:
+		_block("error.save.capacity")
 		return false
 	if filename == "profile.json" and (not _valid_profile(value) or value.schema != PROFILE_SCHEMA):
 		last_error = "error.save.profile_invalid"
@@ -147,7 +235,7 @@ func _write(filename: String, value: Dictionary) -> bool:
 	if file == null:
 		last_error = "error.save.write_failed"
 		return false
-	file.store_string(JSON.stringify(value))
+	file.store_string(encoded)
 	file.flush()
 	if file.get_error() != OK:
 		last_error = "error.save.failed"
@@ -156,7 +244,14 @@ func _write(filename: String, value: Dictionary) -> bool:
 	file.close()
 	if FileAccess.file_exists(path):
 		# 손상 파일도 별도 이름으로 남긴 후 새 데이터를 교체한다.
-		var old = JSON.parse_string(FileAccess.get_file_as_string(path))
+		var state := _current(filename)
+		if state.is_empty():
+			DirAccess.remove_absolute(temp)
+			return false
+		var old: Dictionary = _decode(filename, state)
+		if read_only:
+			DirAccess.remove_absolute(temp)
+			return false
 		var valid: bool = old is Dictionary
 		if valid:
 			valid = _valid_profile(old, true) if filename == "profile.json" else Simulation.new()._valid_snapshot(old)
@@ -169,9 +264,13 @@ func _write(filename: String, value: Dictionary) -> bool:
 		if DirAccess.copy_absolute(path, backup) != OK:
 			last_error = "error.save.backup_failed"
 			return false
+	if _current(filename).is_empty():
+		DirAccess.remove_absolute(temp)
+		return false
 	if DirAccess.rename_absolute(temp, path) != OK:
 		last_error = "error.save.replace_failed"
 		return false
+	_observed_files[filename] = encoded.sha256_text()
 	last_error = ""
 	corrupt_files.erase(filename)
 	return true
@@ -180,7 +279,7 @@ func load_run() -> Dictionary:
 	if read_only:
 		return {}
 	var value := _read("run.json")
-	if value.is_empty():
+	if read_only or value.is_empty():
 		return {}
 	if not Simulation.new()._valid_snapshot(value):
 		mark_corrupt("run.json")
@@ -286,7 +385,7 @@ func permanent_levels() -> Dictionary:
 
 func purchase_permanent(identity: String, expected_level: int, expected_revision: int) -> Dictionary:
 	if read_only:
-		return {"ok": false, "error": "error.save.unsupported_version"}
+		return {"ok": false, "error": _blocked_error}
 	if not profile.economy.upgrades.has(identity):
 		return {"ok": false, "error": "progression.error.unavailable"}
 	var level := int(profile.economy.upgrades[identity])
@@ -329,6 +428,11 @@ func _record_permanent_progress(updated: Dictionary, sim) -> void:
 		_grant(updated.economy, "run:" + sim.run_id, "run", run_diamond_reward(sim), {"run_id": sim.run_id})
 
 func save_run(sim) -> bool:
+	if not _preflight(): return false
+	var snapshot: Dictionary = sim.snapshot()
+	if not Limits.valid(snapshot) or JSON.stringify(snapshot).to_utf8_buffer().size() > Limits.MAX_FILE_BYTES:
+		_block("error.save.capacity")
+		return false
 	var updated := profile.duplicate(true)
 	_record_permanent_progress(updated, sim)
 	for key in sim.discovered_units:
@@ -352,9 +456,13 @@ func save_run(sim) -> bool:
 		return false
 	profile = updated
 	if sim.result != "active":
+		if not _preflight(): return false
 		for filename in ["run.json", "run.json.bak"]:
 			var path := directory.path_join(filename)
 			if FileAccess.file_exists(path):
-				DirAccess.remove_absolute(path)
+				if DirAccess.remove_absolute(path) != OK:
+					last_error = "error.save.failed"
+					return false
+			if filename == "run.json": _observed_files[filename] = "missing"
 		return true
-	return _write("run.json", sim.snapshot())
+	return _write("run.json", snapshot)

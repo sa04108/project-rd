@@ -1,5 +1,7 @@
 extends RefCounted
 
+const SaveLimits = preload("res://game/save_limits.gd")
+
 const L = preload("res://game/localization.gd")
 
 # 피해 확정 시 표시 계층에 값만 전달한다. 저장·판정·난수에는 관여하지 않는다.
@@ -486,7 +488,8 @@ func _finish(outcome: String, reason: String) -> void:
 	revision += 1
 
 func debug_jump_wave(value: int) -> void:
-	# 개발용 점프는 정상 기록과 분리한다. 실제 UI에서는 --dev 옵션에서만 허용한다.
+	# 배포용 실행에서는 직접 호출해도 개발 점프를 허용하지 않는다.
+	if not OS.is_debug_build(): return
 	if not _allowed():
 		return
 	developer_run = true
@@ -538,6 +541,7 @@ func restore(saved: Dictionary) -> bool:
 	return true
 
 func _valid_snapshot(s: Dictionary) -> bool:
+	if not SaveLimits.valid(s): return false
 	for key in ["schema", "content_version", "run_id", "time", "wave", "spawn_index", "gold", "lives", "speed", "result", "result_reason", "units", "enemies", "upgrades", "cooldowns", "next_id", "rng_state", "rng_seed", "discovered_units", "discovered_enemies", "kills", "developer_run"]:
 		if not s.has(key):
 			return false
@@ -574,7 +578,7 @@ func _valid_snapshot(s: Dictionary) -> bool:
 		return false
 	if not s.result in ["active", "victory", "defeat"] or not s.result_reason is String or not s.developer_run is bool:
 		return false
-	if not s.rng_seed is String or not s.rng_state is String or not s.rng_seed.is_valid_int() or not s.rng_state.is_valid_int():
+	if not SaveLimits.signed_integer_text(s.rng_seed) or not SaveLimits.signed_integer_text(s.rng_state):
 		return false
 	if not s.units is Array or not s.enemies is Array or s.units.size() > 36:
 		return false

@@ -1762,5 +1762,17 @@
     "ko": "다이아몬드",
     "zh_CN": "钻石",
     "ja": "ダイヤモンド"
+  },
+  "error.save.conflict": {
+    "en": "Save changed in another session. Reopen the game.",
+    "ko": "다른 실행에서 저장이 변경되었습니다. 게임을 다시 열어 주세요.",
+    "zh_CN": "存档已更改。请重新打开游戏。",
+    "ja": "保存が変更されました。ゲームを開き直してください。"
+  },
+  "error.save.capacity": {
+    "en": "Save exceeds supported limits. Original data was preserved.",
+    "ko": "저장 데이터가 지원 범위를 넘었습니다. 원본은 보존했습니다.",
+    "zh_CN": "无法读取存档。原文件已保留。",
+    "ja": "セーブデータを読み込めません。元のファイルは保持されています。"
   }
 }

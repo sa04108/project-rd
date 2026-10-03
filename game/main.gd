@@ -74,7 +74,7 @@ func _ready() -> void:
 	get_tree().auto_accept_quit = false
 	get_tree().quit_on_go_back = false
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	dev_mode = "--dev" in OS.get_cmdline_user_args()
+	dev_mode = OS.is_debug_build() and "--dev" in OS.get_cmdline_user_args()
 	store = SaveStore.new()
 	_apply_language()
 	_setup_sound()
@@ -387,7 +387,7 @@ func _clear_screen() -> void:
 func _show_menu() -> void:
 	if mode == "battle":
 		_advance_battle_to_now()
-		if not _save():
+		if not _save() and not store.read_only:
 			return
 	mode = "menu"
 	_sync_audio()
@@ -433,6 +433,9 @@ func _request_new() -> void:
 		_open_panel("confirm_new")
 
 func _start_new() -> void:
+	if store.read_only:
+		_toast(L.text(store.last_error))
+		return
 	sim.new_run(0, store.permanent_levels())
 	clock_usec = Time.get_ticks_usec()
 	selected = -1
@@ -442,6 +445,9 @@ func _start_new() -> void:
 	_save()
 
 func _resume() -> void:
+	if store.read_only:
+		_toast(L.text(store.last_error))
+		return
 	if resume_data.is_empty() or not sim.restore(resume_data):
 		_toast(L.text("error.continue.load_failed"))
 		return
@@ -1193,7 +1199,7 @@ func _settings_panel(panel: Control) -> void:
 	_button(panel, L.text("battle.return") if mode == "battle" else L.text("ui.close"), Rect2(35, 632, 579, 100), _close_panel, true, "close_panel")
 	if mode == "battle":
 		_button(panel, L.text("menu.return_to_main"), Rect2(35, 744, 579, 100), func():
-			if _save(): _show_menu(), false, "save_menu")
+			if _save() or store.read_only: _show_menu(), false, "save_menu")
 
 func _settings_language_row(panel: Control) -> void:
 	var row := HBoxContainer.new()
@@ -1305,7 +1311,7 @@ func _result_panel(panel: Control) -> void:
 		tip = L.text("battle.menu.tip.wait_then_upgrade") if sim.enemies.size() >= sim.enemy_limit() else L.text("battle.menu.tip.pause_reposition")
 	_diamond_text(panel, L.text("progression.result.reward") % store.run_diamond_reward(sim) + "\n" + tip, Rect2(64, 403, 535, 95), 20, MUTED)
 	_button(panel, L.text("menu.main.open"), Rect2(62, 523, 526, 100), func():
-		if _save(): _show_menu(), true, "result_menu")
+		if _save() or store.read_only: _show_menu(), true, "result_menu")
 
 func _toast(message: String) -> void:
 	if not is_instance_valid(screen):
@@ -1372,7 +1378,7 @@ func _notification(what: int) -> void:
 	if store == null:
 		return
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		if _save():
+		if _save() or store.read_only:
 			get_tree().quit()
 	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		_handle_back()
@@ -1466,7 +1472,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if is_instance_valid(pause_overlay): return
 	if event.is_action_pressed("ui_cancel"):
 		_handle_back()
-	if dev_mode and event is InputEventKey and event.pressed and not event.echo:
+	if OS.is_debug_build() and dev_mode and event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_F8 and mode == "battle" and sim.result == "active":
 			sim.debug_jump_wave(mini(100, sim.wave + 10))
 			sim.gold += 500
