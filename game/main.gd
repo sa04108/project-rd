@@ -347,8 +347,9 @@ func _battle_action(text_value: String, rect: Rect2, callback: Callable, action:
 	button.accessibility_name = button.tooltip_text
 	_hud_icon(button, icon_kind, Rect2((rect.size.x - 44) * 0.5, 9, 44, 44))
 	if action == "summon":
-		var caption := _gold_line(button, L.text("unit.summon.button"), int(sim.catalog.rules.T.summon_cost), Rect2(9, 57, rect.size.x - 18, 33), 22, PALE, true)
+		var caption := _gold_line(button, L.text("unit.summon.button"), sim.summon_cost(), Rect2(9, 57, rect.size.x - 18, 33), 22, PALE, true)
 		button.set_meta("caption", caption)
+		button.accessibility_name = caption.accessibility_name
 	else:
 		var caption := _label(button, text_value, Vector2(9, 57), rect.size.x - 18, 22, PALE)
 		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -519,15 +520,6 @@ func _show_battle() -> void:
 	board.cell_dragged.connect(_cell_dragged)
 	screen.add_child(board)
 	screen.move_child(board, 0)
-	# 격자 하단(850) 아래 흙길 안에만 선택 동작을 놓는다.
-	labels.unit_actions = Control.new()
-	labels.unit_actions.name = "UnitActions"
-	labels.unit_actions.position = Vector2(256, 850)
-	labels.unit_actions.size = Vector2(208, 76)
-	labels.unit_actions.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	screen.add_child(labels.unit_actions)
-	labels.sell = _gold_button(labels.unit_actions, L.text("unit.sale.button"), sim.sale_price(), Rect2(0, 0, 208, 76), _sell_selected, "sell_unit")
-	labels.sell.tooltip_text = L.text("unit.sale.hint")
 	labels.selection_panel = _panel(screen, Rect2(28, 926, 664, 100), INK, GOLD, "brass")
 	var selection_margin := MarginContainer.new()
 	selection_margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -583,11 +575,6 @@ func _summon() -> void:
 	if response.ok:
 		selected = int(response.unit_id)
 	_transaction(response, true)
-
-func _sell_selected() -> void:
-	var response: Dictionary = sim.sell_unit(selected)
-	if response.ok: selected = -1
-	_transaction(response)
 
 func _transaction(response: Dictionary, confirmation: bool = false, notify: bool = false) -> void:
 	if notify:
@@ -702,18 +689,14 @@ func _refresh() -> void:
 		labels.clock.text += L.text("debug.run.marker")
 	labels.speed.text = "×%d" % sim.speed
 	labels.pause.text = "▶" if sim.pause_reasons.has("user") else "Ⅱ"
-	_set_gold_line(labels.summon.get_meta("caption"), L.text("unit.summon.button"), int(sim.catalog.rules.T.summon_cost))
-	labels.summon.disabled = sim.gold < int(sim.catalog.rules.T.summon_cost) or sim.units.size() >= 36 or sim.result != "active"
+	var summon_cost: int = sim.summon_cost()
+	var summon_caption: RichTextLabel = labels.summon.get_meta("caption")
+	_set_gold_line(summon_caption, L.text("unit.summon.button"), summon_cost)
+	labels.summon.accessibility_name = summon_caption.accessibility_name
+	labels.summon.disabled = sim.gold < summon_cost or sim.units.size() >= 36 or sim.result != "active"
 	var unit: Dictionary = sim.unit_by_id(selected)
 	labels.selection_panel.visible = not unit.is_empty()
-	labels.unit_actions.visible = not unit.is_empty() and panel_name.is_empty() and not sim.pause_reasons.has("user") and sim.result == "active"
-	var refund: int = sim.sale_price(int(sim.catalog.units[unit.kind].tier)) if not unit.is_empty() else -1
-	labels.sell.disabled = refund < 0
-	var sale_caption: RichTextLabel = labels.sell.get_meta("gold_caption")
-	_set_gold_line(sale_caption, L.text("unit.sale.button") if refund >= 0 else L.text("unit.sale.blocked"), refund)
-	labels.sell.accessibility_name = sale_caption.accessibility_name
-	sale_caption.modulate.a = 0.55 if labels.sell.disabled else 1.0
-	labels.summon.get_meta("caption").modulate.a = 0.72 if labels.summon.disabled else 1.0
+	summon_caption.modulate.a = 0.72 if labels.summon.disabled else 1.0
 	if unit.is_empty():
 		selected = -1
 		labels.selection.text = ""
@@ -1052,10 +1035,6 @@ func _sync_board_blockers() -> void:
 	if not is_instance_valid(board):
 		return
 	board.blocked_screen_rects.clear()
-	if labels.has("unit_actions"):
-		labels.unit_actions.visible = selected >= 0 and not sim.unit_by_id(selected).is_empty() and panel_name.is_empty() and sim.result == "active" and not sim.pause_reasons.has("user")
-		if labels.unit_actions.is_visible_in_tree():
-			board.blocked_screen_rects.append(labels.unit_actions.get_global_rect())
 	if is_instance_valid(pause_overlay):
 		board.blocked_screen_rects.append(Rect2(0, 0, 720, 1280))
 	if is_instance_valid(overlay) and overlay.has_meta("blocked_rect"):

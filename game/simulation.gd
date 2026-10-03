@@ -12,6 +12,7 @@ signal unit_presented(event: Dictionary)
 
 const Catalog = preload("res://game/catalog.gd")
 const Progression = preload("res://game/permanent_progression.gd")
+const SNAPSHOT_SCHEMA := 3
 # 아군 한 칸을 1로 두고 폭 1인 외곽 길의 중심선을 따른다.
 const PATH_SIDE := 7.0
 const PATH_LENGTH := PATH_SIDE * 4.0
@@ -24,6 +25,7 @@ var units: Array = []
 var enemies: Array = []
 var effects: Array = []
 var gold := 150
+var paid_summons := 0
 var lives := 20
 var time := 0.0
 var wave := 1
@@ -55,7 +57,8 @@ func new_run(seed_value: int = 0, permanent: Dictionary = {}) -> void:
 	units.clear()
 	enemies.clear()
 	effects.clear()
-	gold = int(catalog.rules.T.summon_cost) * 3 + int(Progression.value("starting_gold", int(permanent_levels.starting_gold)))
+	gold = int(catalog.rules.D.start_gold) + int(Progression.value("starting_gold", int(permanent_levels.starting_gold)))
+	paid_summons = 0
 	lives = 20 + int(Progression.value("extra_lives", int(permanent_levels.extra_lives)))
 	time = 0.0
 	wave = 1
@@ -125,13 +128,16 @@ func add_unit(kind: String, cell: int) -> Dictionary:
 		unit_presented.emit({"id": int(unit.id), "kind": kind, "cell": cell, "time": time, "action": "appear"})
 	return unit
 
+func summon_cost() -> int:
+	return int(catalog.rules.T.summon_cost) + paid_summons * int(catalog.rules.T.summon_cost_step)
+
 func summon() -> Dictionary:
 	if not _allowed():
 		return _fail("error.game.already_ended")
 	var cell := first_empty()
 	if cell < 0:
 		return _fail("error.unit.no_space.merge_hint")
-	var cost: int = catalog.rules.T.summon_cost
+	var cost := summon_cost()
 	if gold < cost:
 		return _fail("error.gold.insufficient")
 	var pool: Array = catalog.pool(1)
@@ -143,6 +149,8 @@ func summon() -> Dictionary:
 	var extra_cell := first_empty()
 	if chance > 0.0 and extra_cell >= 0 and rng.randf() < chance:
 		extra_id = int(add_unit(pool[rng.randi_range(0, pool.size() - 1)], extra_cell).id)
+	# 무료 추가 용병·도박·조합과 무관하게 성공한 유료 소환만 한 번 센다.
+	paid_summons += 1
 	revision += 1
 	return {"ok": true, "extra_unit_id": extra_id, "unit_id": unit.id, "reason": L.text("transaction.unit.joined") % L.unit_name(str(unit.kind))}
 
@@ -207,22 +215,6 @@ func combine(recipe_id: String, anchor_id: int = -1) -> Dictionary:
 	var created := add_unit(recipe.result, target)
 	revision += 1
 	return {"ok": true, "unit_id": created.id, "reason": L.text("recipes.merge.success") % L.unit_name(str(recipe.result))}
-
-func sale_price(tier: int = 1) -> int:
-	var multipliers: Dictionary = catalog.rules.T.sale_summon_multipliers
-	if not multipliers.has(str(tier)): return -1
-	return floori(float(catalog.rules.T.summon_cost) * float(multipliers[str(tier)]))
-
-func sell_unit(unit_id: int) -> Dictionary:
-	if not _allowed(): return _fail("error.game.already_ended")
-	var unit := unit_by_id(unit_id)
-	if unit.is_empty(): return _fail("error.unit.none_selected")
-	var refund := sale_price(int(catalog.units[unit.kind].tier))
-	if refund < 0: return _fail("unit.sale.unavailable")
-	units.erase(unit)
-	gold += refund
-	revision += 1
-	return {"ok": true, "gold": refund, "reason": L.text("unit.sale.success")}
 
 func gamble(tier: int) -> Dictionary:
 	if not _allowed() or not catalog.rules.T.gamble.has(str(tier)):
@@ -500,7 +492,7 @@ func debug_jump_wave(value: int) -> void:
 	_start_wave()
 
 func snapshot() -> Dictionary:
-	return {"schema": 2, "deployment_remaining": deployment_remaining, "permanent_levels": permanent_levels.duplicate(), "user_paused": pause_reasons.has("user"), "path_length": PATH_LENGTH, "content_version": catalog.rules.content_version, "run_id": run_id, "time": time, "wave": wave, "spawn_index": spawn_index, "gold": gold, "lives": lives, "speed": speed, "result": result, "result_reason": result_reason, "units": units.duplicate(true), "enemies": enemies.duplicate(true), "upgrades": upgrades.duplicate(true), "cooldowns": cooldowns.duplicate(true), "next_id": next_id, "rng_state": str(rng.state), "rng_seed": str(rng.seed), "discovered_units": discovered_units.duplicate(), "discovered_enemies": discovered_enemies.duplicate(), "kills": kills.duplicate(), "developer_run": developer_run}
+	return {"schema": SNAPSHOT_SCHEMA, "paid_summons": paid_summons, "deployment_remaining": deployment_remaining, "permanent_levels": permanent_levels.duplicate(), "user_paused": pause_reasons.has("user"), "path_length": PATH_LENGTH, "content_version": catalog.rules.content_version, "run_id": run_id, "time": time, "wave": wave, "spawn_index": spawn_index, "gold": gold, "lives": lives, "speed": speed, "result": result, "result_reason": result_reason, "units": units.duplicate(true), "enemies": enemies.duplicate(true), "upgrades": upgrades.duplicate(true), "cooldowns": cooldowns.duplicate(true), "next_id": next_id, "rng_state": str(rng.state), "rng_seed": str(rng.seed), "discovered_units": discovered_units.duplicate(), "discovered_enemies": discovered_enemies.duplicate(), "kills": kills.duplicate(), "developer_run": developer_run}
 
 func restore(saved: Dictionary) -> bool:
 	if not _valid_snapshot(saved):
@@ -512,6 +504,8 @@ func restore(saved: Dictionary) -> bool:
 	wave = int(saved.wave)
 	spawn_index = int(saved.spawn_index)
 	gold = int(saved.gold)
+	# 횟수가 없던 이전 전투는 업데이트 후 첫 유료 소환부터 비용 증가를 시작한다.
+	paid_summons = int(saved.get("paid_summons", 0))
 	lives = int(saved.lives)
 	speed = int(saved.speed)
 	result = saved.result
@@ -550,11 +544,11 @@ func _valid_snapshot(s: Dictionary) -> bool:
 		return false
 	if not float(saved_path_length) in [LEGACY_PATH_LENGTH, PATH_LENGTH]:
 		return false
-	if not Progression.integer(s.schema, 1, 2) or not s.content_version in ["0.2.0", catalog.rules.content_version] or not s.run_id is String or s.run_id.is_empty():
+	if not Progression.integer(s.schema, 1, SNAPSHOT_SCHEMA) or not s.content_version in ["0.2.0", catalog.rules.content_version] or not s.run_id is String or s.run_id.is_empty():
 		return false
 	var saved_permanent: Dictionary = Progression.defaults()
 	var preparation := 0.0
-	if int(s.schema) == 2:
+	if int(s.schema) >= 2:
 		if not s.has_all(["permanent_levels", "deployment_remaining", "user_paused"]) or not s.user_paused is bool or not Progression.valid_levels(s.permanent_levels): return false
 		if not (s.deployment_remaining is int or s.deployment_remaining is float) or not is_finite(float(s.deployment_remaining)) or s.deployment_remaining < 0.0 or s.deployment_remaining > float(catalog.rules.F.deployment_seconds): return false
 		saved_permanent = s.permanent_levels
@@ -569,6 +563,11 @@ func _valid_snapshot(s: Dictionary) -> bool:
 	for key in ["wave", "spawn_index", "gold", "lives", "speed", "next_id"]:
 		if float(s[key]) != floor(float(s[key])):
 			return false
+	if int(s.schema) >= 3:
+		if not Progression.integer(s.get("paid_summons"), 0, int(s.next_id) - 1):
+			return false
+	elif s.has("paid_summons"):
+		return false
 	var wave_time: float = float(s.time) - (int(s.wave) - 1) * 30.0
 	if wave_time < -0.00001 or (s.wave < 100 and wave_time >= 30.00001):
 		return false

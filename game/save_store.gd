@@ -186,7 +186,7 @@ func _decode(filename: String, state: Dictionary) -> Dictionary:
 	var value: Variant = JSON.parse_string(state.text)
 	if value is Dictionary:
 		var version: Variant = value.get("schema")
-		var maximum := PROFILE_SCHEMA if filename == "profile.json" else 2
+		var maximum := PROFILE_SCHEMA if filename == "profile.json" else Simulation.SNAPSHOT_SCHEMA
 		if (version is int or version is float) and is_finite(float(version)) and float(version) > maximum:
 			_block("error.save.unsupported_version")
 			return value

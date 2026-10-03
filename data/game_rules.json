@@ -24,7 +24,7 @@
     "final_travel": 30.0
   },
   "D": {
-    "summon_fixed_cost": true,
+    "summon_fixed_cost": false,
     "start_gold": 150,
     "normal_spawn_seconds": [
       0,
@@ -73,6 +73,7 @@
   },
   "T": {
     "summon_cost": 50,
+    "summon_cost_step": 10,
     "gamble": {
       "2": {
         "cost": 100,
@@ -113,11 +114,6 @@
         "wave": 100,
         "multiplier": 4.0
       }
-    ],
-    "sale_summon_multipliers": {
-      "1": 0.5,
-      "2": 1.0,
-      "3": 2.0
-    }
+    ]
   }
 }

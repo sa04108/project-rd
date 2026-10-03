@@ -1727,36 +1727,6 @@
     "zh_CN": "%d金币",
     "ja": "%dゴールド"
   },
-  "unit.sale.button": {
-    "en": "Sell",
-    "ko": "판매",
-    "zh_CN": "出售",
-    "ja": "売却"
-  },
-  "unit.sale.hint": {
-    "en": "Sell 1-, 2-, or 3-star mercenaries for half their summon-equivalent cost.",
-    "ko": "1·2·3성 용병을 소환 환산 비용의 절반에 판매합니다.",
-    "zh_CN": "1、2、3星佣兵可按等值召唤费用的一半出售。",
-    "ja": "星1～3の傭兵を召喚換算費用の半額で売却します。"
-  },
-  "unit.sale.success": {
-    "en": "Mercenary sold.",
-    "ko": "용병을 판매했습니다.",
-    "zh_CN": "佣兵已出售。",
-    "ja": "傭兵を売却しました。"
-  },
-  "unit.sale.unavailable": {
-    "en": "Only mercenaries up to 3 stars can be sold.",
-    "ko": "3성 이하 용병만 판매할 수 있습니다.",
-    "zh_CN": "仅可出售3星及以下佣兵。",
-    "ja": "売却できるのは星3以下の傭兵のみです。"
-  },
-  "unit.sale.blocked": {
-    "en": "Cannot Sell",
-    "ko": "판매 불가",
-    "zh_CN": "不可出售",
-    "ja": "売却不可"
-  },
   "currency.diamond.name": {
     "en": "Diamonds",
     "ko": "다이아몬드",
