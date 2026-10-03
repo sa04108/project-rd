@@ -1,0 +1,115 @@
+{
+  "id": "n11",
+  "state": "walk",
+  "status": "unpromoted_candidate",
+  "source": "walk.gait-candidate.source.png",
+  "prompt": "walk.gait-candidate.prompt.txt",
+  "generation_tool": "built-in image_gen",
+  "call_type": "new-generation-with-reference-and-full-sprite-gen-derived-prompt-plus-contact-clarification",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_extrema": [
+    0,
+    254
+  ],
+  "transparent_pixels": 990547,
+  "sha256": "c39184ba9bf557ac0f66c253f2b97f2aea8509f0411bacd4de1bda5b5213c817",
+  "frames": [
+    {
+      "index": 0,
+      "alpha_over_20_bbox_local": [
+        78,
+        82,
+        504,
+        498
+      ],
+      "padding_px": [
+        78,
+        82,
+        8,
+        14
+      ]
+    },
+    {
+      "index": 1,
+      "alpha_over_20_bbox_local": [
+        72,
+        79,
+        479,
+        487
+      ],
+      "padding_px": [
+        72,
+        79,
+        33,
+        25
+      ]
+    },
+    {
+      "index": 2,
+      "alpha_over_20_bbox_local": [
+        46,
+        84,
+        469,
+        497
+      ],
+      "padding_px": [
+        46,
+        84,
+        43,
+        15
+      ]
+    },
+    {
+      "index": 3,
+      "alpha_over_20_bbox_local": [
+        84,
+        49,
+        512,
+        453
+      ],
+      "padding_px": [
+        84,
+        49,
+        0,
+        59
+      ]
+    },
+    {
+      "index": 4,
+      "alpha_over_20_bbox_local": [
+        0,
+        37,
+        473,
+        448
+      ],
+      "padding_px": [
+        0,
+        37,
+        39,
+        64
+      ]
+    },
+    {
+      "index": 5,
+      "alpha_over_20_bbox_local": [
+        32,
+        39,
+        475,
+        455
+      ],
+      "padding_px": [
+        32,
+        39,
+        37,
+        57
+      ]
+    }
+  ],
+  "visually_reviewed": true,
+  "finding": "Candidate remains dominated by one leading-leg silhouette and is larger than the repaired source. Do not auto-promote.",
+  "runtime_verified": false
+}

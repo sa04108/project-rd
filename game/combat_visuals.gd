@@ -7,7 +7,7 @@ const STYLES := {
 	"u09": "slam", "u10": "cast", "u11": "slam", "u12": "slash",
 	"u13": "cast", "u14": "cast", "u15": "slam", "u16": "breath",
 	"u17": "shot", "u18": "cast", "u19": "cast", "u20": "javelin",
-	"u21": "lob", "u22": "slam", "u23": "cast", "u24": "shot",
+	"u21": "lob", "u22": "slam", "u23": "cast", "u24": "bow",
 	"u25": "slash", "u26": "cast", "u27": "slash", "u28": "cast",
 	"u29": "cast", "u30": "cast", "u31": "cast", "u32": "cast",
 	"u33": "breath", "u34": "cast"

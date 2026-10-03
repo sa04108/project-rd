@@ -1,0 +1,211 @@
+{
+  "id": "n06",
+  "state": "walk",
+  "status": "generated_and_source_visually_reviewed_not_runtime_verified",
+  "source": "walk.source.png",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "3388e1461b02907953ac333a47bfb4c27eb77c6a889af6206b6daa2545fd781e",
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 1176109,
+    "nonzero_pixels": 396755,
+    "real_transparency": true
+  },
+  "frames": [
+    {
+      "index": 0,
+      "alpha_over_20_bbox_local": [
+        137,
+        97,
+        412,
+        442
+      ],
+      "padding_px": [
+        137,
+        97,
+        100,
+        70
+      ],
+      "bbox_occupancy_fraction": [
+        0.5371,
+        0.6738
+      ],
+      "alpha_touches_slot_edge": false,
+      "max_slot_edge_alpha": 0,
+      "meaningful_alpha_over_20_touches_edge": false,
+      "strict_70_percent_extent_pass": true,
+      "strict_15_percent_padding_pass": false
+    },
+    {
+      "index": 1,
+      "alpha_over_20_bbox_local": [
+        116,
+        94,
+        390,
+        445
+      ],
+      "padding_px": [
+        116,
+        94,
+        122,
+        67
+      ],
+      "bbox_occupancy_fraction": [
+        0.5352,
+        0.6855
+      ],
+      "alpha_touches_slot_edge": true,
+      "max_slot_edge_alpha": 1,
+      "meaningful_alpha_over_20_touches_edge": false,
+      "strict_70_percent_extent_pass": true,
+      "strict_15_percent_padding_pass": false
+    },
+    {
+      "index": 2,
+      "alpha_over_20_bbox_local": [
+        54,
+        89,
+        353,
+        429
+      ],
+      "padding_px": [
+        54,
+        89,
+        159,
+        83
+      ],
+      "bbox_occupancy_fraction": [
+        0.584,
+        0.6641
+      ],
+      "alpha_touches_slot_edge": true,
+      "max_slot_edge_alpha": 1,
+      "meaningful_alpha_over_20_touches_edge": false,
+      "strict_70_percent_extent_pass": true,
+      "strict_15_percent_padding_pass": false
+    },
+    {
+      "index": 3,
+      "alpha_over_20_bbox_local": [
+        145,
+        83,
+        444,
+        421
+      ],
+      "padding_px": [
+        145,
+        83,
+        68,
+        91
+      ],
+      "bbox_occupancy_fraction": [
+        0.584,
+        0.6602
+      ],
+      "alpha_touches_slot_edge": true,
+      "max_slot_edge_alpha": 1,
+      "meaningful_alpha_over_20_touches_edge": false,
+      "strict_70_percent_extent_pass": true,
+      "strict_15_percent_padding_pass": false
+    },
+    {
+      "index": 4,
+      "alpha_over_20_bbox_local": [
+        108,
+        81,
+        404,
+        435
+      ],
+      "padding_px": [
+        108,
+        81,
+        108,
+        77
+      ],
+      "bbox_occupancy_fraction": [
+        0.5781,
+        0.6914
+      ],
+      "alpha_touches_slot_edge": true,
+      "max_slot_edge_alpha": 1,
+      "meaningful_alpha_over_20_touches_edge": false,
+      "strict_70_percent_extent_pass": true,
+      "strict_15_percent_padding_pass": true
+    },
+    {
+      "index": 5,
+      "alpha_over_20_bbox_local": [
+        52,
+        84,
+        372,
+        437
+      ],
+      "padding_px": [
+        52,
+        84,
+        140,
+        75
+      ],
+      "bbox_occupancy_fraction": [
+        0.625,
+        0.6895
+      ],
+      "alpha_touches_slot_edge": true,
+      "max_slot_edge_alpha": 1,
+      "meaningful_alpha_over_20_touches_edge": false,
+      "strict_70_percent_extent_pass": true,
+      "strict_15_percent_padding_pass": false
+    }
+  ],
+  "reference": "assets/art/portraits/n06.png",
+  "reference_sha256": "f3bb389cbc3d27c28b18dab4b8617d2f6e5ea5b7758ebcd9f64621400184c412",
+  "prompt": "walk.prompt.txt",
+  "layout_repair_prompt": "walk.repair-layout.prompt.txt",
+  "rejected_initial": "walk.rejected-layout.source.png",
+  "provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "generation": {
+    "tool": "built-in image_gen",
+    "original_calls": 1,
+    "layout_repair_calls": 1,
+    "model_identifier": "not exposed",
+    "source_bytes_preserved": true,
+    "deterministic_pose_fabrication": false,
+    "actual_tool_output_paths": {
+      "initial": "/workspace/scratch/efd85aae97ef/generated_images/exec-a8eda1ef-c0fe-447d-99c8-ad52ede40ac0.png",
+      "layout_repair": "/workspace/scratch/efd85aae97ef/generated_images/exec-e77d5a19-1fcb-48a8-bd99-0687dfae65e0.png"
+    }
+  },
+  "visual_review": {
+    "complete_six_characters": true,
+    "slot_overlap_or_canvas_clipping_observed": false,
+    "identity_and_anatomy": "Six spectral glide poses preserve antlers, hands and tail; existing reference floating leaf ornaments were intentionally retained. Tail/arm variation is visible.",
+    "layout_repair": "Initial poses exceeded padding request. Built-in image layout-only repair reduced figures and preserved initial artifact.",
+    "limitations": [
+      "Strict 70-percent occupancy/15-percent padding target may still be missed; actual measurements recorded per frame.",
+      "Animation loop, runtime scale, and game integration remain parent-owned and unverified.",
+      "Sparse alpha=1 background residue occurs on some invisible slot boundaries. Raw pixels preserved; parent importer must apply its verified alpha/noise policy. This is not a strict alpha>0 edge pass."
+    ]
+  },
+  "checks": {
+    "source_sha256_matches": true,
+    "six_nonempty_slots": true,
+    "real_alpha": true,
+    "visible_silhouette_within_slot_at_alpha_over_20": true,
+    "strict_alpha_nonzero_edge_pass": false
+  }
+}

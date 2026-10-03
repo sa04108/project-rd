@@ -1,0 +1,115 @@
+{
+  "id": "n04",
+  "state": "walk",
+  "status": "unpromoted_candidate",
+  "source": "walk.gait-candidate.source.png",
+  "prompt": "walk.gait-candidate.prompt.txt",
+  "generation_tool": "built-in image_gen",
+  "call_type": "new-generation-with-reference-and-full-sprite-gen-derived-prompt-plus-contact-clarification",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_extrema": [
+    0,
+    254
+  ],
+  "transparent_pixels": 1048312,
+  "sha256": "438c117141c70221d2dfab9272527ac41c597ee0a5c3b825107f20327492598d",
+  "frames": [
+    {
+      "index": 0,
+      "alpha_over_20_bbox_local": [
+        81,
+        73,
+        481,
+        488
+      ],
+      "padding_px": [
+        81,
+        73,
+        31,
+        24
+      ]
+    },
+    {
+      "index": 1,
+      "alpha_over_20_bbox_local": [
+        62,
+        75,
+        444,
+        488
+      ],
+      "padding_px": [
+        62,
+        75,
+        68,
+        24
+      ]
+    },
+    {
+      "index": 2,
+      "alpha_over_20_bbox_local": [
+        32,
+        78,
+        441,
+        488
+      ],
+      "padding_px": [
+        32,
+        78,
+        71,
+        24
+      ]
+    },
+    {
+      "index": 3,
+      "alpha_over_20_bbox_local": [
+        70,
+        55,
+        475,
+        451
+      ],
+      "padding_px": [
+        70,
+        55,
+        37,
+        61
+      ]
+    },
+    {
+      "index": 4,
+      "alpha_over_20_bbox_local": [
+        60,
+        55,
+        445,
+        456
+      ],
+      "padding_px": [
+        60,
+        55,
+        67,
+        56
+      ]
+    },
+    {
+      "index": 5,
+      "alpha_over_20_bbox_local": [
+        38,
+        55,
+        441,
+        458
+      ],
+      "padding_px": [
+        38,
+        55,
+        71,
+        54
+      ]
+    }
+  ],
+  "visually_reviewed": true,
+  "finding": "Candidate improves knee lift variation but repeats similar leg phases across rows rather than reliably alternating complete two-step gait. Do not auto-promote over stable layout-repaired source.",
+  "runtime_verified": false
+}

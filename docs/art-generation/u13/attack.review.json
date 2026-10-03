@@ -1,0 +1,105 @@
+{
+  "id": "u13",
+  "state": "attack",
+  "source": "docs/art-generation/u13/attack.source.png",
+  "prompt": "docs/art-generation/u13/attack.prompt.txt",
+  "source_sha256": "6c58db31ea41ced846affad6a6b8501f69aee88d0c6402fe8b90cc11b4ea9ebe",
+  "reference": "assets/art/portraits/u13.png",
+  "reference_sha256": "40c0a9975741fb55696679edba93746888ca70aa6a249d4f81f72f896516b553",
+  "generation_route": "built-in image tool; one call per asset, no external API",
+  "model_identifier": "not exposed by image tool",
+  "template_provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_min": 0,
+  "alpha_max": 254,
+  "transparent_pixel_fraction": 0.7789580027262369,
+  "nontransparent_pixel_fraction": 0.22104199727376303,
+  "visual_review_performed": true,
+  "pose_count_observed": 6,
+  "review_notes": [
+    "Six genuine book-casting poses, open book in left hand on screen-right and right casting hand on screen-left. Layout repair keeps all visible pose elements within nominal cells.",
+    "Original portrait blue ribbon-like ornaments are retained, including legitimate small detached-looking blue parts; do not discard them blindly.",
+    "No apparent clipping or overlap. Requested15-percent bottom padding is not a full pass. Original rejected layout and exact prompt retained."
+  ],
+  "source_layout_contract_pass": false,
+  "needs_nonuniform_pose_extraction": false,
+  "packed": false,
+  "runtime_verified": false,
+  "prompt_sha256": "452a7d2eb312535515d1bcc8488a64c87d2d64f631e7a9b0e9b62d83c33711ac",
+  "components_alpha_gt8_area_ge64": [
+    {
+      "bbox": [
+        140,
+        154,
+        400,
+        450
+      ],
+      "area": 45968
+    },
+    {
+      "bbox": [
+        654,
+        103,
+        923,
+        450
+      ],
+      "area": 51019
+    },
+    {
+      "bbox": [
+        1139,
+        151,
+        1439,
+        450
+      ],
+      "area": 50689
+    },
+    {
+      "bbox": [
+        124,
+        619,
+        448,
+        928
+      ],
+      "area": 56634
+    },
+    {
+      "bbox": [
+        652,
+        629,
+        915,
+        931
+      ],
+      "area": 45608
+    },
+    {
+      "bbox": [
+        1152,
+        627,
+        1434,
+        931
+      ],
+      "area": 50582
+    }
+  ],
+  "rejected_layout_revisions": [
+    "attack.source-v1-layout-rejected.png"
+  ],
+  "review_scope": "Raw source visual/alpha inspection only; no packing, runtime, timing or engine verification by this worker.",
+  "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-ea9ed091-a41f-405d-ba3e-e2c6b16256e3.png",
+  "original_bytes_copy_verified": true
+}

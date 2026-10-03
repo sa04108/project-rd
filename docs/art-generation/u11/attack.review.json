@@ -1,0 +1,105 @@
+{
+  "id": "u11",
+  "state": "attack",
+  "source": "docs/art-generation/u11/attack.source.png",
+  "prompt": "docs/art-generation/u11/attack.prompt.txt",
+  "source_sha256": "86f5abe1339546d0758e3ef1b6ad318d6dcde465fd84f7b52ad11897c3156dda",
+  "reference": "assets/art/portraits/u11.png",
+  "reference_sha256": "4e8d11d2fc9aa72103e482cfc101435e0a4f151fb460f0f7b4bf55348e40b84d",
+  "generation_route": "built-in image tool; one call per asset, no external API",
+  "model_identifier": "not exposed by image tool",
+  "template_provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_min": 0,
+  "alpha_max": 254,
+  "transparent_pixel_fraction": 0.8048426310221354,
+  "nontransparent_pixel_fraction": 0.1951573689778646,
+  "visual_review_performed": true,
+  "pose_count_observed": 6,
+  "review_notes": [
+    "Six genuine heavy mace poses with preserved broad armor, blue-white tabard and one mace. Layout repair keeps complete poses within nominal cells without inter-pose overlap.",
+    "No apparent canvas clipping or disconnected weapon. Requested15-percent padding is not a full pass, particularly bottom/top ground baselines. Original rejected layout and exact prompt retained.",
+    "Follow-through rotates torso farther than ready portrait; review in packed animation."
+  ],
+  "source_layout_contract_pass": false,
+  "needs_nonuniform_pose_extraction": false,
+  "packed": false,
+  "runtime_verified": false,
+  "prompt_sha256": "fc5d501b506883407d2a1bc47dc8bf09ba2bca60cd098357c318191031236bfb",
+  "components_alpha_gt8_area_ge64": [
+    {
+      "bbox": [
+        98,
+        236,
+        445,
+        468
+      ],
+      "area": 46634
+    },
+    {
+      "bbox": [
+        640,
+        131,
+        925,
+        469
+      ],
+      "area": 50848
+    },
+    {
+      "bbox": [
+        1106,
+        245,
+        1441,
+        470
+      ],
+      "area": 42384
+    },
+    {
+      "bbox": [
+        122,
+        672,
+        479,
+        894
+      ],
+      "area": 44030
+    },
+    {
+      "bbox": [
+        660,
+        649,
+        929,
+        894
+      ],
+      "area": 45969
+    },
+    {
+      "bbox": [
+        1137,
+        631,
+        1381,
+        896
+      ],
+      "area": 46950
+    }
+  ],
+  "rejected_layout_revisions": [
+    "attack.source-v1-layout-rejected.png"
+  ],
+  "review_scope": "Raw source visual/alpha inspection only; no packing, runtime, timing or engine verification by this worker.",
+  "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-d2370c12-7f9c-4cf8-839b-618cb26644cc.png",
+  "original_bytes_copy_verified": true
+}

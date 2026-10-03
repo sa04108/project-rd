@@ -1,0 +1,106 @@
+{
+  "id": "u07",
+  "state": "attack",
+  "source": "docs/art-generation/u07/attack.source.png",
+  "prompt": "docs/art-generation/u07/attack.prompt.txt",
+  "source_sha256": "a8f9604f3054c2568469519d69395979eb0044b29f4cc9ba6f43335cc6492d4c",
+  "reference": "assets/art/portraits/u07.png",
+  "reference_sha256": "607eb37b44b096fd35fe6ccdc31dfb47c72764e6623c81bfdb44cb210a5f70f5",
+  "generation_route": "built-in image tool; one call per asset, no external API",
+  "model_identifier": "not exposed by image tool",
+  "template_provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_min": 0,
+  "alpha_max": 254,
+  "transparent_pixel_fraction": 0.8400821685791016,
+  "nontransparent_pixel_fraction": 0.15991783142089844,
+  "visual_review_performed": true,
+  "pose_count_observed": 6,
+  "review_notes": [
+    "Six genuine distinct spear attack poses, blue-gold identity and full spear retained.",
+    "Two layout repair calls reduced oversizing; current lower-left spear still extends about20px past nominal x=512 border, but remains separated from adjacent pose. Nonuniform actual-pose extraction remains required.",
+    "No apparent canvas clipping. Requested15-percent per-cell padding is still not a complete pass. Both prior revisions and exact prompts retained."
+  ],
+  "source_layout_contract_pass": false,
+  "needs_nonuniform_pose_extraction": true,
+  "packed": false,
+  "runtime_verified": false,
+  "prompt_sha256": "5456b076c1cc5fe785b7d5a315de8d85cfb2933ee02118645957b75726865ca6",
+  "components_alpha_gt8_area_ge64": [
+    {
+      "bbox": [
+        142,
+        131,
+        389,
+        437
+      ],
+      "area": 33716
+    },
+    {
+      "bbox": [
+        596,
+        173,
+        908,
+        437
+      ],
+      "area": 35022
+    },
+    {
+      "bbox": [
+        1087,
+        205,
+        1491,
+        437
+      ],
+      "area": 30934
+    },
+    {
+      "bbox": [
+        94,
+        648,
+        533,
+        880
+      ],
+      "area": 34622
+    },
+    {
+      "bbox": [
+        617,
+        620,
+        957,
+        880
+      ],
+      "area": 36275
+    },
+    {
+      "bbox": [
+        1179,
+        555,
+        1404,
+        880
+      ],
+      "area": 35316
+    }
+  ],
+  "rejected_layout_revisions": [
+    "attack.source-v1-layout-rejected.png",
+    "attack.source-v2-layout-rejected.png"
+  ],
+  "review_scope": "Raw source visual/alpha inspection only; no packing, runtime, timing or engine verification by this worker.",
+  "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-11954678-a7a9-43cb-be6c-b8f72f6d2330.png",
+  "original_bytes_copy_verified": true
+}

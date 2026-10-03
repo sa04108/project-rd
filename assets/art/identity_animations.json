@@ -60,6 +60,134 @@
     "u22": {
       "atlas": "assets/art/identities/u22/atlas.png",
       "frame_layout": "assets/art/identities/u22/layout.json"
+    },
+    "u23": {
+      "atlas": "assets/art/identities/u23/atlas.png",
+      "frame_layout": "assets/art/identities/u23/layout.json"
+    },
+    "u24": {
+      "atlas": "assets/art/identities/u24/atlas.png",
+      "frame_layout": "assets/art/identities/u24/layout.json"
+    },
+    "u25": {
+      "atlas": "assets/art/identities/u25/atlas.png",
+      "frame_layout": "assets/art/identities/u25/layout.json"
+    },
+    "u07": {
+      "atlas": "assets/art/identities/u07/atlas.png",
+      "frame_layout": "assets/art/identities/u07/layout.json"
+    },
+    "u08": {
+      "atlas": "assets/art/identities/u08/atlas.png",
+      "frame_layout": "assets/art/identities/u08/layout.json"
+    },
+    "u09": {
+      "atlas": "assets/art/identities/u09/atlas.png",
+      "frame_layout": "assets/art/identities/u09/layout.json"
+    },
+    "u10": {
+      "atlas": "assets/art/identities/u10/atlas.png",
+      "frame_layout": "assets/art/identities/u10/layout.json"
+    },
+    "u11": {
+      "atlas": "assets/art/identities/u11/atlas.png",
+      "frame_layout": "assets/art/identities/u11/layout.json"
+    },
+    "u12": {
+      "atlas": "assets/art/identities/u12/atlas.png",
+      "frame_layout": "assets/art/identities/u12/layout.json"
+    },
+    "u13": {
+      "atlas": "assets/art/identities/u13/atlas.png",
+      "frame_layout": "assets/art/identities/u13/layout.json"
+    },
+    "u14": {
+      "atlas": "assets/art/identities/u14/atlas.png",
+      "frame_layout": "assets/art/identities/u14/layout.json"
+    },
+    "u15": {
+      "atlas": "assets/art/identities/u15/atlas.png",
+      "frame_layout": "assets/art/identities/u15/layout.json"
+    },
+    "u16": {
+      "atlas": "assets/art/identities/u16/atlas.png",
+      "frame_layout": "assets/art/identities/u16/layout.json"
+    },
+    "u26": {
+      "atlas": "assets/art/identities/u26/atlas.png",
+      "frame_layout": "assets/art/identities/u26/layout.json"
+    },
+    "u27": {
+      "atlas": "assets/art/identities/u27/atlas.png",
+      "frame_layout": "assets/art/identities/u27/layout.json"
+    },
+    "u28": {
+      "atlas": "assets/art/identities/u28/atlas.png",
+      "frame_layout": "assets/art/identities/u28/layout.json"
+    },
+    "u29": {
+      "atlas": "assets/art/identities/u29/atlas.png",
+      "frame_layout": "assets/art/identities/u29/layout.json"
+    },
+    "u31": {
+      "atlas": "assets/art/identities/u31/atlas.png",
+      "frame_layout": "assets/art/identities/u31/layout.json"
+    },
+    "u32": {
+      "atlas": "assets/art/identities/u32/atlas.png",
+      "frame_layout": "assets/art/identities/u32/layout.json"
+    },
+    "u33": {
+      "atlas": "assets/art/identities/u33/atlas.png",
+      "frame_layout": "assets/art/identities/u33/layout.json"
+    },
+    "u34": {
+      "atlas": "assets/art/identities/u34/atlas.png",
+      "frame_layout": "assets/art/identities/u34/layout.json"
+    },
+    "u30": {
+      "atlas": "assets/art/identities/u30/atlas.png",
+      "frame_layout": "assets/art/identities/u30/layout.json"
+    },
+    "n04": {
+      "atlas": "assets/art/identities/n04/atlas.png",
+      "frame_layout": "assets/art/identities/n04/layout.json"
+    },
+    "n05": {
+      "atlas": "assets/art/identities/n05/atlas.png",
+      "frame_layout": "assets/art/identities/n05/layout.json"
+    },
+    "n06": {
+      "atlas": "assets/art/identities/n06/atlas.png",
+      "frame_layout": "assets/art/identities/n06/layout.json"
+    },
+    "n07": {
+      "atlas": "assets/art/identities/n07/atlas.png",
+      "frame_layout": "assets/art/identities/n07/layout.json"
+    },
+    "n08": {
+      "atlas": "assets/art/identities/n08/atlas.png",
+      "frame_layout": "assets/art/identities/n08/layout.json"
+    },
+    "n09": {
+      "atlas": "assets/art/identities/n09/atlas.png",
+      "frame_layout": "assets/art/identities/n09/layout.json"
+    },
+    "n10": {
+      "atlas": "assets/art/identities/n10/atlas.png",
+      "frame_layout": "assets/art/identities/n10/layout.json"
+    },
+    "n11": {
+      "atlas": "assets/art/identities/n11/atlas.png",
+      "frame_layout": "assets/art/identities/n11/layout.json"
+    },
+    "n12": {
+      "atlas": "assets/art/identities/n12/atlas.png",
+      "frame_layout": "assets/art/identities/n12/layout.json"
+    },
+    "n13": {
+      "atlas": "assets/art/identities/n13/atlas.png",
+      "frame_layout": "assets/art/identities/n13/layout.json"
     }
   }
 }

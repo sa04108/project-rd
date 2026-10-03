@@ -1,0 +1,210 @@
+{
+  "id": "n11",
+  "state": "walk",
+  "status": "generated_and_source_visually_reviewed_not_runtime_verified",
+  "source": "walk.source.png",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "703f34725587fbedacf733f02d36d15ffbe77b380e9a0be4ccbe8431bf23384a",
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 1304003,
+    "nonzero_pixels": 268861,
+    "real_transparency": true
+  },
+  "frames": [
+    {
+      "index": 0,
+      "alpha_over_20_bbox_local": [
+        129,
+        145,
+        422,
+        413
+      ],
+      "padding_px": [
+        129,
+        145,
+        90,
+        99
+      ],
+      "bbox_occupancy_fraction": [
+        0.5723,
+        0.5234
+      ],
+      "alpha_touches_slot_edge": false,
+      "max_slot_edge_alpha": 0,
+      "meaningful_alpha_over_20_touches_edge": false,
+      "strict_70_percent_extent_pass": true,
+      "strict_15_percent_padding_pass": true
+    },
+    {
+      "index": 1,
+      "alpha_over_20_bbox_local": [
+        116,
+        143,
+        396,
+        415
+      ],
+      "padding_px": [
+        116,
+        143,
+        116,
+        97
+      ],
+      "bbox_occupancy_fraction": [
+        0.5469,
+        0.5312
+      ],
+      "alpha_touches_slot_edge": false,
+      "max_slot_edge_alpha": 0,
+      "meaningful_alpha_over_20_touches_edge": false,
+      "strict_70_percent_extent_pass": true,
+      "strict_15_percent_padding_pass": true
+    },
+    {
+      "index": 2,
+      "alpha_over_20_bbox_local": [
+        110,
+        145,
+        395,
+        418
+      ],
+      "padding_px": [
+        110,
+        145,
+        117,
+        94
+      ],
+      "bbox_occupancy_fraction": [
+        0.5566,
+        0.5332
+      ],
+      "alpha_touches_slot_edge": false,
+      "max_slot_edge_alpha": 0,
+      "meaningful_alpha_over_20_touches_edge": false,
+      "strict_70_percent_extent_pass": true,
+      "strict_15_percent_padding_pass": true
+    },
+    {
+      "index": 3,
+      "alpha_over_20_bbox_local": [
+        122,
+        118,
+        424,
+        387
+      ],
+      "padding_px": [
+        122,
+        118,
+        88,
+        125
+      ],
+      "bbox_occupancy_fraction": [
+        0.5898,
+        0.5254
+      ],
+      "alpha_touches_slot_edge": false,
+      "max_slot_edge_alpha": 0,
+      "meaningful_alpha_over_20_touches_edge": false,
+      "strict_70_percent_extent_pass": true,
+      "strict_15_percent_padding_pass": true
+    },
+    {
+      "index": 4,
+      "alpha_over_20_bbox_local": [
+        109,
+        113,
+        406,
+        387
+      ],
+      "padding_px": [
+        109,
+        113,
+        106,
+        125
+      ],
+      "bbox_occupancy_fraction": [
+        0.5801,
+        0.5352
+      ],
+      "alpha_touches_slot_edge": false,
+      "max_slot_edge_alpha": 0,
+      "meaningful_alpha_over_20_touches_edge": false,
+      "strict_70_percent_extent_pass": true,
+      "strict_15_percent_padding_pass": true
+    },
+    {
+      "index": 5,
+      "alpha_over_20_bbox_local": [
+        101,
+        112,
+        411,
+        391
+      ],
+      "padding_px": [
+        101,
+        112,
+        101,
+        121
+      ],
+      "bbox_occupancy_fraction": [
+        0.6055,
+        0.5449
+      ],
+      "alpha_touches_slot_edge": false,
+      "max_slot_edge_alpha": 0,
+      "meaningful_alpha_over_20_touches_edge": false,
+      "strict_70_percent_extent_pass": true,
+      "strict_15_percent_padding_pass": true
+    }
+  ],
+  "reference": "assets/art/portraits/n11.png",
+  "reference_sha256": "8b92df3c8730927f114df8d100c04b87b2f11ad6ec1448107ed1192c5fecddca",
+  "prompt": "walk.prompt.txt",
+  "layout_repair_prompt": "walk.repair-layout.prompt.txt",
+  "rejected_initial": "walk.rejected-layout.source.png",
+  "provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "generation": {
+    "tool": "built-in image_gen",
+    "original_calls": 1,
+    "layout_repair_calls": 1,
+    "model_identifier": "not exposed",
+    "source_bytes_preserved": true,
+    "deterministic_pose_fabrication": false,
+    "actual_tool_output_paths": {
+      "initial": "/workspace/scratch/efd85aae97ef/generated_images/exec-849693d0-6961-40b2-a6d0-20f10cd8a92f.png",
+      "layout_repair": "/workspace/scratch/efd85aae97ef/generated_images/exec-7473ff96-c3f7-4f83-909a-cebeac3c0fbb.png"
+    }
+  },
+  "visual_review": {
+    "complete_six_characters": true,
+    "slot_overlap_or_canvas_clipping_observed": false,
+    "identity_and_anatomy": "Six bandit stride poses preserve two held curved blades, orange hood and red ragged cape. Knee, foot and cloak phases differ, but similar leading-foot silhouettes recur and seamless gait needs parent review.",
+    "layout_repair": "Initial poses exceeded padding request. Built-in image layout-only repair reduced figures and preserved initial artifact.",
+    "limitations": [
+      "Strict 70-percent occupancy/15-percent padding target may still be missed; actual measurements recorded per frame.",
+      "Animation loop, runtime scale, and game integration remain parent-owned and unverified."
+    ]
+  },
+  "checks": {
+    "source_sha256_matches": true,
+    "six_nonempty_slots": true,
+    "real_alpha": true,
+    "visible_silhouette_within_slot_at_alpha_over_20": true,
+    "strict_alpha_nonzero_edge_pass": true
+  }
+}

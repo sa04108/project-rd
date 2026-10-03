@@ -1,0 +1,102 @@
+{
+  "id": "u09",
+  "state": "attack",
+  "source": "docs/art-generation/u09/attack.source.png",
+  "prompt": "docs/art-generation/u09/attack.prompt.txt",
+  "source_sha256": "fa7b8797a51f24fa67e4878457b4afd4b069ba18b7d6fb78d7f1058100bdad31",
+  "reference": "assets/art/portraits/u09.png",
+  "reference_sha256": "7c890378ed89edb82bd4ce2b158ad53c88cb5f13bd61cecf2a1c22464b303ced",
+  "generation_route": "built-in image tool; one call per asset, no external API",
+  "model_identifier": "not exposed by image tool",
+  "template_provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_min": 0,
+  "alpha_max": 254,
+  "transparent_pixel_fraction": 0.6364924112955729,
+  "nontransparent_pixel_fraction": 0.36350758870442706,
+  "visual_review_performed": true,
+  "pose_count_observed": 6,
+  "review_notes": [
+    "Six visibly distinct drumming poses; strapped drum and exactly two beaters retained, strikes meet drum skin.",
+    "No apparent clipping or inter-pose overlap. Raised beaters and bodies exceed requested 70-percent slot sizing; padding is smaller than requested."
+  ],
+  "source_layout_contract_pass": false,
+  "needs_nonuniform_pose_extraction": false,
+  "packed": false,
+  "runtime_verified": false,
+  "prompt_sha256": "26c2ac9169a8a7da0ee80201557587d99c8509f5f6281d2d5d80b5f1056454ce",
+  "components_alpha_gt8_area_ge64": [
+    {
+      "bbox": [
+        108,
+        70,
+        477,
+        477
+      ],
+      "area": 88189
+    },
+    {
+      "bbox": [
+        597,
+        18,
+        938,
+        477
+      ],
+      "area": 90909
+    },
+    {
+      "bbox": [
+        1128,
+        106,
+        1438,
+        476
+      ],
+      "area": 81635
+    },
+    {
+      "bbox": [
+        108,
+        541,
+        474,
+        959
+      ],
+      "area": 81464
+    },
+    {
+      "bbox": [
+        619,
+        526,
+        939,
+        959
+      ],
+      "area": 85127
+    },
+    {
+      "bbox": [
+        1101,
+        558,
+        1468,
+        959
+      ],
+      "area": 87185
+    }
+  ],
+  "rejected_layout_revisions": [],
+  "review_scope": "Raw source visual/alpha inspection only; no packing, runtime, timing or engine verification by this worker.",
+  "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-429c52b9-f462-4bb0-a7de-2f8abd993329.png",
+  "original_bytes_copy_verified": true
+}

@@ -1,0 +1,115 @@
+{
+  "id": "n07",
+  "state": "walk",
+  "status": "unpromoted_candidate",
+  "source": "walk.gait-candidate.source.png",
+  "prompt": "walk.gait-candidate.prompt.txt",
+  "generation_tool": "built-in image_gen",
+  "call_type": "new-generation-with-reference-and-full-sprite-gen-derived-prompt-plus-contact-clarification",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_extrema": [
+    0,
+    254
+  ],
+  "transparent_pixels": 944251,
+  "sha256": "5325b6b54715ca5e294260864ec7c3ac4d4d41e23eebbed5f948d2558cd43f44",
+  "frames": [
+    {
+      "index": 0,
+      "alpha_over_20_bbox_local": [
+        66,
+        81,
+        474,
+        484
+      ],
+      "padding_px": [
+        66,
+        81,
+        38,
+        28
+      ]
+    },
+    {
+      "index": 1,
+      "alpha_over_20_bbox_local": [
+        78,
+        74,
+        454,
+        481
+      ],
+      "padding_px": [
+        78,
+        74,
+        58,
+        31
+      ]
+    },
+    {
+      "index": 2,
+      "alpha_over_20_bbox_local": [
+        67,
+        76,
+        447,
+        490
+      ],
+      "padding_px": [
+        67,
+        76,
+        65,
+        22
+      ]
+    },
+    {
+      "index": 3,
+      "alpha_over_20_bbox_local": [
+        74,
+        49,
+        478,
+        446
+      ],
+      "padding_px": [
+        74,
+        49,
+        34,
+        66
+      ]
+    },
+    {
+      "index": 4,
+      "alpha_over_20_bbox_local": [
+        74,
+        41,
+        461,
+        444
+      ],
+      "padding_px": [
+        74,
+        41,
+        51,
+        68
+      ]
+    },
+    {
+      "index": 5,
+      "alpha_over_20_bbox_local": [
+        62,
+        47,
+        450,
+        453
+      ],
+      "padding_px": [
+        62,
+        47,
+        62,
+        59
+      ]
+    }
+  ],
+  "visually_reviewed": true,
+  "finding": "Candidate adds a useful raised opposite-knee pose in frame5, but enlarged layout and residual similar lead-foot poses mean no automatic quality upgrade. Parent may compare if useful.",
+  "runtime_verified": false
+}

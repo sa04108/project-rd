@@ -1,0 +1,102 @@
+{
+  "id": "u12",
+  "state": "attack",
+  "source": "docs/art-generation/u12/attack.source.png",
+  "prompt": "docs/art-generation/u12/attack.prompt.txt",
+  "source_sha256": "049edd49d968765eb12f2c5eeed07a54e6101fcc58887dfb654b0a78482e2ecf",
+  "reference": "assets/art/portraits/u12.png",
+  "reference_sha256": "77e524939a10c80db26bad4a1d7fbd717cc8e5a4d927d6be681ce5f25365c192",
+  "generation_route": "built-in image tool; one call per asset, no external API",
+  "model_identifier": "not exposed by image tool",
+  "template_provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_min": 0,
+  "alpha_max": 254,
+  "transparent_pixel_fraction": 0.7057584126790365,
+  "nontransparent_pixel_fraction": 0.29424158732096356,
+  "visual_review_performed": true,
+  "pose_count_observed": 6,
+  "review_notes": [
+    "Six distinct articulated two-sword attack poses; exactly two silver curved blades, ponytail, magenta-gold costume preserved.",
+    "All visible blade tips complete and poses spatially separate. Top-right leftward sword approaches nominal x=1024 boundary very closely; do not equal-slice without checking exact alpha bounds. Requested15-percent padding is not met."
+  ],
+  "source_layout_contract_pass": false,
+  "needs_nonuniform_pose_extraction": true,
+  "packed": false,
+  "runtime_verified": false,
+  "prompt_sha256": "cd84faf422b939c6e248b3f7ace10d53e2a2618dfc402c4f869b92e2686eb71c",
+  "components_alpha_gt8_area_ge64": [
+    {
+      "bbox": [
+        64,
+        105,
+        484,
+        487
+      ],
+      "area": 59708
+    },
+    {
+      "bbox": [
+        576,
+        75,
+        997,
+        485
+      ],
+      "area": 62907
+    },
+    {
+      "bbox": [
+        1022,
+        136,
+        1510,
+        479
+      ],
+      "area": 61105
+    },
+    {
+      "bbox": [
+        44,
+        554,
+        469,
+        955
+      ],
+      "area": 63641
+    },
+    {
+      "bbox": [
+        550,
+        599,
+        989,
+        949
+      ],
+      "area": 62838
+    },
+    {
+      "bbox": [
+        1053,
+        577,
+        1470,
+        956
+      ],
+      "area": 60691
+    }
+  ],
+  "rejected_layout_revisions": [],
+  "review_scope": "Raw source visual/alpha inspection only; no packing, runtime, timing or engine verification by this worker.",
+  "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-04d170d7-3614-4d08-af9b-16984cfa29a6.png",
+  "original_bytes_copy_verified": true
+}

@@ -1,0 +1,103 @@
+{
+  "id": "u16",
+  "state": "attack",
+  "reference": "assets/art/portraits/u16.png",
+  "reference_sha256": "23babad0fb9fd1b10d5f623b5e87ffb32fd9c93b55fdef967e08c93448027e95",
+  "generation_route": "built-in image tool; one call per identity, image-tool layout repairs where recorded, no external API",
+  "model_identifier": "not exposed by image tool",
+  "template_provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "visual_review_performed": true,
+  "pose_count_observed": 6,
+  "packed": false,
+  "runtime_verified": false,
+  "source": "docs/art-generation/u16/attack.source.png",
+  "prompt": "docs/art-generation/u16/attack.prompt.txt",
+  "source_sha256": "b33a7189be7cb698d32705a293faeb4d2030db9f48f7bc2b0c534dd25402b58f",
+  "prompt_sha256": "69fe34f0b724e27962457e6405502dc1c47c46c1947e60d881bf082792f4c713",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_min": 0,
+  "alpha_max": 254,
+  "transparent_pixel_fraction": 0.5489819844563802,
+  "nontransparent_pixel_fraction": 0.4510180155436198,
+  "source_layout_contract_pass": false,
+  "review_notes": [
+    "Six genuine dragon neck/jaw attack poses with preparation, open-jaw release, follow-through, close-jaw recovery; no detached breath projectile or new weapon.",
+    "Purple scale identity, gold horns, wings, existing limbs and tail retained with complete tips.",
+    "Bottom-left snout slightly crosses nominal x=512 border; top-right wide wing approaches x=1024. Whole-pose extraction is required. Requested15-percent safe padding is not met."
+  ],
+  "needs_nonuniform_pose_extraction": true,
+  "components_alpha_gt8_area_ge64": [
+    {
+      "bbox": [
+        58,
+        120,
+        474,
+        481
+      ],
+      "area": 94284
+    },
+    {
+      "bbox": [
+        573,
+        96,
+        990,
+        483
+      ],
+      "area": 92472
+    },
+    {
+      "bbox": [
+        1027,
+        91,
+        1507,
+        482
+      ],
+      "area": 107796
+    },
+    {
+      "bbox": [
+        37,
+        571,
+        528,
+        951
+      ],
+      "area": 108259
+    },
+    {
+      "bbox": [
+        577,
+        592,
+        1013,
+        956
+      ],
+      "area": 95154
+    },
+    {
+      "bbox": [
+        1084,
+        579,
+        1501,
+        956
+      ],
+      "area": 96977
+    }
+  ],
+  "rejected_layout_revisions": [],
+  "review_scope": "Raw source visual/alpha inspection only; no packing, runtime, timing or engine verification by this worker.",
+  "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-1f8f7633-ebdc-4c08-a288-91e44876b8f3.png",
+  "original_bytes_copy_verified": true
+}

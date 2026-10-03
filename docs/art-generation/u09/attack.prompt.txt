@@ -1,0 +1,41 @@
+Create a single six-pose 3-by-2 sprite sheet for the game character `u09` in the state `attack`.
+
+If this is a pre-idle/simple run, the attached base image may be used as the canonical character design. In direction-anchor mode, do not use base images for final action rows; accepted idle/direction anchors own row identity. Use the attached accepted idle/direction anchor as the canonical character design for this row. If a state anchor is attached for a non-locomotion state, treat it as approved state vocabulary only. Use the attached layout guide image only for frame count, slot spacing, centering, and safe padding. If an additional generated row strip is attached, use it only as a motion reference, never as a replacement identity source. Do not simply copy the still reference pose. Generate distinct animation poses that create a readable cycle or action.
+
+Character: Broad green-skinned orc war drummer with black short crest hair, pointed ears, tusks, brown leather and gold-orange armor, cream fur shoulder and skirt trims, heavy boots, one large orange wood and cream-skin drum strapped to the front of the torso, and exactly two wooden drum beaters with rounded cream heads, one in each hand. Keep the drum straps and drum shape continuous in every pose. No hammer, mace or other weapons. Exact attached u09 portrait pixels are identity authority.
+Style contract: Match that exact reference portrait: detailed crisp pixel-art rendering, same pixel density, proportions, face, anatomy, hair, clothing, palette, outline weight, shading, detail, fixed three-quarter game view and facing. Never redesign, mirror, rotate camera or add equipment.
+
+Use this prompt as an authoritative sprite-production spec.
+
+Animation action: Lift the two existing drum beaters; complete an alternating-arm anticipation over the strapped drum; strike the drum head; show the second beat and recoil; lift both beaters off the head; settle to ready.
+Six genuinely articulated and visibly different full-body poses in reading order. TOP LEFT=preparation 1; TOP MIDDLE=full anticipation 2; TOP RIGHT=contact/release 3; BOTTOM LEFT=follow-through 4; BOTTOM MIDDLE=recovery 5; BOTTOM RIGHT=ready recovery 6. Change arms, shoulders, knees, torso and cloth as appropriate; never six shifted, rotated or scaled copies. Feet stay in one ground cell. Preserve the broad orc-like drummer, strapped drum and two beaters; strikes must visibly meet the drum rather than become hammer slams. No damage or hit on this ally.
+
+Anchor lock:
+- Accepted idle/direction anchors own character identity, outfit details, colors, face design, asymmetric markings, and side-specific accessories for final action rows.
+- Base character images and original character sheets are pre-idle sources only. Do not reinterpret or reintroduce base-character details inside a direction-anchor action row.
+- This row owns motion only. Spend the variation budget on limb contacts, arm counter-swing, body height, torso lean, head bob, hair bounce, and loop continuity.
+- Do not redesign or reinterpret identity details while animating. Keep face, hair shape, markings, palette, outline weight, body proportions, outfit, props, and silhouette copied from the approved anchors.
+- Preserve side-specific features exactly as the approved anchors show them. Do not solve hairpin side, earring side, logos, handed props, scars, one-sided markings, asymmetric clothing, or lighting cues from scratch inside the row.
+- When generating a paired left/right row, use the paired row reference only for timing, scale, and animation intensity. Rotate the body, feet, shoulders, face angle, and gaze to the target facing, but keep identity details attached according to the accepted target-direction anchor.
+- For cyclic locomotion, do not let a single running/walking pose anchor determine every frame's leg phase. When a multi-pose motion reference is attached, use it for foot contacts.
+- Prefer a subtler animation over any change that mutates the character identity.
+
+
+Transparency and artifact rules:
+- Prefer pose, expression, and silhouette changes over decorative effects.
+- Effects are allowed only when state-relevant, opaque, hard-edged, sprite-like, fully inside the same frame slot, and physically touching or overlapping the character silhouette.
+- Do not draw detached effects: floating stars, loose sparkles, floating punctuation, floating icons, separated smoke clouds, loose dust, disconnected outline bits, or stray pixels.
+- Do not draw wave marks, motion arcs, speed lines, action streaks, afterimages, blur, smears, halos, glows, auras, floor patches, cast shadows, contact shadows, drop shadows, oval floor shadows, landing marks, or impact bursts.
+- Do not include text, labels, frame numbers, visible grids, guide marks, speech bubbles, thought bubbles, UI panels, code snippets, scenery, checkerboard transparency, white backgrounds, or black backgrounds.
+- Reject any pose that is cropped, overlaps another pose, crosses into a neighboring frame slot, or creates a separate disconnected component that is not attached to the character.
+
+Layout requirements (explicit native-alpha 3x2 adaptation of the sprite-gen row contract):
+- Exactly SIX full-body poses in THREE columns and TWO rows, reading left to right on top, then left to right on bottom. This is a spacious landscape sheet, ideally 1536x1024.
+- First reference is the canonical identity portrait. Second reference is ONLY a layout guide for six equal square invisible cells. Do NOT reproduce its visible grid, colors, lines, labels or background.
+- Each COMPLETE pose including all weapon tips, garments, ornaments, hair and anatomy fits within a box NO LARGER THAN 70 percent of its own cell width AND 70 percent of cell height. At least 15 percent TRANSPARENT PADDING on every side. Generous empty margins are essential. Never enlarge a figure to fill its cell.
+- Use ONE consistent scale for the body and equipment across all six cells. Choose a small enough body scale for the most extended/raised attack pose and apply it to every other pose. NEVER change weapon length, scale or body proportions to fit.
+- Feet/support points end at the SAME baseline at 85 percent of each cell height. Center the planted ground/hips anchor at the same horizontal position in each cell. Keep complete spear/bow/weapon inside its own cell. NEVER let a weapon or body cross a cell boundary. No overlap between adjacent poses or rows.
+- Six requested cells each contain exactly one complete character. No duplicates, additional figures, blank cells, visible guide marks, text or labels.
+- Genuine TRANSPARENT ALPHA background across all empty areas, replacing upstream magenta chroma key. No colored, white or black background, checkerboard pattern, scenery, ground, floor, shadows or haze.
+- Crisp clean sprite edges. No motion blur, trails, detached effects, projectiles, glow, particles, floating icons or decoration. Prefer clear limb poses over effects.
+Output only the six-pose sprite sheet image.

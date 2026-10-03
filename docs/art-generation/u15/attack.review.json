@@ -1,0 +1,103 @@
+{
+  "id": "u15",
+  "state": "attack",
+  "reference": "assets/art/portraits/u15.png",
+  "reference_sha256": "39be8f01555cc27fa095ed3a97a924e5799ea78e13e2fbf15265d55691a24b20",
+  "generation_route": "built-in image tool; one call per identity, image-tool layout repairs where recorded, no external API",
+  "model_identifier": "not exposed by image tool",
+  "template_provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "visual_review_performed": true,
+  "pose_count_observed": 6,
+  "packed": false,
+  "runtime_verified": false,
+  "source": "docs/art-generation/u15/attack.source.png",
+  "prompt": "docs/art-generation/u15/attack.prompt.txt",
+  "source_sha256": "48f9dd7ab5b2ea41a97ac1e26b418781527f40e5f84bddb696b682af8631c3d8",
+  "prompt_sha256": "1733cfe0916679bd28a9538e8ac0bda35518eacad253811178f65cbfe59a0d30",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_min": 0,
+  "alpha_max": 254,
+  "transparent_pixel_fraction": 0.6387564341227213,
+  "nontransparent_pixel_fraction": 0.3612435658772786,
+  "source_layout_contract_pass": false,
+  "review_notes": [
+    "Six genuine massive stone-fist attack poses; existing oversized right fist, smaller left hand, lava cracks, belt and stone body retained. No hammer invented.",
+    "Complete poses have no apparent clipping or inter-pose overlap. Preparation/full windup/release/follow-through/recovery visible.",
+    "Top-left smaller hand slightly approaches/crosses nominal x=512 boundary; use whole-pose bounds. Requested15-percent safe padding is not met."
+  ],
+  "needs_nonuniform_pose_extraction": true,
+  "components_alpha_gt8_area_ge64": [
+    {
+      "bbox": [
+        73,
+        163,
+        515,
+        498
+      ],
+      "area": 87934
+    },
+    {
+      "bbox": [
+        578,
+        27,
+        958,
+        497
+      ],
+      "area": 93316
+    },
+    {
+      "bbox": [
+        1070,
+        208,
+        1477,
+        499
+      ],
+      "area": 69353
+    },
+    {
+      "bbox": [
+        71,
+        625,
+        509,
+        964
+      ],
+      "area": 90450
+    },
+    {
+      "bbox": [
+        573,
+        526,
+        957,
+        970
+      ],
+      "area": 93193
+    },
+    {
+      "bbox": [
+        1074,
+        629,
+        1467,
+        973
+      ],
+      "area": 91397
+    }
+  ],
+  "rejected_layout_revisions": [],
+  "review_scope": "Raw source visual/alpha inspection only; no packing, runtime, timing or engine verification by this worker.",
+  "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-da3fde00-feaa-4be2-aa35-456c8e2c74b9.png",
+  "original_bytes_copy_verified": true
+}
