@@ -72,6 +72,8 @@ static func dropdown_arrow() -> Texture2D:
 	return _svg_texture("dropdown_arrow", '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><path d="m5 10 9 9 9-9" fill="none" stroke="#f2e5c7" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/></svg>')
 
 static func icon_texture(kind: String) -> Texture2D:
+	if kind == "diamond":
+		return _texture("res://assets/ui/diamond.svg")
 	var shapes := {
 		"home": '<path d="M5 29 31 7l26 22-6 7-20-17-20 17z" fill="url(#metal)"/><path d="M13 31v24h13V39h10v16h13V31L31 16z" fill="url(#paper)"/><path d="M25 55V38h12v17" fill="#29251f"/><path d="M40 10h9v12l-9-8z" fill="url(#metal)"/>',
 		"recipes": '<path d="M9 13c8-3 15-2 23 3 8-5 15-6 23-3v37c-8-3-15-2-23 3-8-5-15-6-23-3z" fill="url(#paper)"/><path d="M32 16v37M15 23h10m-10 7h10m-10 7h10" fill="none"/><path d="M44 25v14m-7-7h14" fill="none" stroke-width="3"/>',

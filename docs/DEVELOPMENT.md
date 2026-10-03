@@ -104,7 +104,7 @@ export ANDROID_SERIAL='DEVICE_SERIAL'
 
 언어는 `data/localization.json`의 의미 기반 고정 키로 관리합니다. 예를 들어 `settings.language` 아래에 `en`·`ko`·`zh_CN`·`ja` 값을 모두 두며 한국어 문장을 키로 쓰지 않습니다. 용병은 `unit.u01.name`·`unit.u01.description`, 적은 `enemy.n01.name`처럼 기존 정의 ID를 사용하므로 이름이나 설명을 수정해도 키는 유지합니다. 문구를 추가할 때 네 언어 값과 포맷 인자의 종류·순서를 맞춥니다.
 
-`game/localization.gd`가 Godot TranslationServer에 등록하며, 호출부는 `L.text("settings.language")`처럼 키를 명시합니다. 숫자·이름을 넣는 문장은 템플릿을 먼저 번역한 뒤 포맷하고, Label·Button·알림의 표시 함수에 완성된 문장을 전달합니다. 저장 오류는 고정 키로 표시 계층에 전달하고, 새 전투 종료 사유도 고정 키로 저장합니다. 이전 저장의 한국어 종료 사유는 호환 처리로 읽습니다. CJK 번역을 바꾸면 [폰트 제작 절차](RESOURCE_GUIDE.md)에 따라 부분집합을 다시 만들고 네 언어의 작은 화면 줄바꿈, 드롭다운, 저장 후 재시작을 확인합니다.
+`game/localization.gd`가 Godot TranslationServer에 등록하며, 호출부는 `L.text("settings.language")`처럼 키를 명시합니다. 숫자·이름을 넣는 문장은 템플릿을 먼저 번역한 뒤 포맷하고, Label·Button·알림의 표시 함수에 완성된 문장을 전달합니다. 재화 아이콘의 `{diamond}` 자리는 `CurrencyLabel`에서 텍스처로 바꾸며 번역에 BBCode나 이미지 경로를 넣지 않습니다. 해당 문구를 일반 Label에 연결하지 않고, 접근성 이름에는 번역된 재화 명칭이 남는지 확인합니다. 저장 오류는 고정 키로 표시 계층에 전달하고, 새 전투 종료 사유도 고정 키로 저장합니다. 이전 저장의 한국어 종료 사유는 호환 처리로 읽습니다. CJK 번역을 바꾸면 [폰트 제작 절차](RESOURCE_GUIDE.md)에 따라 부분집합을 다시 만들고 네 언어의 작은 화면 줄바꿈, 드롭다운, 저장 후 재시작을 확인합니다.
 
 도감·조합법 용병 목록의 `CatalogFilters`는 성급, 거리, 대상 수, 행동 필터를 AND로 적용합니다. 표시 분류와 필터는 `UnitDescription`의 같은 순수 판정 함수를 사용합니다. 새 필터 상태 라벨은 `catalog.filter.distance`, `catalog.filter.targets`, `catalog.filter.action`의 네 언어 값을 등록합니다. 공격력 증가 버프 용병은 공격·지원 필터에 모두 포함하고, 둔화·기절은 별도 능력 설명으로 표시합니다.
 

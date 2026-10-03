@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- project-rd 전용으로 직접 제작한 투명 배경 재화 아이콘. 외부 이미지 미사용. -->
+  <path d="M14 10h36L61 26 32 58 3 26Z" fill="#17475d" stroke="#153b4c" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M15 12h34L58 26H6Z" fill="#9feaff"/>
+  <path d="m15 12 8 14 9-14 9 14 8-14" fill="#ddfbff"/>
+  <path d="M6 26h17l9 29Z" fill="#31afd9"/>
+  <path d="M23 26h18l-9 29Z" fill="#91e6ff"/>
+  <path d="M41 26h17L32 55Z" fill="#2086b8"/>
+  <path d="m15 12 8 14 9-14 9 14 8-14M6 26h52M23 26l9 29 9-29" fill="none" stroke="#266f91" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="m16 14-7 10h12M25 29l6 17" fill="none" stroke="#f0fdff" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

@@ -2,6 +2,7 @@ extends Control
 
 const L = preload("res://game/localization.gd")
 const UiSkin = preload("res://game/ui_skin.gd")
+const CurrencyLabel = preload("res://game/currency_label.gd")
 const DragScrollContainer = preload("res://game/drag_scroll_container.gd")
 const BATTLE_BACKGROUND = preload("res://assets/art/orthographic/battle-map.webp")
 const VisualAssets = preload("res://game/visual_assets.gd")
@@ -37,7 +38,7 @@ var selected := -1
 var resume_data: Dictionary = {}
 var dynamic: Array[Callable] = []
 var labels: Dictionary = {}
-var toast_label: Label
+var toast_label: RichTextLabel
 var toast_until := 0.0
 var wall_time := 0.0
 var refresh_time := 0.0
@@ -260,6 +261,23 @@ func _hud_icon(parent: Control, kind: String, rect: Rect2) -> TextureRect:
 	parent.add_child(icon)
 	return icon
 
+func _diamond_text(parent: Control, value: String, rect: Rect2, font_size: int = 26, color: Color = PALE, centered: bool = false) -> RichTextLabel:
+	var line := CurrencyLabel.new()
+	line.name = "DiamondAmount"
+	line.position = rect.position
+	line.size = rect.size
+	line.add_theme_font_size_override("normal_font_size", font_size)
+	line.add_theme_color_override("default_color", _content_color(parent, color))
+	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER if centered else HORIZONTAL_ALIGNMENT_LEFT
+	if mode == "menu" and parent == screen:
+		line.add_theme_color_override("font_shadow_color", Color(0.02, 0.03, 0.04, 0.95))
+		line.add_theme_constant_override("shadow_offset_x", 2)
+		line.add_theme_constant_override("shadow_offset_y", 3)
+		line.add_theme_constant_override("shadow_outline_size", 2)
+	parent.add_child(line)
+	line.set_currency_text(value)
+	return line
+
 func _gold_line(parent: Control, title: String, amount: int, rect: Rect2, font_size: int = 26, color: Color = PALE, centered: bool = false) -> RichTextLabel:
 	var line := RichTextLabel.new()
 	line.name = "GoldAmount"
@@ -402,8 +420,7 @@ func _show_menu() -> void:
 	_hud_button(screen, L.text("menu.codex.open"), Rect2(126, 920, 228, 100), func(): _open_panel("codex"), "codex")
 	_hud_button(screen, L.text("settings.title"), Rect2(366, 920, 228, 100), func(): _open_panel("settings"), "settings")
 	_hud_button(screen, L.text("progression.menu.open"), Rect2(126, 1032, 468, 100), func(): _open_panel("progression"), "progression", "", true)
-	labels.menu_diamonds = _label(screen, L.text("progression.wallet.balance") % store.diamond_balance(), Vector2(126, 1146), 468, 25, PALE)
-	labels.menu_diamonds.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	labels.menu_diamonds = _diamond_text(screen, L.text("progression.wallet.balance") % store.diamond_balance(), Rect2(126, 1146, 468, 42), 25, PALE, true)
 	labels.menu_footer = _label(screen, "© 2026 %s  ·  v0.4" % display_name, Vector2(48, 1222), 624, 18, MUTED)
 	labels.menu_footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	if not store.last_error.is_empty():
@@ -629,7 +646,7 @@ func _purchase_permanent(identity: String, level: int, revision: int) -> void:
 		_toast(L.text(response.error))
 	else:
 		audio.play_ui("chime")
-		labels.menu_diamonds.text = L.text("progression.wallet.balance") % store.diamond_balance()
+		labels.menu_diamonds.set_currency_text(L.text("progression.wallet.balance") % store.diamond_balance())
 	_open_panel("progression", true)
 
 func _mark_dirty() -> void:
@@ -738,6 +755,9 @@ func _capture_modal_focus() -> void:
 	for node in overlay.find_children("*", "Control", true, false):
 		var control := node as Control
 		if control.focus_mode == Control.FOCUS_NONE or not control.is_visible_in_tree() or (control is BaseButton and control.disabled):
+			continue
+		# 아이콘 라벨의 접근성 포커스는 스크린 리더가 켜졌을 때만 사용한다.
+		if control.focus_mode == Control.FOCUS_ACCESSIBILITY and not get_tree().is_accessibility_enabled():
 			continue
 		if first == null or control.name == "cancel_new":
 			first = control
@@ -1283,7 +1303,7 @@ func _result_panel(panel: Control) -> void:
 	var tip := L.text("result.guidance.next_expedition")
 	if sim.result == "defeat":
 		tip = L.text("battle.menu.tip.wait_then_upgrade") if sim.enemies.size() >= sim.enemy_limit() else L.text("battle.menu.tip.pause_reposition")
-	_paragraph(panel, L.text("progression.result.reward") % store.run_diamond_reward(sim) + "\n" + tip, Rect2(64, 403, 535, 95), 20, MUTED)
+	_diamond_text(panel, L.text("progression.result.reward") % store.run_diamond_reward(sim) + "\n" + tip, Rect2(64, 403, 535, 95), 20, MUTED)
 	_button(panel, L.text("menu.main.open"), Rect2(62, 523, 526, 100), func():
 		if _save(): _show_menu(), true, "result_menu")
 
@@ -1291,8 +1311,8 @@ func _toast(message: String) -> void:
 	if not is_instance_valid(screen):
 		return
 	if not is_instance_valid(toast_label):
-		toast_label = _label(self, "", Vector2(30, 8), 660, 19, GOLD)
-		toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		toast_label = _diamond_text(self, "", Rect2(30, 8, 660, 76), 19, GOLD, true)
+		toast_label.fit_content = false
 		toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		# 모든 화면의 맨 위에 반투명 알림을 겹치되 뒤의 HUD 터치 입력은 통과시킨다.
@@ -1303,7 +1323,7 @@ func _toast(message: String) -> void:
 	toast_label.position = Vector2(30, 8)
 	toast_label.size = Vector2(660, 76)
 	toast_label.show()
-	toast_label.text = message
+	toast_label.set_currency_text(message)
 	toast_until = wall_time + 3.0
 	move_child(toast_label, get_child_count() - 1)
 
