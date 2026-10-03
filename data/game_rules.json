@@ -69,8 +69,7 @@
     "enemy_limit_scope": "all_active_enemies_including_boss_and_special",
     "enemy_limit_trigger": "immediate_on_spawn_at_or_above_limit",
     "pause_only_by_button": true,
-    "background_progress": true,
-    "synthesis_tier": 1
+    "background_progress": true
   },
   "T": {
     "summon_cost": 50,
