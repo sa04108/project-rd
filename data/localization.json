@@ -1208,5 +1208,10 @@
     "en": "BATTLE OVER",
     "zh_CN": "战斗结束",
     "ja": "戦闘終了"
+  },
+  "기본 능력 · 공격 %d\n사거리 %.1f · 주기 %s초": {
+    "en": "Base Stats · Attack %d\nRange %.1f · Interval %s sec",
+    "zh_CN": "基础能力 · 攻击 %d\n射程 %.1f · 间隔 %s秒",
+    "ja": "基本能力 · 攻撃 %d\n射程 %.1f · 間隔 %s秒"
   }
 }
