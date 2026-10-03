@@ -10,18 +10,33 @@ static func set_language(language: String) -> void:
 		for code in LANGUAGES:
 			var translation := Translation.new()
 			translation.locale = code
-			for source in messages:
-				translation.add_message(source, source if code == "ko" else str(messages[source][code]))
+			for key in messages:
+				translation.add_message(key, str(messages[key][code]))
 			TranslationServer.add_translation(translation)
 		_registered = true
 	TranslationServer.set_locale(language if language in LANGUAGES else "en")
 
-static func text(source: String) -> String:
-	return TranslationServer.translate(source)
+static func text(key: String) -> String:
+	return TranslationServer.translate(key)
 
-static func result_reason(source: String) -> String:
-	# 기존 저장의 종료 사유는 원문으로 보존하고, 표시할 때 현재 언어를 적용한다.
+static func unit_name(identity: String) -> String:
+	return text("unit.%s.name" % identity)
+
+static func unit_description(identity: String) -> String:
+	return text("unit.%s.description" % identity)
+
+static func enemy_name(identity: String) -> String:
+	return text("enemy.%s.name" % identity)
+
+static func result_reason(source: String, enemy_limit: int) -> String:
+	# 이전 버전의 저장에 남은 한국어 사유만 변환한다. 새 저장과 번역 조회는 고정 키를 쓴다.
+	match source:
+		"마왕을 처치했습니다": source = "result.reason.victory"
+		"마왕이 탈출했습니다": source = "result.reason.demon_escaped"
+		"길드를 지킬 목숨이 남지 않았습니다": source = "result.reason.lives_depleted"
 	var matched := RegEx.create_from_string("^전장의 적이 ([0-9]+)마리에 도달했습니다$").search(source)
 	if matched != null:
-		return text("전장의 적이 %d마리에 도달했습니다") % int(matched.get_string(1))
+		return text("result.reason.enemy_limit") % int(matched.get_string(1))
+	if source == "result.reason.enemy_limit":
+		return text(source) % enemy_limit
 	return text(source)

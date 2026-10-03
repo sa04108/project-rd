@@ -1,1217 +1,1460 @@
 {
-  "용병 소환": {
-    "en": "Summon Mercenary",
-    "zh_CN": "召唤佣兵",
-    "ja": "傭兵を召喚"
-  },
-  "이어하기 파일이 손상되었거나 버전이 다릅니다. 원본은 보존됩니다.": {
-    "en": "The continue file is damaged or uses a different version. The original has been preserved.",
-    "zh_CN": "继续记录已损坏或版本不匹配。原文件已保留。",
-    "ja": "続きのデータが破損しているか、バージョンが異なります。元のデータは保持されています。"
-  },
-  "새 게임": {
-    "en": "New Game",
-    "zh_CN": "新游戏",
-    "ja": "新しいゲーム"
-  },
-  "이어하기": {
-    "en": "Continue",
-    "zh_CN": "继续",
-    "ja": "続ける"
-  },
-  "도감": {
-    "en": "Codex",
-    "zh_CN": "图鉴",
-    "ja": "図鑑"
-  },
-  "설정": {
-    "en": "Settings",
-    "zh_CN": "设置",
-    "ja": "設定"
-  },
-  "이어하기를 불러올 수 없습니다": {
-    "en": "Could not load the saved game.",
-    "zh_CN": "无法读取继续记录。",
-    "ja": "続きのデータを読み込めません。"
-  },
-  "조합법": {
-    "en": "Recipes",
-    "zh_CN": "配方",
-    "ja": "レシピ"
-  },
-  "배속 변경": {
-    "en": "Change Speed",
-    "zh_CN": "切换速度",
-    "ja": "速度変更"
-  },
-  "배속 변경 · ×1 / ×2 / ×3 / ×5": {
-    "en": "Change Speed · ×1 / ×2 / ×3 / ×5",
-    "zh_CN": "切换速度 · ×1 / ×2 / ×3 / ×5",
-    "ja": "速度変更 · ×1 / ×2 / ×3 / ×5"
-  },
-  "일시정지 / 재개": {
-    "en": "Pause / Resume",
-    "zh_CN": "暂停 / 继续",
-    "ja": "一時停止 / 再開"
-  },
-  "강화": {
-    "en": "Upgrade",
-    "zh_CN": "强化",
-    "ja": "強化"
-  },
-  "도박": {
-    "en": "Recruit",
-    "zh_CN": "招募",
-    "ja": "募集"
-  },
-  "특수몬스터": {
-    "en": "Special Monster",
-    "zh_CN": "特殊怪物",
-    "ja": "特殊モンスター"
-  },
-  "전장 적  %d / %d": {
+  "battle.enemy.count": {
     "en": "Enemies  %d / %d",
+    "ko": "전장 적  %d / %d",
     "zh_CN": "敌人  %d / %d",
     "ja": "敵  %d / %d"
   },
-  "마왕을 처치하세요": {
-    "en": "Defeat the Demon King",
-    "zh_CN": "击败魔王",
-    "ja": "魔王を倒そう"
-  },
-  "다음 웨이브  %04.1f초": {
-    "en": "Next wave in %04.1f sec",
-    "zh_CN": "下一波还有 %04.1f 秒",
-    "ja": "次のウェーブまで %04.1f秒"
-  },
-  "  [개발 기록]": {
-    "en": "  [Developer Run]",
-    "zh_CN": "  [开发记录]",
-    "ja": "  [開発用プレイ]"
-  },
-  "소환   ◈ %d": {
-    "en": "Summon   ◈ %d",
-    "zh_CN": "召唤   ◈ %d",
-    "ja": "召喚   ◈ %d"
-  },
-  "직접 공격 불가": {
-    "en": "Out of range",
-    "zh_CN": "无法直接攻击",
-    "ja": "直接攻撃不可"
-  },
-  "직접 공격 접점이 좁음": {
-    "en": "Limited reach",
-    "zh_CN": "攻击覆盖较窄",
-    "ja": "攻撃範囲が狭い"
-  },
-  "공격 %.0f · 사거리 %.1f%s\n%s": {
-    "en": "Attack %.0f · Range %.1f%s\n%s",
-    "zh_CN": "攻击 %.0f · 射程 %.1f%s\n%s",
-    "ja": "攻撃 %.0f · 射程 %.1f%s\n%s"
-  },
-  "길드 공방 · 공통 공격력 강화": {
-    "en": "Guild Workshop",
-    "zh_CN": "公会工坊 · 攻击强化",
-    "ja": "ギルド工房 · 攻撃力強化"
-  },
-  "운명의 계약 · 영입 도전": {
-    "en": "Recruitment",
-    "zh_CN": "命运契约 · 招募",
-    "ja": "運命の契約 · 募集"
-  },
-  "특수몬스터 · 보상형 적": {
-    "en": "Bounty Monsters",
-    "zh_CN": "悬赏怪物",
-    "ja": "報酬モンスター"
-  },
-  "조합 도감": {
-    "en": "Recipe Codex",
-    "zh_CN": "合成图鉴",
-    "ja": "合成図鑑"
-  },
-  "길드 기록관": {
-    "en": "Guild Codex",
-    "zh_CN": "公会图鉴",
-    "ja": "ギルド図鑑"
-  },
-  "마왕 격파": {
-    "en": "Demon King Defeated",
-    "zh_CN": "魔王讨伐",
-    "ja": "魔王撃破"
-  },
-  "전투 종료": {
-    "en": "Battle Over",
-    "zh_CN": "战斗结束",
-    "ja": "戦闘終了"
-  },
-  "새로운 출정": {
-    "en": "New Expedition",
-    "zh_CN": "新的远征",
-    "ja": "新たな出陣"
-  },
-  "진행 중인 전투가 있습니다. 새 게임을 시작하면 이번 판의 배치와 골드를 잃습니다.": {
-    "en": "A battle is in progress. Starting a new game will discard this battle's formation and gold.",
-    "zh_CN": "当前战斗仍在进行。开始新游戏将失去本局的阵容和金币。",
-    "ja": "戦闘が進行中です。新しいゲームを始めると、この戦闘の配置とゴールドが失われます。"
-  },
-  "새 게임 시작": {
-    "en": "Start New Game",
-    "zh_CN": "开始新游戏",
-    "ja": "新しいゲームを始める"
-  },
-  "이어하기 유지": {
-    "en": "Keep This Game",
-    "zh_CN": "继续当前游戏",
-    "ja": "このゲームを続ける"
-  },
-  "공격 +%d%%": {
-    "en": "Attack +%d%%",
-    "zh_CN": "攻击 +%d%%",
-    "ja": "攻撃 +%d%%"
-  },
-  "최대 강화": {
-    "en": "Fully Upgraded",
-    "zh_CN": "已满级",
-    "ja": "最大強化済み"
-  },
-  "강화   ◈ %d": {
-    "en": "Upgrade   ◈ %d",
-    "zh_CN": "强化   ◈ %d",
-    "ja": "強化   ◈ %d"
-  },
-  " 도전": {
-    "en": " Challenge",
-    "zh_CN": " 挑战",
-    "ja": " 挑戦"
-  },
-  "성공 확률  %d%%": {
-    "en": "Success Chance  %d%%",
-    "zh_CN": "成功概率  %d%%",
-    "ja": "成功率  %d%%"
-  },
-  "실패 시 보상 없음": {
-    "en": "No reward on failure",
-    "zh_CN": "失败时无奖励",
-    "ja": "失敗時は報酬なし"
-  },
-  "계약   ◈ %d": {
-    "en": "Contract   ◈ %d",
-    "zh_CN": "契约   ◈ %d",
-    "ja": "契約   ◈ %d"
-  },
-  "처치 ◈ %d": {
-    "en": "Defeat ◈ %d",
-    "zh_CN": "击败 ◈ %d",
-    "ja": "討伐 ◈ %d"
-  },
-  "무료 소환": {
-    "en": "Free Summon",
-    "zh_CN": "免费召唤",
-    "ja": "無料召喚"
-  },
-  "%d웨이브 완료 후": {
-    "en": "Unlocks after wave %d",
-    "zh_CN": "完成第 %d 波后解锁",
-    "ja": "%dウェーブ完了後に解放"
-  },
-  "대기 %d게임초": {
-    "en": "Wait %d game sec",
-    "zh_CN": "等待 %d 游戏秒",
-    "ja": "あと%dゲーム秒待機"
-  },
-  "처치하고 보상 획득": {
-    "en": "Defeat it to claim the reward",
-    "zh_CN": "击败目标并领取奖励",
-    "ja": "倒して報酬を受け取ろう"
-  },
-  "소환 시 패배": {
-    "en": "Too many enemies",
-    "zh_CN": "召唤即战败",
-    "ja": "召喚すると敗北"
-  },
-  "조합": {
-    "en": "Merge",
-    "zh_CN": "合成",
-    "ja": "合成"
-  },
-  "용병 %d": {
-    "en": "Mercenaries %d",
-    "zh_CN": "佣兵 %d",
-    "ja": "傭兵 %d"
-  },
-  "적 %d": {
-    "en": "Enemies %d",
-    "zh_CN": "敌人 %d",
-    "ja": "敵 %d"
-  },
-  "전체": {
-    "en": "All",
-    "zh_CN": "全部",
-    "ja": "すべて"
-  },
-  "%d성": {
-    "en": "%d★",
-    "zh_CN": "%d星",
-    "ja": "星%d"
-  },
-  "일반": {
-    "en": "Normal",
-    "zh_CN": "普通",
-    "ja": "通常"
-  },
-  "보스": {
-    "en": "Boss",
-    "zh_CN": "首领",
-    "ja": "ボス"
-  },
-  "특수": {
-    "en": "Special",
-    "zh_CN": "特殊",
-    "ja": "特殊"
-  },
-  "발견": {
-    "en": "Discovered",
-    "zh_CN": "已发现",
-    "ja": "発見済み"
-  },
-  "미발견": {
-    "en": "Undiscovered",
-    "zh_CN": "未发现",
-    "ja": "未発見"
-  },
-  "공격 %d · 사거리 %.1f · 주기 %.1f초": {
-    "en": "Attack %d · Range %.1f · Interval %.1f sec",
-    "zh_CN": "攻击 %d · 射程 %.1f · 间隔 %.1f 秒",
-    "ja": "攻撃 %d · 射程 %.1f · 間隔 %.1f秒"
-  },
-  "기본 체력 %d · 처치 ◈ %d": {
-    "en": "Base HP %d · Bounty ◈ %d",
-    "zh_CN": "基础生命 %d · 击败奖励 ◈ %d",
-    "ja": "基本HP %d · 討伐報酬 ◈ %d"
-  },
-  "기본 이동 %.0f초 · 누적 처치 %d": {
-    "en": "Base Travel Time %.0f sec · Defeated %d",
-    "zh_CN": "基础移动时间 %.0f 秒 · 累计击败 %d",
-    "ja": "基本移動時間 %.0f秒 · 討伐数 %d"
-  },
-  "%d웨이브 완료 후 해금": {
-    "en": "Unlocks after completing wave %d",
-    "zh_CN": "完成第 %d 波后解锁",
-    "ja": "%dウェーブクリア後に解放"
-  },
-  "배경음악": {
-    "en": "Music",
-    "zh_CN": "音乐",
-    "ja": "音楽"
-  },
-  "효과음": {
-    "en": "Sound Effects",
-    "zh_CN": "音效",
-    "ja": "効果音"
-  },
-  "진동": {
-    "en": "Haptics",
-    "zh_CN": "触觉反馈",
-    "ja": "振動"
-  },
-  "동작 연출 줄이기": {
-    "en": "Reduced Motion",
-    "zh_CN": "减少动作效果",
-    "ja": "動きを減らす"
-  },
-  "전투로 돌아가기": {
-    "en": "Return to Battle",
-    "zh_CN": "返回战斗",
-    "ja": "戦闘に戻る"
-  },
-  "닫기": {
-    "en": "Close",
-    "zh_CN": "关闭",
-    "ja": "閉じる"
-  },
-  "저장 후 메인 메뉴": {
-    "en": "Save and Return to Menu",
-    "zh_CN": "保存并返回主菜单",
-    "ja": "保存してメニューへ"
-  },
-  "도달 웨이브  %d / 100": {
-    "en": "Wave Reached  %d / 100",
-    "zh_CN": "到达波次  %d / 100",
-    "ja": "到達ウェーブ  %d / 100"
-  },
-  "길드는 다음 출정을 기다립니다": {
-    "en": "The guild awaits its next expedition",
-    "zh_CN": "公会正等待下一次远征",
-    "ja": "ギルドは次の出陣を待っています"
-  },
-  "적을 묶는 동안 화력을 높이세요. 조합과 성급 강화로 밀린 적을 처치할 수 있습니다.": {
-    "en": "Increase your firepower while enemies are held back. Merge units and upgrade their tiers to defeat the advancing horde.",
-    "zh_CN": "牵制敌人时提升火力。合成佣兵并强化阶级，击败逼近的敌群。",
-    "ja": "敵を足止めしている間に火力を上げましょう。傭兵を合成し、段階を強化して迫る敵を倒します。"
-  },
-  "일시정지 중 조합과 재배치를 활용하세요. 짧은 사거리 용병은 길 가장자리가 유리합니다.": {
+  "battle.menu.tip.pause_reposition": {
     "en": "Use merging and repositioning while paused. Mercenaries with short range work best near the path.",
+    "ko": "일시정지 중 조합과 재배치를 활용하세요. 짧은 사거리 용병은 길 가장자리가 유리합니다.",
     "zh_CN": "暂停时可以合成和重新部署。射程较短的佣兵适合放在道路边缘。",
     "ja": "一時停止中に合成と再配置を活用しましょう。射程の短い傭兵は道の近くが有利です。"
   },
-  "메인 메뉴": {
-    "en": "Main Menu",
-    "zh_CN": "主菜单",
-    "ja": "メインメニュー"
+  "battle.menu.tip.wait_then_upgrade": {
+    "en": "Increase your firepower while enemies are held back. Merge units and upgrade their tiers to defeat the advancing horde.",
+    "ko": "적을 묶는 동안 화력을 높이세요. 조합과 성급 강화로 밀린 적을 처치할 수 있습니다.",
+    "zh_CN": "牵制敌人时提升火力。合成佣兵并强化阶级，击败逼近的敌群。",
+    "ja": "敵を足止めしている間に火力を上げましょう。傭兵を合成し、段階を強化して迫る敵を倒します。"
   },
-  "개발용 점프 · 최고 기록에 반영되지 않습니다": {
+  "battle.next_wave.timer": {
+    "en": "Next wave in %04.1f sec",
+    "ko": "다음 웨이브  %04.1f초",
+    "zh_CN": "下一波还有 %04.1f 秒",
+    "ja": "次のウェーブまで %04.1f秒"
+  },
+  "battle.objective.demon_king": {
+    "en": "Defeat the Demon King",
+    "ko": "마왕을 처치하세요",
+    "zh_CN": "击败魔王",
+    "ja": "魔王を倒そう"
+  },
+  "battle.pause.toggle": {
+    "en": "Pause / Resume",
+    "ko": "일시정지 / 재개",
+    "zh_CN": "暂停 / 继续",
+    "ja": "一時停止 / 再開"
+  },
+  "battle.return": {
+    "en": "Return to Battle",
+    "ko": "전투로 돌아가기",
+    "zh_CN": "返回战斗",
+    "ja": "戦闘に戻る"
+  },
+  "battle.speed.open": {
+    "en": "Change Speed",
+    "ko": "배속 변경",
+    "zh_CN": "切换速度",
+    "ja": "速度変更"
+  },
+  "battle.speed.options": {
+    "en": "Change Speed · ×1 / ×2 / ×3 / ×5",
+    "ko": "배속 변경 · ×1 / ×2 / ×3 / ×5",
+    "zh_CN": "切换速度 · ×1 / ×2 / ×3 / ×5",
+    "ja": "速度変更 · ×1 / ×2 / ×3 / ×5"
+  },
+  "battle.wave.reached": {
+    "en": "Wave Reached  %d / 100",
+    "ko": "도달 웨이브  %d / 100",
+    "zh_CN": "到达波次  %d / 100",
+    "ja": "到達ウェーブ  %d / 100"
+  },
+  "catalog.codex.title": {
+    "en": "Guild Codex",
+    "ko": "길드 기록관",
+    "zh_CN": "公会图鉴",
+    "ja": "ギルド図鑑"
+  },
+  "catalog.enemies.tab": {
+    "en": "Enemies %d",
+    "ko": "적 %d",
+    "zh_CN": "敌人 %d",
+    "ja": "敵 %d"
+  },
+  "catalog.enemy.progress": {
+    "en": "Base Travel Time %.0f sec · Defeated %d",
+    "ko": "기본 이동 %.0f초 · 누적 처치 %d",
+    "zh_CN": "基础移动时间 %.0f 秒 · 累计击败 %d",
+    "ja": "基本移動時間 %.0f秒 · 討伐数 %d"
+  },
+  "catalog.enemy.stats": {
+    "en": "Base HP %d · Bounty ◈ %d",
+    "ko": "기본 체력 %d · 처치 ◈ %d",
+    "zh_CN": "基础生命 %d · 击败奖励 ◈ %d",
+    "ja": "基本HP %d · 討伐報酬 ◈ %d"
+  },
+  "catalog.enemy.unlock_wave": {
+    "en": "Unlocks after completing wave %d",
+    "ko": "%d웨이브 완료 후 해금",
+    "zh_CN": "完成第 %d 波后解锁",
+    "ja": "%dウェーブクリア後に解放"
+  },
+  "catalog.filter.all": {
+    "en": "All",
+    "ko": "전체",
+    "zh_CN": "全部",
+    "ja": "すべて"
+  },
+  "catalog.filter.boss": {
+    "en": "Boss",
+    "ko": "보스",
+    "zh_CN": "首领",
+    "ja": "ボス"
+  },
+  "catalog.filter.normal": {
+    "en": "Normal",
+    "ko": "일반",
+    "zh_CN": "普通",
+    "ja": "通常"
+  },
+  "catalog.filter.special": {
+    "en": "Special",
+    "ko": "특수",
+    "zh_CN": "特殊",
+    "ja": "特殊"
+  },
+  "catalog.filter.tier": {
+    "en": "%d★",
+    "ko": "%d성",
+    "zh_CN": "%d星",
+    "ja": "星%d"
+  },
+  "catalog.status.discovered": {
+    "en": "Discovered",
+    "ko": "발견",
+    "zh_CN": "已发现",
+    "ja": "発見済み"
+  },
+  "catalog.status.undiscovered": {
+    "en": "Undiscovered",
+    "ko": "미발견",
+    "zh_CN": "未发现",
+    "ja": "未発見"
+  },
+  "catalog.units.tab": {
+    "en": "Mercenaries %d",
+    "ko": "용병 %d",
+    "zh_CN": "佣兵 %d",
+    "ja": "傭兵 %d"
+  },
+  "debug.run.marker": {
+    "en": "  [Developer Run]",
+    "ko": "  [개발 기록]",
+    "zh_CN": "  [开发记录]",
+    "ja": "  [開発用プレイ]"
+  },
+  "debug.wave.skip": {
     "en": "Developer Skip · Not counted toward records",
+    "ko": "개발용 점프 · 최고 기록에 반영되지 않습니다",
     "zh_CN": "开发跳关 · 不计入最高纪录",
     "ja": "開発用スキップ · 記録には反映されません"
   },
-  "이미 종료된 전투입니다": {
-    "en": "This battle has already ended.",
-    "zh_CN": "本场战斗已经结束。",
-    "ja": "この戦闘はすでに終了しています。"
-  },
-  "빈 칸이 없습니다 · 조합으로 공간을 만드세요": {
-    "en": "No empty slots · Merge units to make room",
-    "zh_CN": "没有空位 · 合成佣兵腾出空间",
-    "ja": "空きがありません · 合成して場所を空けましょう"
-  },
-  "골드가 부족합니다": {
-    "en": "Not enough gold",
-    "zh_CN": "金币不足",
-    "ja": "ゴールドが足りません"
-  },
-  "%s 합류!": {
-    "en": "%s joins the guild!",
-    "zh_CN": "%s加入公会！",
-    "ja": "%sがギルドに加入！"
-  },
-  "배치할 수 없는 칸입니다": {
-    "en": "That slot cannot be used",
-    "zh_CN": "无法部署到该位置",
-    "ja": "そこには配置できません"
-  },
-  "선택한 용병이 없습니다": {
-    "en": "No mercenary selected",
-    "zh_CN": "未选择佣兵",
-    "ja": "傭兵が選択されていません"
-  },
-  "이미 같은 칸에 있습니다": {
-    "en": "Already in that slot",
-    "zh_CN": "已在该位置",
-    "ja": "すでにその場所にいます"
-  },
-  "배치를 변경했습니다": {
-    "en": "Formation updated",
-    "zh_CN": "阵容已调整",
-    "ja": "配置を変更しました"
-  },
-  "없는 조합법입니다": {
-    "en": "That recipe does not exist",
-    "zh_CN": "该合成配方不存在",
-    "ja": "その合成レシピはありません"
-  },
-  "조합 재료가 부족하거나 기준 용병이 맞지 않습니다": {
-    "en": "Missing merge materials or the selected mercenary does not match",
-    "zh_CN": "合成材料不足或所选佣兵不符合配方",
-    "ja": "合成素材が不足しているか、選択した傭兵が条件に合いません"
-  },
-  "%s 조합 완료!": {
-    "en": "%s merged!",
-    "zh_CN": "%s合成完成！",
-    "ja": "%sを合成しました！"
-  },
-  "지금 도전할 수 없습니다": {
-    "en": "Cannot challenge right now",
-    "zh_CN": "现在无法挑战",
-    "ja": "今は挑戦できません"
-  },
-  "빈 칸이 없습니다": {
-    "en": "No empty slots",
-    "zh_CN": "没有空位",
-    "ja": "空きがありません"
-  },
-  "%d성 영입 성공!": {
-    "en": "Recruited a %d-star mercenary!",
-    "zh_CN": "成功招募%d星佣兵！",
-    "ja": "星%dの傭兵を獲得！"
-  },
-  "도전 실패 · 보상 없음": {
-    "en": "Challenge failed · No reward",
-    "zh_CN": "挑战失败 · 无奖励",
-    "ja": "挑戦失敗 · 報酬なし"
-  },
-  "강화할 수 없습니다": {
-    "en": "Cannot upgrade",
-    "zh_CN": "无法强化",
-    "ja": "強化できません"
-  },
-  "최대 강화입니다": {
-    "en": "Already fully upgraded",
-    "zh_CN": "已达到最高强化",
-    "ja": "すでに最大まで強化済みです"
-  },
-  "%d성 공통 공격력 강화!": {
-    "en": "All %d-star mercenaries gain attack power!",
-    "zh_CN": "全体%d星佣兵攻击力提升！",
-    "ja": "星%dの傭兵全員の攻撃力が上昇！"
-  },
-  "소환할 수 없습니다": {
-    "en": "Cannot summon",
-    "zh_CN": "无法召唤",
-    "ja": "召喚できません"
-  },
-  "해당 웨이브를 완료하면 해금됩니다": {
-    "en": "Unlocks after completing this wave",
-    "zh_CN": "完成当前波次后解锁",
-    "ja": "このウェーブをクリアすると解放されます"
-  },
-  "아직 재소환 대기 중입니다": {
-    "en": "Summon cooldown is still active",
-    "zh_CN": "召唤冷却尚未结束",
-    "ja": "再召喚まで待機時間が残っています"
-  },
-  "%s 출현 · 처치하고 보상을 받으세요": {
-    "en": "%s appears · Defeat it for a reward",
-    "zh_CN": "%s出现了 · 击败它领取奖励",
-    "ja": "%sが出現 · 倒して報酬を受け取りましょう"
-  },
-  "전장의 적이 %d마리에 도달했습니다": {
-    "en": "The battlefield has reached %d enemies",
-    "zh_CN": "战场敌人已达到%d只",
-    "ja": "戦場の敵が%d体に達しました"
-  },
-  "마왕을 처치했습니다": {
-    "en": "The Demon King has been defeated",
-    "zh_CN": "魔王已被击败",
-    "ja": "魔王を討伐しました"
-  },
-  "마왕이 탈출했습니다": {
-    "en": "The Demon King escaped",
-    "zh_CN": "魔王逃脱了",
-    "ja": "魔王に逃げられました"
-  },
-  "길드를 지킬 목숨이 남지 않았습니다": {
-    "en": "No lives remain to defend the guild",
-    "zh_CN": "已没有生命可用于守卫公会",
-    "ja": "ギルドを守る残りライフがありません"
-  },
-  "기록 파일 형식이 맞지 않습니다. 원본을 보존했습니다.": {
-    "en": "The profile file has an invalid format. The original has been preserved.",
-    "zh_CN": "档案文件格式无效。原文件已保留。",
-    "ja": "プロフィールの形式が正しくありません。元のファイルは保持されています。"
-  },
-  "손상된 저장을 격리하지 못했습니다. 원본을 보존합니다.": {
-    "en": "Could not quarantine the damaged save. The original is being preserved.",
-    "zh_CN": "无法隔离损坏的存档。原文件将保留。",
-    "ja": "破損したセーブを隔離できませんでした。元のデータを保持します。"
-  },
-  "저장 파일을 읽을 수 없습니다. 원본을 보존했습니다.": {
-    "en": "Could not read the save file. The original has been preserved.",
-    "zh_CN": "无法读取存档。原文件已保留。",
-    "ja": "セーブデータを読み込めません。元のファイルは保持されています。"
-  },
-  "저장 공간에 쓸 수 없습니다. 이전 기록은 유지됩니다.": {
-    "en": "Could not write to storage. The previous save is unchanged.",
-    "zh_CN": "无法写入存储空间。之前的存档未更改。",
-    "ja": "保存領域に書き込めません。前回のデータは保持されています。"
-  },
-  "저장 도중 오류가 발생했습니다.": {
-    "en": "An error occurred while saving.",
-    "zh_CN": "保存时发生错误。",
-    "ja": "保存中にエラーが発生しました。"
-  },
-  "이전 저장의 백업을 만들 수 없습니다.": {
-    "en": "Could not back up the previous save.",
-    "zh_CN": "无法备份之前的存档。",
-    "ja": "以前のセーブデータをバックアップできません。"
-  },
-  "저장 파일을 교체할 수 없습니다.": {
-    "en": "Could not replace the save file.",
-    "zh_CN": "无法替换存档文件。",
-    "ja": "セーブファイルを置き換えられません。"
-  },
-  "근접": {
-    "en": "Melee",
-    "zh_CN": "近战",
-    "ja": "近接"
-  },
-  "원거리": {
-    "en": "Ranged",
-    "zh_CN": "远程",
-    "ja": "遠距離"
-  },
-  "범위": {
-    "en": "Area",
-    "zh_CN": "范围",
-    "ja": "範囲"
-  },
-  "단일": {
-    "en": "Single Target",
-    "zh_CN": "单体",
-    "ja": "単体"
-  },
-  "공격": {
-    "en": "Attack",
-    "zh_CN": "攻击",
-    "ja": "攻撃"
-  },
-  "지원": {
-    "en": "Support",
-    "zh_CN": "辅助",
-    "ja": "支援"
-  },
-  "공격 + 지원": {
-    "en": "Attack + Support",
-    "zh_CN": "攻击 + 辅助",
-    "ja": "攻撃 + 支援"
-  },
-  "둔화 %d%% · %s초": {
-    "en": "Slow %d%% · %s sec",
-    "zh_CN": "减速 %d%% · %s 秒",
-    "ja": "スロウ %d%% · %s秒"
-  },
-  "기절 %s초": {
-    "en": "Stun %s sec",
-    "zh_CN": "眩晕 %s 秒",
-    "ja": "スタン %s秒"
-  },
-  "사거리 내 아군 공격력 +%d%%": {
-    "en": "Allies in range gain +%d%% attack",
-    "zh_CN": "射程内友军攻击力 +%d%%",
-    "ja": "射程内の味方の攻撃力 +%d%%"
-  },
-  "길드 검사": {
-    "en": "Guild Swordsman",
-    "zh_CN": "公会剑士",
-    "ja": "ギルドの剣士"
-  },
-  "가까운 적을 안정적으로 베는 기본 전사.": {
-    "en": "A steady swordsman who cuts down nearby foes.",
-    "zh_CN": "稳稳斩击近处敌人的基础战士。",
-    "ja": "近くの敵を着実に斬る、基本の戦士。"
-  },
-  "숲길 궁수": {
-    "en": "Forestpath Archer",
-    "zh_CN": "林径弓手",
-    "ja": "森道の弓兵"
-  },
-  "긴 사거리에서 화살을 발사한다.": {
-    "en": "Fires arrows from long range.",
-    "zh_CN": "从远处射出箭矢。",
-    "ja": "遠距離から矢を放つ。"
-  },
-  "견습 마도사": {
-    "en": "Apprentice Mage",
-    "zh_CN": "见习法师",
-    "ja": "見習い魔導士"
-  },
-  "작은 폭발을 일으켜 주변 적도 공격한다.": {
-    "en": "Creates a small blast that also hits nearby foes.",
-    "zh_CN": "引发小型爆炸，也会攻击周围敌人。",
-    "ja": "小さな爆発で周囲の敵にも攻撃する。"
-  },
-  "수도사": {
-    "en": "Monk",
-    "zh_CN": "武僧",
-    "ja": "修道士"
-  },
-  "짧은 타격으로 적의 이동을 잠시 멈춘다.": {
-    "en": "Briefly stops a foe with a quick strike.",
-    "zh_CN": "以迅捷一击短暂阻止敌人行动。",
-    "ja": "素早い一撃で敵の動きを一時止める。"
-  },
-  "길드 사제": {
-    "en": "Guild Priest",
-    "zh_CN": "公会祭司",
-    "ja": "ギルドの司祭"
-  },
-  "성광으로 공격하며 주변 용병의 화력을 조금 높인다.": {
-    "en": "Attacks with holy light and slightly boosts nearby mercenaries’ damage.",
-    "zh_CN": "以圣光攻击，并小幅提升附近佣兵的攻击力。",
-    "ja": "聖光で攻撃し、周囲の傭兵の攻撃力を少し高める。"
-  },
-  "늪지 약제사": {
-    "en": "Marsh Apothecary",
-    "zh_CN": "沼泽药剂师",
-    "ja": "沼地の薬師"
-  },
-  "끈적한 약제를 던져 적의 이동을 늦춘다.": {
-    "en": "Throws a sticky concoction that slows foes.",
-    "zh_CN": "投掷黏稠药剂，减缓敌人行动。",
-    "ja": "粘着性の薬剤を投げ、敵の動きを遅くする。"
-  },
-  "왕실 창기사": {
-    "en": "Royal Lancer",
-    "zh_CN": "皇家枪骑兵",
-    "ja": "王室の槍騎士"
-  },
-  "갑옷을 갖춘 창으로 빠르게 찌른다.": {
-    "en": "An armored lancer who strikes swiftly.",
-    "zh_CN": "披甲枪骑兵迅速突刺。",
-    "ja": "鎧をまとった槍騎士が素早く突く。"
-  },
-  "룬 저격수": {
-    "en": "Rune Sniper",
-    "zh_CN": "符文狙击手",
-    "ja": "ルーンの狙撃手"
-  },
-  "룬 화살로 먼 적을 겨냥한다.": {
-    "en": "Targets distant foes with rune arrows.",
-    "zh_CN": "以符文箭瞄准远处的敌人。",
-    "ja": "ルーンの矢で遠くの敵を狙う。"
-  },
-  "전쟁 북장이": {
-    "en": "War Drummer",
-    "zh_CN": "战鼓手",
-    "ja": "戦太鼓の奏者"
-  },
-  "북의 충격파로 적을 멈추고 용병의 화력을 북돋운다.": {
-    "en": "Stops foes with drum shockwaves and rallies mercenary damage.",
-    "zh_CN": "以战鼓冲击波阻止敌人，并鼓舞佣兵提升攻击力。",
-    "ja": "太鼓の衝撃波で敵を止め、傭兵の攻撃力を鼓舞する。"
-  },
-  "설원 사냥꾼": {
-    "en": "Snowfield Hunter",
-    "zh_CN": "雪原猎手",
-    "ja": "雪原の狩人"
-  },
-  "빙결 덫으로 적의 이동을 늦춘다.": {
-    "en": "Slows foes with a freezing trap.",
-    "zh_CN": "用冰冻陷阱减缓敌人行动。",
-    "ja": "凍結罠で敵の動きを遅くする。"
-  },
-  "철갑 수호자": {
-    "en": "Ironclad Guardian",
-    "zh_CN": "铁甲守卫",
-    "ja": "鉄甲の守護者"
-  },
-  "넓은 철퇴 공격으로 주변 적에게 피해를 준다.": {
-    "en": "Strikes with a broad mace swing, damaging nearby foes.",
-    "zh_CN": "挥动宽大的铁锤，对周围敌人造成伤害。",
-    "ja": "大きく鉄槌を振り、周囲の敵にダメージを与える。"
-  },
-  "폭풍 검무가": {
-    "en": "Stormblade Dancer",
-    "zh_CN": "风暴剑舞者",
-    "ja": "嵐刃の舞い手"
-  },
-  "빠른 검무로 가까운 적 무리를 베어낸다.": {
-    "en": "Cuts through nearby groups with a swift sword dance.",
-    "zh_CN": "以迅捷剑舞斩击近处的敌群。",
-    "ja": "素早い剣舞で近くの敵の群れを斬る。"
-  },
-  "대현자": {
-    "en": "Archsage",
-    "zh_CN": "大贤者",
-    "ja": "大賢者"
-  },
-  "비전 폭발로 적 무리를 공격하고 잠시 둔화시킨다.": {
-    "en": "Blasts groups with arcane power and briefly slows them.",
-    "zh_CN": "以奥术爆发攻击敌群，并短暂减缓其行动。",
-    "ja": "秘術の爆発で敵の群れを攻撃し、一時的に遅くする。"
-  },
-  "황금 고블린": {
-    "en": "Golden Goblin",
-    "zh_CN": "黄金哥布林",
-    "ja": "黄金のゴブリン"
-  },
-  "황금 토템의 오라로 주변 용병의 공격력을 높인다.": {
-    "en": "Raises nearby mercenaries’ damage with a golden totem aura.",
-    "zh_CN": "以黄金图腾光环提升附近佣兵的攻击力。",
-    "ja": "黄金のトーテムのオーラで周囲の傭兵の攻撃力を高める。"
-  },
-  "용암 거인": {
-    "en": "Lava Giant",
-    "zh_CN": "熔岩巨人",
-    "ja": "溶岩の巨人"
-  },
-  "용암 망치로 넓은 범위를 강타한다.": {
-    "en": "Slams a wide area with a lava hammer.",
-    "zh_CN": "用熔岩之锤猛击一大片区域。",
-    "ja": "溶岩の槌で広い範囲を叩きつける。"
-  },
-  "고대 비룡": {
-    "en": "Ancient Drake",
-    "zh_CN": "古代飞龙",
-    "ja": "古代の飛竜"
-  },
-  "용의 숨결로 원거리의 적 무리를 공격한다.": {
-    "en": "Attacks distant groups with dragon breath.",
-    "zh_CN": "以龙息攻击远处的敌群。",
-    "ja": "竜の息吹で遠くの敵の群れを攻撃する。"
-  },
-  "해적 총잡이": {
-    "en": "Pirate Gunslinger",
-    "zh_CN": "海盗枪手",
-    "ja": "海賊の銃士"
-  },
-  "오래된 화승총으로 멀리 있는 적을 저격한다.": {
-    "en": "Picks off distant foes with an old matchlock.",
-    "zh_CN": "用老式火绳枪狙击远处的敌人。",
-    "ja": "古い火縄銃で遠くの敵を狙撃する。"
-  },
-  "황혼 주술사": {
-    "en": "Dusk Shaman",
-    "zh_CN": "暮色萨满",
-    "ja": "黄昏の呪術師"
-  },
-  "황혼의 저주로 작은 무리의 발걸음을 늦춘다.": {
-    "en": "Slows small groups with a dusk curse.",
-    "zh_CN": "以黄昏诅咒减缓小群敌人的脚步。",
-    "ja": "黄昏の呪いで小さな敵の群れを遅くする。"
-  },
-  "수정 정령": {
-    "en": "Crystal Spirit",
-    "zh_CN": "水晶精灵",
-    "ja": "水晶の精霊"
-  },
-  "맑은 수정 파동으로 한 적을 잠시 멈춘다.": {
-    "en": "Briefly halts one foe with a clear crystal pulse.",
-    "zh_CN": "以清澈的水晶波暂时定住一名敌人。",
-    "ja": "澄んだ水晶の波動で敵一体を一時止める。"
-  },
-  "사막 투창병": {
-    "en": "Desert Javeliner",
-    "zh_CN": "沙漠投矛手",
-    "ja": "砂漠の投槍兵"
-  },
-  "긴 투창을 연달아 날려 단일 적을 추격한다.": {
-    "en": "Hurls a series of long javelins at a single foe.",
-    "zh_CN": "连续投出长矛追击单个敌人。",
-    "ja": "長い投槍を連続で放ち、敵一体を追撃する。"
-  },
-  "성채 연금술사": {
-    "en": "Citadel Alchemist",
-    "zh_CN": "城堡炼金术师",
-    "ja": "城塞の錬金術師"
-  },
-  "연금 수류탄으로 밀집한 적을 공격한다.": {
-    "en": "Hits clustered foes with an alchemical grenade.",
-    "zh_CN": "用炼金手榴弹攻击聚集的敌人。",
-    "ja": "錬金術の手榴弾で密集した敵を攻撃する。"
-  },
-  "은빛 성기사": {
-    "en": "Silver Paladin",
-    "zh_CN": "银色圣骑士",
-    "ja": "銀の聖騎士"
-  },
-  "은빛 망치로 가까운 적을 짧게 멈춘다.": {
-    "en": "Briefly stuns a nearby foe with a silver hammer.",
-    "zh_CN": "以银锤短暂击晕近处的敌人。",
-    "ja": "銀の槌で近くの敵を短時間気絶させる。"
-  },
-  "독안개 현자": {
-    "en": "Venommist Sage",
-    "zh_CN": "毒雾贤者",
-    "ja": "毒霧の賢者"
-  },
-  "짙은 독안개로 적 무리를 느리게 만든다.": {
-    "en": "Slows groups with a dense venom mist.",
-    "zh_CN": "以浓密毒雾减缓敌群行动。",
-    "ja": "濃い毒霧で敵の群れを遅くする。"
-  },
-  "천둥 사수": {
-    "en": "Thunder Marksman",
-    "zh_CN": "雷霆射手",
-    "ja": "雷鳴の射手"
-  },
-  "충전된 번개 화살로 먼 적을 꿰뚫는다.": {
-    "en": "Pierces distant foes with charged lightning arrows.",
-    "zh_CN": "以充能雷箭贯穿远处敌人。",
-    "ja": "帯電した雷の矢で遠くの敵を貫く。"
-  },
-  "얼음 무희": {
-    "en": "Frostblade Dancer",
-    "zh_CN": "冰刃舞者",
-    "ja": "氷刃の舞い手"
-  },
-  "차가운 칼춤으로 작은 무리를 붙잡는다.": {
-    "en": "Pins down small groups with a chilling blade dance.",
-    "zh_CN": "以寒冷刀舞牵制小群敌人。",
-    "ja": "冷たい刃の舞で小さな群れを足止めする。"
-  },
-  "철혈 사령관": {
-    "en": "Ironblood Commander",
-    "zh_CN": "铁血指挥官",
-    "ja": "鉄血の指揮官"
-  },
-  "전투 깃발로 주변 용병의 공격력을 높인다.": {
-    "en": "Raises nearby mercenaries’ damage with a battle standard.",
-    "zh_CN": "以战旗提升附近佣兵的攻击力。",
-    "ja": "軍旗で周囲の傭兵の攻撃力を高める。"
-  },
-  "그림자 검객": {
-    "en": "Shadow Swordsman",
-    "zh_CN": "暗影剑客",
-    "ja": "影の剣士"
-  },
-  "빠른 연속 베기로 가까운 강적을 노린다.": {
-    "en": "Targets nearby strong foes with rapid slashes.",
-    "zh_CN": "以快速连斩瞄准近处的强敌。",
-    "ja": "素早い連続斬りで近くの強敵を狙う。"
-  },
-  "태양 사제": {
-    "en": "Sun Priest",
-    "zh_CN": "太阳祭司",
-    "ja": "太陽の司祭"
-  },
-  "따뜻한 빛의 파동으로 적을 공격하고 전열을 돕는다.": {
-    "en": "Attacks with a warm wave of light and supports the frontline.",
-    "zh_CN": "以温暖的光波攻击敌人并支援前线。",
-    "ja": "温かな光の波で敵を攻撃し、前線を支える。"
-  },
-  "별빛 도사": {
-    "en": "Starlight Adept",
-    "zh_CN": "星辉道士",
-    "ja": "星明かりの道士"
-  },
-  "별의 인장으로 멀리 있는 적을 멈춘다.": {
-    "en": "Halts distant foes with a star sigil.",
-    "zh_CN": "以星之印记定住远处的敌人。",
-    "ja": "星の印で遠くの敵を止める。"
-  },
-  "숲의 파수꾼": {
-    "en": "Forest Warden",
-    "zh_CN": "森林守望者",
-    "ja": "森の番人"
-  },
-  "숲의 짐승이 덩굴을 뻗어 적의 이동을 방해한다.": {
-    "en": "A forest beast lashes out with vines to hinder foes.",
-    "zh_CN": "森林野兽伸出藤蔓阻碍敌人行动。",
-    "ja": "森の獣がツタを伸ばし、敵の動きを妨げる。"
-  },
-  "폭풍 군주": {
-    "en": "Storm Lord",
-    "zh_CN": "风暴领主",
-    "ja": "嵐の君主"
-  },
-  "벼락을 내려 먼 무리 전체를 타격한다.": {
-    "en": "Calls down lightning on a distant group.",
-    "zh_CN": "召下雷霆打击远处整群敌人。",
-    "ja": "遠くの敵の群れに雷を落とす。"
-  },
-  "월식 여왕": {
-    "en": "Eclipse Queen",
-    "zh_CN": "月蚀女王",
-    "ja": "月蝕の女王"
-  },
-  "달의 거미줄로 적 무리를 느리게 만든다.": {
-    "en": "Slows enemy groups with a lunar web.",
-    "zh_CN": "以月之蛛网减缓敌群行动。",
-    "ja": "月の蜘蛛糸で敵の群れを遅くする。"
-  },
-  "성역 수호룡": {
-    "en": "Sanctuary Dragon",
-    "zh_CN": "圣域守护龙",
-    "ja": "聖域の守護竜"
-  },
-  "성역의 숨결로 공격하며 넓은 전열을 강화한다.": {
-    "en": "Attacks with a sanctuary breath and strengthens a wide frontline.",
-    "zh_CN": "以圣域吐息攻击，并强化较大范围的前线。",
-    "ja": "聖域の息吹で攻撃し、広い前線を強化する。"
-  },
-  "시간의 관측자": {
-    "en": "Timekeeper",
-    "zh_CN": "时间观测者",
-    "ja": "時の観測者"
-  },
-  "시간의 고리로 적의 발걸음을 여러 번 끊는다.": {
-    "en": "Disrupts enemy movement repeatedly with a ring of time.",
-    "zh_CN": "以时间之环多次打断敌人的行动。",
-    "ja": "時の輪で敵の足取りを何度も止める。"
-  },
-  "고블린 정찰병": {
-    "en": "Goblin Scout",
-    "zh_CN": "哥布林斥候",
-    "ja": "ゴブリン斥候"
-  },
-  "늑대 약탈자": {
-    "en": "Wolf Raider",
-    "zh_CN": "狼族掠袭者",
-    "ja": "狼の略奪者"
-  },
-  "슬라임": {
-    "en": "Slime",
-    "zh_CN": "史莱姆",
-    "ja": "スライム"
-  },
-  "해골 전사": {
-    "en": "Skeleton Warrior",
-    "zh_CN": "骷髅战士",
-    "ja": "スケルトン戦士"
-  },
-  "거미 추적자": {
-    "en": "Spider Stalker",
-    "zh_CN": "蜘蛛追猎者",
-    "ja": "クモの追跡者"
-  },
-  "숲의 망령": {
-    "en": "Forest Wraith",
-    "zh_CN": "森林幽魂",
-    "ja": "森の亡霊"
-  },
-  "오크 돌격병": {
-    "en": "Orc Charger",
-    "zh_CN": "兽人冲锋兵",
-    "ja": "オーク突撃兵"
-  },
-  "어린 와이번": {
-    "en": "Young Wyvern",
-    "zh_CN": "幼年飞龙",
-    "ja": "幼いワイバーン"
-  },
-  "가시 멧돼지": {
-    "en": "Bristle Boar",
-    "zh_CN": "棘刺野猪",
-    "ja": "トゲイノシシ"
-  },
-  "동굴 박쥐": {
-    "en": "Cave Bat",
-    "zh_CN": "洞穴蝙蝠",
-    "ja": "洞窟コウモリ"
-  },
-  "붉은 도적": {
-    "en": "Red Bandit",
-    "zh_CN": "赤衣盗匪",
-    "ja": "赤い盗賊"
-  },
-  "늪 거머리": {
-    "en": "Marsh Leech",
-    "zh_CN": "沼泽水蛭",
-    "ja": "沼地のヒル"
-  },
-  "바위 게": {
-    "en": "Rock Crab",
-    "zh_CN": "岩蟹",
-    "ja": "岩ガニ"
-  },
-  "불꽃 정령": {
-    "en": "Flame Spirit",
-    "zh_CN": "火焰精灵",
-    "ja": "炎の精霊"
-  },
-  "회색 늑대": {
-    "en": "Gray Wolf",
-    "zh_CN": "灰狼",
-    "ja": "灰色オオカミ"
-  },
-  "장갑 고블린": {
-    "en": "Armored Goblin",
-    "zh_CN": "装甲哥布林",
-    "ja": "鎧ゴブリン"
-  },
-  "서리 슬라임": {
-    "en": "Frost Slime",
-    "zh_CN": "冰霜史莱姆",
-    "ja": "霜のスライム"
-  },
-  "밤의 추적자": {
-    "en": "Night Stalker",
-    "zh_CN": "夜行追猎者",
-    "ja": "夜の追跡者"
-  },
-  "독거미": {
-    "en": "Venom Spider",
-    "zh_CN": "毒蜘蛛",
-    "ja": "毒グモ"
-  },
-  "고대 골렘": {
-    "en": "Ancient Golem",
-    "zh_CN": "古代魔像",
-    "ja": "古代のゴーレム"
-  },
-  "사막 전갈": {
-    "en": "Desert Scorpion",
-    "zh_CN": "沙漠蝎",
-    "ja": "砂漠のサソリ"
-  },
-  "유령 기사": {
-    "en": "Ghost Knight",
-    "zh_CN": "幽灵骑士",
-    "ja": "亡霊騎士"
-  },
-  "붉은 와이번": {
-    "en": "Red Wyvern",
-    "zh_CN": "赤红飞龙",
-    "ja": "赤いワイバーン"
-  },
-  "얼음 거수": {
-    "en": "Frost Colossus",
-    "zh_CN": "冰霜巨兽",
-    "ja": "氷の巨獣"
-  },
-  "맹독 슬라임": {
-    "en": "Toxic Slime",
-    "zh_CN": "剧毒史莱姆",
-    "ja": "猛毒スライム"
-  },
-  "화산 투사": {
-    "en": "Volcanic Brawler",
-    "zh_CN": "火山斗士",
-    "ja": "火山の闘士"
-  },
-  "황혼 정령": {
-    "en": "Dusk Spirit",
-    "zh_CN": "黄昏精灵",
-    "ja": "黄昏の精霊"
-  },
-  "칼날 사마귀": {
-    "en": "Blade Mantis",
-    "zh_CN": "刃螳螂",
-    "ja": "刃カマキリ"
-  },
-  "검은 사냥개": {
-    "en": "Black Hound",
-    "zh_CN": "黑猎犬",
-    "ja": "黒い猟犬"
-  },
-  "폐허 주술사": {
-    "en": "Ruin Shaman",
-    "zh_CN": "废墟萨满",
-    "ja": "廃墟の呪術師"
-  },
-  "구름 해파리": {
-    "en": "Cloud Jellyfish",
-    "zh_CN": "云海蜇",
-    "ja": "雲クラゲ"
-  },
-  "철갑 거북": {
-    "en": "Ironback Turtle",
-    "zh_CN": "铁甲龟",
-    "ja": "鉄甲ガメ"
-  },
-  "불사조의 잔영": {
-    "en": "Phoenix Echo",
-    "zh_CN": "凤凰残影",
-    "ja": "不死鳥の残影"
-  },
-  "심연의 문어": {
-    "en": "Abyssal Octopus",
-    "zh_CN": "深渊章鱼",
-    "ja": "深淵のタコ"
-  },
-  "흑요석 거인": {
-    "en": "Obsidian Giant",
-    "zh_CN": "黑曜石巨人",
-    "ja": "黒曜石の巨人"
-  },
-  "달빛 망령": {
-    "en": "Moonlit Wraith",
-    "zh_CN": "月光幽魂",
-    "ja": "月明かりの亡霊"
-  },
-  "수정 용": {
-    "en": "Crystal Dragon",
-    "zh_CN": "水晶龙",
-    "ja": "水晶の竜"
-  },
-  "균열 수호병": {
-    "en": "Rift Sentinel",
-    "zh_CN": "裂隙守卫",
-    "ja": "裂け目の守衛"
-  },
-  "마왕의 전령": {
-    "en": "Demon King’s Herald",
-    "zh_CN": "魔王使者",
-    "ja": "魔王の伝令"
-  },
-  "공허 비룡": {
-    "en": "Void Drake",
-    "zh_CN": "虚空飞龙",
-    "ja": "虚無の飛竜"
-  },
-  "도보 도적왕": {
+  "enemy.b10.name": {
     "en": "Bandit King",
+    "ko": "도보 도적왕",
     "zh_CN": "盗匪王",
     "ja": "盗賊王"
   },
-  "숲의 거목": {
-    "en": "Forest Elderwood",
-    "zh_CN": "森林古树",
-    "ja": "森の古木"
-  },
-  "거미 여왕": {
-    "en": "Spider Queen",
-    "zh_CN": "蜘蛛女王",
-    "ja": "クモの女王"
-  },
-  "심연의 망령": {
-    "en": "Abyss Wraith",
-    "zh_CN": "深渊幽魂",
-    "ja": "深淵の亡霊"
-  },
-  "고대 슬라임": {
-    "en": "Ancient Slime",
-    "zh_CN": "古代史莱姆",
-    "ja": "古代のスライム"
-  },
-  "빙설 거수": {
-    "en": "Glacier Colossus",
-    "zh_CN": "冰雪巨兽",
-    "ja": "氷雪の巨獣"
-  },
-  "화산 거인": {
-    "en": "Volcanic Giant",
-    "zh_CN": "火山巨人",
-    "ja": "火山の巨人"
-  },
-  "폭풍 와이번": {
-    "en": "Storm Wyvern",
-    "zh_CN": "风暴飞龙",
-    "ja": "嵐のワイバーン"
-  },
-  "타락한 용기사": {
-    "en": "Fallen Dragon Knight",
-    "zh_CN": "堕落龙骑士",
-    "ja": "堕ちた竜騎士"
-  },
-  "마왕": {
+  "enemy.b100.name": {
     "en": "Demon King",
+    "ko": "마왕",
     "zh_CN": "魔王",
     "ja": "魔王"
   },
-  "골드 고블린": {
+  "enemy.b20.name": {
+    "en": "Forest Elderwood",
+    "ko": "숲의 거목",
+    "zh_CN": "森林古树",
+    "ja": "森の古木"
+  },
+  "enemy.b30.name": {
+    "en": "Spider Queen",
+    "ko": "거미 여왕",
+    "zh_CN": "蜘蛛女王",
+    "ja": "クモの女王"
+  },
+  "enemy.b40.name": {
+    "en": "Abyss Wraith",
+    "ko": "심연의 망령",
+    "zh_CN": "深渊幽魂",
+    "ja": "深淵の亡霊"
+  },
+  "enemy.b50.name": {
+    "en": "Ancient Slime",
+    "ko": "고대 슬라임",
+    "zh_CN": "古代史莱姆",
+    "ja": "古代のスライム"
+  },
+  "enemy.b60.name": {
+    "en": "Glacier Colossus",
+    "ko": "빙설 거수",
+    "zh_CN": "冰雪巨兽",
+    "ja": "氷雪の巨獣"
+  },
+  "enemy.b70.name": {
+    "en": "Volcanic Giant",
+    "ko": "화산 거인",
+    "zh_CN": "火山巨人",
+    "ja": "火山の巨人"
+  },
+  "enemy.b80.name": {
+    "en": "Storm Wyvern",
+    "ko": "폭풍 와이번",
+    "zh_CN": "风暴飞龙",
+    "ja": "嵐のワイバーン"
+  },
+  "enemy.b90.name": {
+    "en": "Fallen Dragon Knight",
+    "ko": "타락한 용기사",
+    "zh_CN": "堕落龙骑士",
+    "ja": "堕ちた竜騎士"
+  },
+  "enemy.n01.name": {
+    "en": "Goblin Scout",
+    "ko": "고블린 정찰병",
+    "zh_CN": "哥布林斥候",
+    "ja": "ゴブリン斥候"
+  },
+  "enemy.n02.name": {
+    "en": "Wolf Raider",
+    "ko": "늑대 약탈자",
+    "zh_CN": "狼族掠袭者",
+    "ja": "狼の略奪者"
+  },
+  "enemy.n03.name": {
+    "en": "Slime",
+    "ko": "슬라임",
+    "zh_CN": "史莱姆",
+    "ja": "スライム"
+  },
+  "enemy.n04.name": {
+    "en": "Skeleton Warrior",
+    "ko": "해골 전사",
+    "zh_CN": "骷髅战士",
+    "ja": "スケルトン戦士"
+  },
+  "enemy.n05.name": {
+    "en": "Spider Stalker",
+    "ko": "거미 추적자",
+    "zh_CN": "蜘蛛追猎者",
+    "ja": "クモの追跡者"
+  },
+  "enemy.n06.name": {
+    "en": "Forest Wraith",
+    "ko": "숲의 망령",
+    "zh_CN": "森林幽魂",
+    "ja": "森の亡霊"
+  },
+  "enemy.n07.name": {
+    "en": "Orc Charger",
+    "ko": "오크 돌격병",
+    "zh_CN": "兽人冲锋兵",
+    "ja": "オーク突撃兵"
+  },
+  "enemy.n08.name": {
+    "en": "Young Wyvern",
+    "ko": "어린 와이번",
+    "zh_CN": "幼年飞龙",
+    "ja": "幼いワイバーン"
+  },
+  "enemy.n09.name": {
+    "en": "Bristle Boar",
+    "ko": "가시 멧돼지",
+    "zh_CN": "棘刺野猪",
+    "ja": "トゲイノシシ"
+  },
+  "enemy.n10.name": {
+    "en": "Cave Bat",
+    "ko": "동굴 박쥐",
+    "zh_CN": "洞穴蝙蝠",
+    "ja": "洞窟コウモリ"
+  },
+  "enemy.n11.name": {
+    "en": "Red Bandit",
+    "ko": "붉은 도적",
+    "zh_CN": "赤衣盗匪",
+    "ja": "赤い盗賊"
+  },
+  "enemy.n12.name": {
+    "en": "Marsh Leech",
+    "ko": "늪 거머리",
+    "zh_CN": "沼泽水蛭",
+    "ja": "沼地のヒル"
+  },
+  "enemy.n13.name": {
+    "en": "Rock Crab",
+    "ko": "바위 게",
+    "zh_CN": "岩蟹",
+    "ja": "岩ガニ"
+  },
+  "enemy.n14.name": {
+    "en": "Flame Spirit",
+    "ko": "불꽃 정령",
+    "zh_CN": "火焰精灵",
+    "ja": "炎の精霊"
+  },
+  "enemy.n15.name": {
+    "en": "Gray Wolf",
+    "ko": "회색 늑대",
+    "zh_CN": "灰狼",
+    "ja": "灰色オオカミ"
+  },
+  "enemy.n16.name": {
+    "en": "Armored Goblin",
+    "ko": "장갑 고블린",
+    "zh_CN": "装甲哥布林",
+    "ja": "鎧ゴブリン"
+  },
+  "enemy.n17.name": {
+    "en": "Frost Slime",
+    "ko": "서리 슬라임",
+    "zh_CN": "冰霜史莱姆",
+    "ja": "霜のスライム"
+  },
+  "enemy.n18.name": {
+    "en": "Night Stalker",
+    "ko": "밤의 추적자",
+    "zh_CN": "夜行追猎者",
+    "ja": "夜の追跡者"
+  },
+  "enemy.n19.name": {
+    "en": "Venom Spider",
+    "ko": "독거미",
+    "zh_CN": "毒蜘蛛",
+    "ja": "毒グモ"
+  },
+  "enemy.n20.name": {
+    "en": "Ancient Golem",
+    "ko": "고대 골렘",
+    "zh_CN": "古代魔像",
+    "ja": "古代のゴーレム"
+  },
+  "enemy.n21.name": {
+    "en": "Desert Scorpion",
+    "ko": "사막 전갈",
+    "zh_CN": "沙漠蝎",
+    "ja": "砂漠のサソリ"
+  },
+  "enemy.n22.name": {
+    "en": "Ghost Knight",
+    "ko": "유령 기사",
+    "zh_CN": "幽灵骑士",
+    "ja": "亡霊騎士"
+  },
+  "enemy.n23.name": {
+    "en": "Red Wyvern",
+    "ko": "붉은 와이번",
+    "zh_CN": "赤红飞龙",
+    "ja": "赤いワイバーン"
+  },
+  "enemy.n24.name": {
+    "en": "Frost Colossus",
+    "ko": "얼음 거수",
+    "zh_CN": "冰霜巨兽",
+    "ja": "氷の巨獣"
+  },
+  "enemy.n25.name": {
+    "en": "Toxic Slime",
+    "ko": "맹독 슬라임",
+    "zh_CN": "剧毒史莱姆",
+    "ja": "猛毒スライム"
+  },
+  "enemy.n26.name": {
+    "en": "Volcanic Brawler",
+    "ko": "화산 투사",
+    "zh_CN": "火山斗士",
+    "ja": "火山の闘士"
+  },
+  "enemy.n27.name": {
+    "en": "Dusk Spirit",
+    "ko": "황혼 정령",
+    "zh_CN": "黄昏精灵",
+    "ja": "黄昏の精霊"
+  },
+  "enemy.n28.name": {
+    "en": "Blade Mantis",
+    "ko": "칼날 사마귀",
+    "zh_CN": "刃螳螂",
+    "ja": "刃カマキリ"
+  },
+  "enemy.n29.name": {
+    "en": "Black Hound",
+    "ko": "검은 사냥개",
+    "zh_CN": "黑猎犬",
+    "ja": "黒い猟犬"
+  },
+  "enemy.n30.name": {
+    "en": "Ruin Shaman",
+    "ko": "폐허 주술사",
+    "zh_CN": "废墟萨满",
+    "ja": "廃墟の呪術師"
+  },
+  "enemy.n31.name": {
+    "en": "Cloud Jellyfish",
+    "ko": "구름 해파리",
+    "zh_CN": "云海蜇",
+    "ja": "雲クラゲ"
+  },
+  "enemy.n32.name": {
+    "en": "Ironback Turtle",
+    "ko": "철갑 거북",
+    "zh_CN": "铁甲龟",
+    "ja": "鉄甲ガメ"
+  },
+  "enemy.n33.name": {
+    "en": "Phoenix Echo",
+    "ko": "불사조의 잔영",
+    "zh_CN": "凤凰残影",
+    "ja": "不死鳥の残影"
+  },
+  "enemy.n34.name": {
+    "en": "Abyssal Octopus",
+    "ko": "심연의 문어",
+    "zh_CN": "深渊章鱼",
+    "ja": "深淵のタコ"
+  },
+  "enemy.n35.name": {
+    "en": "Obsidian Giant",
+    "ko": "흑요석 거인",
+    "zh_CN": "黑曜石巨人",
+    "ja": "黒曜石の巨人"
+  },
+  "enemy.n36.name": {
+    "en": "Moonlit Wraith",
+    "ko": "달빛 망령",
+    "zh_CN": "月光幽魂",
+    "ja": "月明かりの亡霊"
+  },
+  "enemy.n37.name": {
+    "en": "Crystal Dragon",
+    "ko": "수정 용",
+    "zh_CN": "水晶龙",
+    "ja": "水晶の竜"
+  },
+  "enemy.n38.name": {
+    "en": "Rift Sentinel",
+    "ko": "균열 수호병",
+    "zh_CN": "裂隙守卫",
+    "ja": "裂け目の守衛"
+  },
+  "enemy.n39.name": {
+    "en": "Demon King’s Herald",
+    "ko": "마왕의 전령",
+    "zh_CN": "魔王使者",
+    "ja": "魔王の伝令"
+  },
+  "enemy.n40.name": {
+    "en": "Void Drake",
+    "ko": "공허 비룡",
+    "zh_CN": "虚空飞龙",
+    "ja": "虚無の飛竜"
+  },
+  "enemy.s10.name": {
     "en": "Gold Goblin",
+    "ko": "골드 고블린",
     "zh_CN": "金币哥布林",
     "ja": "ゴールドゴブリン"
   },
-  "도적 두목": {
+  "enemy.s30.name": {
+    "en": "Golden Goblin",
+    "ko": "황금 고블린",
+    "zh_CN": "黄金哥布林",
+    "ja": "黄金のゴブリン"
+  },
+  "enemy.s60.name": {
     "en": "Bandit Chief",
+    "ko": "도적 두목",
     "zh_CN": "盗匪头目",
     "ja": "盗賊の頭"
   },
-  "언어": {
-    "en": "Language",
-    "zh_CN": "语言",
-    "ja": "言語"
+  "error.continue.invalid_save": {
+    "en": "The continue file is damaged or uses a different version. The original has been preserved.",
+    "ko": "이어하기 파일이 손상되었거나 버전이 다릅니다. 원본은 보존됩니다.",
+    "zh_CN": "继续记录已损坏或版本不匹配。原文件已保留。",
+    "ja": "続きのデータが破損しているか、バージョンが異なります。元のデータは保持されています。"
   },
-  "%s 음량": {
-    "en": "%s volume",
-    "zh_CN": "%s音量",
-    "ja": "%sの音量"
+  "error.continue.load_failed": {
+    "en": "Could not load the saved game.",
+    "ko": "이어하기를 불러올 수 없습니다",
+    "zh_CN": "无法读取继续记录。",
+    "ja": "続きのデータを読み込めません。"
   },
-  "%s 켜기": {
-    "en": "Turn on %s",
-    "zh_CN": "开启%s",
-    "ja": "%sをオンにする"
+  "error.game.already_ended": {
+    "en": "This battle has already ended.",
+    "ko": "이미 종료된 전투입니다",
+    "zh_CN": "本场战斗已经结束。",
+    "ja": "この戦闘はすでに終了しています。"
   },
-  "%s 음소거": {
-    "en": "Mute %s",
-    "zh_CN": "静音%s",
-    "ja": "%sをミュート"
+  "error.gold.insufficient": {
+    "en": "Not enough gold",
+    "ko": "골드가 부족합니다",
+    "zh_CN": "金币不足",
+    "ja": "ゴールドが足りません"
   },
-  "VICTORY": {
-    "en": "VICTORY",
-    "zh_CN": "胜利",
-    "ja": "勝利"
+  "error.save.backup_failed": {
+    "en": "Could not back up the previous save.",
+    "ko": "이전 저장의 백업을 만들 수 없습니다.",
+    "zh_CN": "无法备份之前的存档。",
+    "ja": "以前のセーブデータをバックアップできません。"
   },
-  "THE GUILD REMEMBERS": {
+  "error.save.failed": {
+    "en": "An error occurred while saving.",
+    "ko": "저장 도중 오류가 발생했습니다.",
+    "zh_CN": "保存时发生错误。",
+    "ja": "保存中にエラーが発生しました。"
+  },
+  "error.save.profile_invalid": {
+    "en": "The profile file has an invalid format. The original has been preserved.",
+    "ko": "기록 파일 형식이 맞지 않습니다. 원본을 보존했습니다.",
+    "zh_CN": "档案文件格式无效。原文件已保留。",
+    "ja": "プロフィールの形式が正しくありません。元のファイルは保持されています。"
+  },
+  "error.save.quarantine_failed": {
+    "en": "Could not quarantine the damaged save. The original is being preserved.",
+    "ko": "손상된 저장을 격리하지 못했습니다. 원본을 보존합니다.",
+    "zh_CN": "无法隔离损坏的存档。原文件将保留。",
+    "ja": "破損したセーブを隔離できませんでした。元のデータを保持します。"
+  },
+  "error.save.read_failed": {
+    "en": "Could not read the save file. The original has been preserved.",
+    "ko": "저장 파일을 읽을 수 없습니다. 원본을 보존했습니다.",
+    "zh_CN": "无法读取存档。原文件已保留。",
+    "ja": "セーブデータを読み込めません。元のファイルは保持されています。"
+  },
+  "error.save.replace_failed": {
+    "en": "Could not replace the save file.",
+    "ko": "저장 파일을 교체할 수 없습니다.",
+    "zh_CN": "无法替换存档文件。",
+    "ja": "セーブファイルを置き換えられません。"
+  },
+  "error.save.write_failed": {
+    "en": "Could not write to storage. The previous save is unchanged.",
+    "ko": "저장 공간에 쓸 수 없습니다. 이전 기록은 유지됩니다.",
+    "zh_CN": "无法写入存储空间。之前的存档未更改。",
+    "ja": "保存領域に書き込めません。前回のデータは保持されています。"
+  },
+  "error.unit.already_in_cell": {
+    "en": "Already in that slot",
+    "ko": "이미 같은 칸에 있습니다",
+    "zh_CN": "已在该位置",
+    "ja": "すでにその場所にいます"
+  },
+  "error.unit.invalid_cell": {
+    "en": "That slot cannot be used",
+    "ko": "배치할 수 없는 칸입니다",
+    "zh_CN": "无法部署到该位置",
+    "ja": "そこには配置できません"
+  },
+  "error.unit.no_space": {
+    "en": "No empty slots",
+    "ko": "빈 칸이 없습니다",
+    "zh_CN": "没有空位",
+    "ja": "空きがありません"
+  },
+  "error.unit.no_space.merge_hint": {
+    "en": "No empty slots · Merge units to make room",
+    "ko": "빈 칸이 없습니다 · 조합으로 공간을 만드세요",
+    "zh_CN": "没有空位 · 合成佣兵腾出空间",
+    "ja": "空きがありません · 合成して場所を空けましょう"
+  },
+  "error.unit.none_selected": {
+    "en": "No mercenary selected",
+    "ko": "선택한 용병이 없습니다",
+    "zh_CN": "未选择佣兵",
+    "ja": "傭兵が選択されていません"
+  },
+  "expedition.new.title": {
+    "en": "New Expedition",
+    "ko": "새로운 출정",
+    "zh_CN": "新的远征",
+    "ja": "新たな出陣"
+  },
+  "gamble.challenge.suffix": {
+    "en": " Challenge",
+    "ko": " 도전",
+    "zh_CN": " 挑战",
+    "ja": " 挑戦"
+  },
+  "gamble.contract.button": {
+    "en": "Contract   ◈ %d",
+    "ko": "계약   ◈ %d",
+    "zh_CN": "契约   ◈ %d",
+    "ja": "契約   ◈ %d"
+  },
+  "gamble.failure": {
+    "en": "Challenge failed · No reward",
+    "ko": "도전 실패 · 보상 없음",
+    "zh_CN": "挑战失败 · 无奖励",
+    "ja": "挑戦失敗 · 報酬なし"
+  },
+  "gamble.failure.no_reward": {
+    "en": "No reward on failure",
+    "ko": "실패 시 보상 없음",
+    "zh_CN": "失败时无奖励",
+    "ja": "失敗時は報酬なし"
+  },
+  "gamble.open": {
+    "en": "Recruit",
+    "ko": "도박",
+    "zh_CN": "招募",
+    "ja": "募集"
+  },
+  "gamble.success": {
+    "en": "Recruited a %d-star mercenary!",
+    "ko": "%d성 영입 성공!",
+    "zh_CN": "成功招募%d星佣兵！",
+    "ja": "星%dの傭兵を獲得！"
+  },
+  "gamble.success_chance": {
+    "en": "Success Chance  %d%%",
+    "ko": "성공 확률  %d%%",
+    "zh_CN": "成功概率  %d%%",
+    "ja": "成功率  %d%%"
+  },
+  "gamble.title": {
+    "en": "Recruitment",
+    "ko": "운명의 계약 · 영입 도전",
+    "zh_CN": "命运契约 · 招募",
+    "ja": "運命の契約 · 募集"
+  },
+  "gamble.unavailable": {
+    "en": "Cannot challenge right now",
+    "ko": "지금 도전할 수 없습니다",
+    "zh_CN": "现在无法挑战",
+    "ja": "今は挑戦できません"
+  },
+  "menu.codex.open": {
+    "en": "Codex",
+    "ko": "도감",
+    "zh_CN": "图鉴",
+    "ja": "図鑑"
+  },
+  "menu.continue": {
+    "en": "Continue",
+    "ko": "이어하기",
+    "zh_CN": "继续",
+    "ja": "続ける"
+  },
+  "menu.main.open": {
+    "en": "Main Menu",
+    "ko": "메인 메뉴",
+    "zh_CN": "主菜单",
+    "ja": "メインメニュー"
+  },
+  "menu.new_game": {
+    "en": "New Game",
+    "ko": "새 게임",
+    "zh_CN": "新游戏",
+    "ja": "新しいゲーム"
+  },
+  "menu.new_game.confirm.warning": {
+    "en": "A battle is in progress. Starting a new game will discard this battle's formation and gold.",
+    "ko": "진행 중인 전투가 있습니다. 새 게임을 시작하면 이번 판의 배치와 골드를 잃습니다.",
+    "zh_CN": "当前战斗仍在进行。开始新游戏将失去本局的阵容和金币。",
+    "ja": "戦闘が進行中です。新しいゲームを始めると、この戦闘の配置とゴールドが失われます。"
+  },
+  "menu.new_game.keep_current": {
+    "en": "Keep This Game",
+    "ko": "이어하기 유지",
+    "zh_CN": "继续当前游戏",
+    "ja": "このゲームを続ける"
+  },
+  "menu.new_game.start": {
+    "en": "Start New Game",
+    "ko": "새 게임 시작",
+    "zh_CN": "开始新游戏",
+    "ja": "新しいゲームを始める"
+  },
+  "menu.return_to_main": {
+    "en": "Save and Return to Menu",
+    "ko": "저장 후 메인 메뉴",
+    "zh_CN": "保存并返回主菜单",
+    "ja": "保存してメニューへ"
+  },
+  "recipes.codex.title": {
+    "en": "Recipe Codex",
+    "ko": "조합 도감",
+    "zh_CN": "合成图鉴",
+    "ja": "合成図鑑"
+  },
+  "recipes.materials_missing": {
+    "en": "Missing merge materials or the selected mercenary does not match",
+    "ko": "조합 재료가 부족하거나 기준 용병이 맞지 않습니다",
+    "zh_CN": "合成材料不足或所选佣兵不符合配方",
+    "ja": "合成素材が不足しているか、選択した傭兵が条件に合いません"
+  },
+  "recipes.merge.button": {
+    "en": "Merge",
+    "ko": "조합",
+    "zh_CN": "合成",
+    "ja": "合成"
+  },
+  "recipes.merge.success": {
+    "en": "%s merged!",
+    "ko": "%s 조합 완료!",
+    "zh_CN": "%s合成完成！",
+    "ja": "%sを合成しました！"
+  },
+  "recipes.not_found": {
+    "en": "That recipe does not exist",
+    "ko": "없는 조합법입니다",
+    "zh_CN": "该合成配方不存在",
+    "ja": "その合成レシピはありません"
+  },
+  "recipes.open": {
+    "en": "Recipes",
+    "ko": "조합법",
+    "zh_CN": "配方",
+    "ja": "レシピ"
+  },
+  "result.defeat.banner": {
     "en": "BATTLE OVER",
+    "ko": "THE GUILD REMEMBERS",
     "zh_CN": "战斗结束",
     "ja": "戦闘終了"
   },
-  "기본 능력 · 공격 %d\n사거리 %.1f · 주기 %s초": {
+  "result.guidance.next_expedition": {
+    "en": "The guild awaits its next expedition",
+    "ko": "길드는 다음 출정을 기다립니다",
+    "zh_CN": "公会正等待下一次远征",
+    "ja": "ギルドは次の出陣を待っています"
+  },
+  "result.reason.demon_escaped": {
+    "en": "The Demon King escaped",
+    "ko": "마왕이 탈출했습니다",
+    "zh_CN": "魔王逃脱了",
+    "ja": "魔王に逃げられました"
+  },
+  "result.reason.enemy_limit": {
+    "en": "The battlefield has reached %d enemies",
+    "ko": "전장의 적이 %d마리에 도달했습니다",
+    "zh_CN": "战场敌人已达到%d只",
+    "ja": "戦場の敵が%d体に達しました"
+  },
+  "result.reason.lives_depleted": {
+    "en": "No lives remain to defend the guild",
+    "ko": "길드를 지킬 목숨이 남지 않았습니다",
+    "zh_CN": "已没有生命可用于守卫公会",
+    "ja": "ギルドを守る残りライフがありません"
+  },
+  "result.reason.victory": {
+    "en": "The Demon King has been defeated",
+    "ko": "마왕을 처치했습니다",
+    "zh_CN": "魔王已被击败",
+    "ja": "魔王を討伐しました"
+  },
+  "result.title.defeat": {
+    "en": "Battle Over",
+    "ko": "전투 종료",
+    "zh_CN": "战斗结束",
+    "ja": "戦闘終了"
+  },
+  "result.title.victory": {
+    "en": "Demon King Defeated",
+    "ko": "마왕 격파",
+    "zh_CN": "魔王讨伐",
+    "ja": "魔王撃破"
+  },
+  "result.victory.banner": {
+    "en": "VICTORY",
+    "ko": "VICTORY",
+    "zh_CN": "胜利",
+    "ja": "勝利"
+  },
+  "settings.audio.effects": {
+    "en": "Sound Effects",
+    "ko": "효과음",
+    "zh_CN": "音效",
+    "ja": "効果音"
+  },
+  "settings.audio.music": {
+    "en": "Music",
+    "ko": "배경음악",
+    "zh_CN": "音乐",
+    "ja": "音楽"
+  },
+  "settings.audio.mute": {
+    "en": "Mute %s",
+    "ko": "%s 음소거",
+    "zh_CN": "静音%s",
+    "ja": "%sをミュート"
+  },
+  "settings.audio.volume": {
+    "en": "%s volume",
+    "ko": "%s 음량",
+    "zh_CN": "%s音量",
+    "ja": "%sの音量"
+  },
+  "settings.haptics": {
+    "en": "Haptics",
+    "ko": "진동",
+    "zh_CN": "触觉反馈",
+    "ja": "振動"
+  },
+  "settings.language": {
+    "en": "Language",
+    "ko": "언어",
+    "zh_CN": "语言",
+    "ja": "言語"
+  },
+  "settings.reduced_motion": {
+    "en": "Reduced Motion",
+    "ko": "동작 연출 줄이기",
+    "zh_CN": "减少动作效果",
+    "ja": "動きを減らす"
+  },
+  "settings.title": {
+    "en": "Settings",
+    "ko": "설정",
+    "zh_CN": "设置",
+    "ja": "設定"
+  },
+  "settings.toggle.enable": {
+    "en": "Turn on %s",
+    "ko": "%s 켜기",
+    "zh_CN": "开启%s",
+    "ja": "%sをオンにする"
+  },
+  "special.claim_reward": {
+    "en": "Defeat it to claim the reward",
+    "ko": "처치하고 보상 획득",
+    "zh_CN": "击败目标并领取奖励",
+    "ja": "倒して報酬を受け取ろう"
+  },
+  "special.cooldown": {
+    "en": "Wait %d game sec",
+    "ko": "대기 %d게임초",
+    "zh_CN": "等待 %d 游戏秒",
+    "ja": "あと%dゲーム秒待機"
+  },
+  "special.cooldown_active": {
+    "en": "Summon cooldown is still active",
+    "ko": "아직 재소환 대기 중입니다",
+    "zh_CN": "召唤冷却尚未结束",
+    "ja": "再召喚まで待機時間が残っています"
+  },
+  "special.defeat.reward": {
+    "en": "Defeat ◈ %d",
+    "ko": "처치 ◈ %d",
+    "zh_CN": "击败 ◈ %d",
+    "ja": "討伐 ◈ %d"
+  },
+  "special.open": {
+    "en": "Special Monster",
+    "ko": "특수몬스터",
+    "zh_CN": "特殊怪物",
+    "ja": "特殊モンスター"
+  },
+  "special.spawned": {
+    "en": "%s appears · Defeat it for a reward",
+    "ko": "%s 출현 · 처치하고 보상을 받으세요",
+    "zh_CN": "%s出现了 · 击败它领取奖励",
+    "ja": "%sが出現 · 倒して報酬を受け取りましょう"
+  },
+  "special.title": {
+    "en": "Bounty Monsters",
+    "ko": "특수몬스터 · 보상형 적",
+    "zh_CN": "悬赏怪物",
+    "ja": "報酬モンスター"
+  },
+  "special.unlock_after_wave": {
+    "en": "Unlocks after completing this wave",
+    "ko": "해당 웨이브를 완료하면 해금됩니다",
+    "zh_CN": "完成当前波次后解锁",
+    "ja": "このウェーブをクリアすると解放されます"
+  },
+  "special.unlock_wave": {
+    "en": "Unlocks after wave %d",
+    "ko": "%d웨이브 완료 후",
+    "zh_CN": "完成第 %d 波后解锁",
+    "ja": "%dウェーブ完了後に解放"
+  },
+  "transaction.formation.updated": {
+    "en": "Formation updated",
+    "ko": "배치를 변경했습니다",
+    "zh_CN": "阵容已调整",
+    "ja": "配置を変更しました"
+  },
+  "transaction.unit.joined": {
+    "en": "%s joins the guild!",
+    "ko": "%s 합류!",
+    "zh_CN": "%s加入公会！",
+    "ja": "%sがギルドに加入！"
+  },
+  "ui.close": {
+    "en": "Close",
+    "ko": "닫기",
+    "zh_CN": "关闭",
+    "ja": "閉じる"
+  },
+  "unit.ability.ally_attack_buff": {
+    "en": "Allies in range gain +%d%% attack",
+    "ko": "사거리 내 아군 공격력 +%d%%",
+    "zh_CN": "射程内友军攻击力 +%d%%",
+    "ja": "射程内の味方の攻撃力 +%d%%"
+  },
+  "unit.ability.slow": {
+    "en": "Slow %d%% · %s sec",
+    "ko": "둔화 %d%% · %s초",
+    "zh_CN": "减速 %d%% · %s 秒",
+    "ja": "スロウ %d%% · %s秒"
+  },
+  "unit.ability.stun": {
+    "en": "Stun %s sec",
+    "ko": "기절 %s초",
+    "zh_CN": "眩晕 %s 秒",
+    "ja": "スタン %s秒"
+  },
+  "unit.attack.action": {
+    "en": "Attack",
+    "ko": "공격",
+    "zh_CN": "攻击",
+    "ja": "攻撃"
+  },
+  "unit.attack.action_with_support": {
+    "en": "Attack + Support",
+    "ko": "공격 + 지원",
+    "zh_CN": "攻击 + 辅助",
+    "ja": "攻撃 + 支援"
+  },
+  "unit.attack.area": {
+    "en": "Area",
+    "ko": "범위",
+    "zh_CN": "范围",
+    "ja": "範囲"
+  },
+  "unit.attack.base_stats": {
     "en": "Base Stats · Attack %d\nRange %.1f · Interval %s sec",
+    "ko": "기본 능력 · 공격 %d\n사거리 %.1f · 주기 %s초",
     "zh_CN": "基础能力 · 攻击 %d\n射程 %.1f · 间隔 %s秒",
     "ja": "基本能力 · 攻撃 %d\n射程 %.1f · 間隔 %s秒"
+  },
+  "unit.attack.limited_coverage": {
+    "en": "Limited reach",
+    "ko": "직접 공격 접점이 좁음",
+    "zh_CN": "攻击覆盖较窄",
+    "ja": "攻撃範囲が狭い"
+  },
+  "unit.attack.melee": {
+    "en": "Melee",
+    "ko": "근접",
+    "zh_CN": "近战",
+    "ja": "近接"
+  },
+  "unit.attack.out_of_range": {
+    "en": "Out of range",
+    "ko": "직접 공격 불가",
+    "zh_CN": "无法直接攻击",
+    "ja": "直接攻撃不可"
+  },
+  "unit.attack.ranged": {
+    "en": "Ranged",
+    "ko": "원거리",
+    "zh_CN": "远程",
+    "ja": "遠距離"
+  },
+  "unit.attack.selected_details": {
+    "en": "Attack %.0f · Range %.1f%s\n%s",
+    "ko": "공격 %.0f · 사거리 %.1f%s\n%s",
+    "zh_CN": "攻击 %.0f · 射程 %.1f%s\n%s",
+    "ja": "攻撃 %.0f · 射程 %.1f%s\n%s"
+  },
+  "unit.attack.single": {
+    "en": "Single Target",
+    "ko": "단일",
+    "zh_CN": "单体",
+    "ja": "単体"
+  },
+  "unit.attack.support": {
+    "en": "Support",
+    "ko": "지원",
+    "zh_CN": "辅助",
+    "ja": "支援"
+  },
+  "unit.summon.blocked_by_enemy_limit": {
+    "en": "Too many enemies",
+    "ko": "소환 시 패배",
+    "zh_CN": "召唤即战败",
+    "ja": "召喚すると敗北"
+  },
+  "unit.summon.button": {
+    "en": "Summon   ◈ %d",
+    "ko": "소환   ◈ %d",
+    "zh_CN": "召唤   ◈ %d",
+    "ja": "召喚   ◈ %d"
+  },
+  "unit.summon.free": {
+    "en": "Free Summon",
+    "ko": "무료 소환",
+    "zh_CN": "免费召唤",
+    "ja": "無料召喚"
+  },
+  "unit.summon.title": {
+    "en": "Summon Mercenary",
+    "ko": "용병 소환",
+    "zh_CN": "召唤佣兵",
+    "ja": "傭兵を召喚"
+  },
+  "unit.summon.unavailable": {
+    "en": "Cannot summon",
+    "ko": "소환할 수 없습니다",
+    "zh_CN": "无法召唤",
+    "ja": "召喚できません"
+  },
+  "unit.u01.description": {
+    "en": "A steady swordsman who cuts down nearby foes.",
+    "ko": "가까운 적을 안정적으로 베는 기본 전사.",
+    "zh_CN": "稳稳斩击近处敌人的基础战士。",
+    "ja": "近くの敵を着実に斬る、基本の戦士。"
+  },
+  "unit.u01.name": {
+    "en": "Guild Swordsman",
+    "ko": "길드 검사",
+    "zh_CN": "公会剑士",
+    "ja": "ギルドの剣士"
+  },
+  "unit.u02.description": {
+    "en": "Fires arrows from long range.",
+    "ko": "긴 사거리에서 화살을 발사한다.",
+    "zh_CN": "从远处射出箭矢。",
+    "ja": "遠距離から矢を放つ。"
+  },
+  "unit.u02.name": {
+    "en": "Forestpath Archer",
+    "ko": "숲길 궁수",
+    "zh_CN": "林径弓手",
+    "ja": "森道の弓兵"
+  },
+  "unit.u03.description": {
+    "en": "Creates a small blast that also hits nearby foes.",
+    "ko": "작은 폭발을 일으켜 주변 적도 공격한다.",
+    "zh_CN": "引发小型爆炸，也会攻击周围敌人。",
+    "ja": "小さな爆発で周囲の敵にも攻撃する。"
+  },
+  "unit.u03.name": {
+    "en": "Apprentice Mage",
+    "ko": "견습 마도사",
+    "zh_CN": "见习法师",
+    "ja": "見習い魔導士"
+  },
+  "unit.u04.description": {
+    "en": "Briefly stops a foe with a quick strike.",
+    "ko": "짧은 타격으로 적의 이동을 잠시 멈춘다.",
+    "zh_CN": "以迅捷一击短暂阻止敌人行动。",
+    "ja": "素早い一撃で敵の動きを一時止める。"
+  },
+  "unit.u04.name": {
+    "en": "Monk",
+    "ko": "수도사",
+    "zh_CN": "武僧",
+    "ja": "修道士"
+  },
+  "unit.u05.description": {
+    "en": "Attacks with holy light and slightly boosts nearby mercenaries’ damage.",
+    "ko": "성광으로 공격하며 주변 용병의 화력을 조금 높인다.",
+    "zh_CN": "以圣光攻击，并小幅提升附近佣兵的攻击力。",
+    "ja": "聖光で攻撃し、周囲の傭兵の攻撃力を少し高める。"
+  },
+  "unit.u05.name": {
+    "en": "Guild Priest",
+    "ko": "길드 사제",
+    "zh_CN": "公会祭司",
+    "ja": "ギルドの司祭"
+  },
+  "unit.u06.description": {
+    "en": "Throws a sticky concoction that slows foes.",
+    "ko": "끈적한 약제를 던져 적의 이동을 늦춘다.",
+    "zh_CN": "投掷黏稠药剂，减缓敌人行动。",
+    "ja": "粘着性の薬剤を投げ、敵の動きを遅くする。"
+  },
+  "unit.u06.name": {
+    "en": "Marsh Apothecary",
+    "ko": "늪지 약제사",
+    "zh_CN": "沼泽药剂师",
+    "ja": "沼地の薬師"
+  },
+  "unit.u07.description": {
+    "en": "An armored lancer who strikes swiftly.",
+    "ko": "갑옷을 갖춘 창으로 빠르게 찌른다.",
+    "zh_CN": "披甲枪骑兵迅速突刺。",
+    "ja": "鎧をまとった槍騎士が素早く突く。"
+  },
+  "unit.u07.name": {
+    "en": "Royal Lancer",
+    "ko": "왕실 창기사",
+    "zh_CN": "皇家枪骑兵",
+    "ja": "王室の槍騎士"
+  },
+  "unit.u08.description": {
+    "en": "Targets distant foes with rune arrows.",
+    "ko": "룬 화살로 먼 적을 겨냥한다.",
+    "zh_CN": "以符文箭瞄准远处的敌人。",
+    "ja": "ルーンの矢で遠くの敵を狙う。"
+  },
+  "unit.u08.name": {
+    "en": "Rune Sniper",
+    "ko": "룬 저격수",
+    "zh_CN": "符文狙击手",
+    "ja": "ルーンの狙撃手"
+  },
+  "unit.u09.description": {
+    "en": "Stops foes with drum shockwaves and rallies mercenary damage.",
+    "ko": "북의 충격파로 적을 멈추고 용병의 화력을 북돋운다.",
+    "zh_CN": "以战鼓冲击波阻止敌人，并鼓舞佣兵提升攻击力。",
+    "ja": "太鼓の衝撃波で敵を止め、傭兵の攻撃力を鼓舞する。"
+  },
+  "unit.u09.name": {
+    "en": "War Drummer",
+    "ko": "전쟁 북장이",
+    "zh_CN": "战鼓手",
+    "ja": "戦太鼓の奏者"
+  },
+  "unit.u10.description": {
+    "en": "Slows foes with a freezing trap.",
+    "ko": "빙결 덫으로 적의 이동을 늦춘다.",
+    "zh_CN": "用冰冻陷阱减缓敌人行动。",
+    "ja": "凍結罠で敵の動きを遅くする。"
+  },
+  "unit.u10.name": {
+    "en": "Snowfield Hunter",
+    "ko": "설원 사냥꾼",
+    "zh_CN": "雪原猎手",
+    "ja": "雪原の狩人"
+  },
+  "unit.u11.description": {
+    "en": "Strikes with a broad mace swing, damaging nearby foes.",
+    "ko": "넓은 철퇴 공격으로 주변 적에게 피해를 준다.",
+    "zh_CN": "挥动宽大的铁锤，对周围敌人造成伤害。",
+    "ja": "大きく鉄槌を振り、周囲の敵にダメージを与える。"
+  },
+  "unit.u11.name": {
+    "en": "Ironclad Guardian",
+    "ko": "철갑 수호자",
+    "zh_CN": "铁甲守卫",
+    "ja": "鉄甲の守護者"
+  },
+  "unit.u12.description": {
+    "en": "Cuts through nearby groups with a swift sword dance.",
+    "ko": "빠른 검무로 가까운 적 무리를 베어낸다.",
+    "zh_CN": "以迅捷剑舞斩击近处的敌群。",
+    "ja": "素早い剣舞で近くの敵の群れを斬る。"
+  },
+  "unit.u12.name": {
+    "en": "Stormblade Dancer",
+    "ko": "폭풍 검무가",
+    "zh_CN": "风暴剑舞者",
+    "ja": "嵐刃の舞い手"
+  },
+  "unit.u13.description": {
+    "en": "Blasts groups with arcane power and briefly slows them.",
+    "ko": "비전 폭발로 적 무리를 공격하고 잠시 둔화시킨다.",
+    "zh_CN": "以奥术爆发攻击敌群，并短暂减缓其行动。",
+    "ja": "秘術の爆発で敵の群れを攻撃し、一時的に遅くする。"
+  },
+  "unit.u13.name": {
+    "en": "Archsage",
+    "ko": "대현자",
+    "zh_CN": "大贤者",
+    "ja": "大賢者"
+  },
+  "unit.u14.description": {
+    "en": "Raises nearby mercenaries’ damage with a golden totem aura.",
+    "ko": "황금 토템의 오라로 주변 용병의 공격력을 높인다.",
+    "zh_CN": "以黄金图腾光环提升附近佣兵的攻击力。",
+    "ja": "黄金のトーテムのオーラで周囲の傭兵の攻撃力を高める。"
+  },
+  "unit.u14.name": {
+    "en": "Golden Goblin",
+    "ko": "황금 고블린",
+    "zh_CN": "黄金哥布林",
+    "ja": "黄金のゴブリン"
+  },
+  "unit.u15.description": {
+    "en": "Slams a wide area with a lava hammer.",
+    "ko": "용암 망치로 넓은 범위를 강타한다.",
+    "zh_CN": "用熔岩之锤猛击一大片区域。",
+    "ja": "溶岩の槌で広い範囲を叩きつける。"
+  },
+  "unit.u15.name": {
+    "en": "Lava Giant",
+    "ko": "용암 거인",
+    "zh_CN": "熔岩巨人",
+    "ja": "溶岩の巨人"
+  },
+  "unit.u16.description": {
+    "en": "Attacks distant groups with dragon breath.",
+    "ko": "용의 숨결로 원거리의 적 무리를 공격한다.",
+    "zh_CN": "以龙息攻击远处的敌群。",
+    "ja": "竜の息吹で遠くの敵の群れを攻撃する。"
+  },
+  "unit.u16.name": {
+    "en": "Ancient Drake",
+    "ko": "고대 비룡",
+    "zh_CN": "古代飞龙",
+    "ja": "古代の飛竜"
+  },
+  "unit.u17.description": {
+    "en": "Picks off distant foes with an old matchlock.",
+    "ko": "오래된 화승총으로 멀리 있는 적을 저격한다.",
+    "zh_CN": "用老式火绳枪狙击远处的敌人。",
+    "ja": "古い火縄銃で遠くの敵を狙撃する。"
+  },
+  "unit.u17.name": {
+    "en": "Pirate Gunslinger",
+    "ko": "해적 총잡이",
+    "zh_CN": "海盗枪手",
+    "ja": "海賊の銃士"
+  },
+  "unit.u18.description": {
+    "en": "Slows small groups with a dusk curse.",
+    "ko": "황혼의 저주로 작은 무리의 발걸음을 늦춘다.",
+    "zh_CN": "以黄昏诅咒减缓小群敌人的脚步。",
+    "ja": "黄昏の呪いで小さな敵の群れを遅くする。"
+  },
+  "unit.u18.name": {
+    "en": "Dusk Shaman",
+    "ko": "황혼 주술사",
+    "zh_CN": "暮色萨满",
+    "ja": "黄昏の呪術師"
+  },
+  "unit.u19.description": {
+    "en": "Briefly halts one foe with a clear crystal pulse.",
+    "ko": "맑은 수정 파동으로 한 적을 잠시 멈춘다.",
+    "zh_CN": "以清澈的水晶波暂时定住一名敌人。",
+    "ja": "澄んだ水晶の波動で敵一体を一時止める。"
+  },
+  "unit.u19.name": {
+    "en": "Crystal Spirit",
+    "ko": "수정 정령",
+    "zh_CN": "水晶精灵",
+    "ja": "水晶の精霊"
+  },
+  "unit.u20.description": {
+    "en": "Hurls a series of long javelins at a single foe.",
+    "ko": "긴 투창을 연달아 날려 단일 적을 추격한다.",
+    "zh_CN": "连续投出长矛追击单个敌人。",
+    "ja": "長い投槍を連続で放ち、敵一体を追撃する。"
+  },
+  "unit.u20.name": {
+    "en": "Desert Javeliner",
+    "ko": "사막 투창병",
+    "zh_CN": "沙漠投矛手",
+    "ja": "砂漠の投槍兵"
+  },
+  "unit.u21.description": {
+    "en": "Hits clustered foes with an alchemical grenade.",
+    "ko": "연금 수류탄으로 밀집한 적을 공격한다.",
+    "zh_CN": "用炼金手榴弹攻击聚集的敌人。",
+    "ja": "錬金術の手榴弾で密集した敵を攻撃する。"
+  },
+  "unit.u21.name": {
+    "en": "Citadel Alchemist",
+    "ko": "성채 연금술사",
+    "zh_CN": "城堡炼金术师",
+    "ja": "城塞の錬金術師"
+  },
+  "unit.u22.description": {
+    "en": "Briefly stuns a nearby foe with a silver hammer.",
+    "ko": "은빛 망치로 가까운 적을 짧게 멈춘다.",
+    "zh_CN": "以银锤短暂击晕近处的敌人。",
+    "ja": "銀の槌で近くの敵を短時間気絶させる。"
+  },
+  "unit.u22.name": {
+    "en": "Silver Paladin",
+    "ko": "은빛 성기사",
+    "zh_CN": "银色圣骑士",
+    "ja": "銀の聖騎士"
+  },
+  "unit.u23.description": {
+    "en": "Slows groups with a dense venom mist.",
+    "ko": "짙은 독안개로 적 무리를 느리게 만든다.",
+    "zh_CN": "以浓密毒雾减缓敌群行动。",
+    "ja": "濃い毒霧で敵の群れを遅くする。"
+  },
+  "unit.u23.name": {
+    "en": "Venommist Sage",
+    "ko": "독안개 현자",
+    "zh_CN": "毒雾贤者",
+    "ja": "毒霧の賢者"
+  },
+  "unit.u24.description": {
+    "en": "Pierces distant foes with charged lightning arrows.",
+    "ko": "충전된 번개 화살로 먼 적을 꿰뚫는다.",
+    "zh_CN": "以充能雷箭贯穿远处敌人。",
+    "ja": "帯電した雷の矢で遠くの敵を貫く。"
+  },
+  "unit.u24.name": {
+    "en": "Thunder Marksman",
+    "ko": "천둥 사수",
+    "zh_CN": "雷霆射手",
+    "ja": "雷鳴の射手"
+  },
+  "unit.u25.description": {
+    "en": "Pins down small groups with a chilling blade dance.",
+    "ko": "차가운 칼춤으로 작은 무리를 붙잡는다.",
+    "zh_CN": "以寒冷刀舞牵制小群敌人。",
+    "ja": "冷たい刃の舞で小さな群れを足止めする。"
+  },
+  "unit.u25.name": {
+    "en": "Frostblade Dancer",
+    "ko": "얼음 무희",
+    "zh_CN": "冰刃舞者",
+    "ja": "氷刃の舞い手"
+  },
+  "unit.u26.description": {
+    "en": "Raises nearby mercenaries’ damage with a battle standard.",
+    "ko": "전투 깃발로 주변 용병의 공격력을 높인다.",
+    "zh_CN": "以战旗提升附近佣兵的攻击力。",
+    "ja": "軍旗で周囲の傭兵の攻撃力を高める。"
+  },
+  "unit.u26.name": {
+    "en": "Ironblood Commander",
+    "ko": "철혈 사령관",
+    "zh_CN": "铁血指挥官",
+    "ja": "鉄血の指揮官"
+  },
+  "unit.u27.description": {
+    "en": "Targets nearby strong foes with rapid slashes.",
+    "ko": "빠른 연속 베기로 가까운 강적을 노린다.",
+    "zh_CN": "以快速连斩瞄准近处的强敌。",
+    "ja": "素早い連続斬りで近くの強敵を狙う。"
+  },
+  "unit.u27.name": {
+    "en": "Shadow Swordsman",
+    "ko": "그림자 검객",
+    "zh_CN": "暗影剑客",
+    "ja": "影の剣士"
+  },
+  "unit.u28.description": {
+    "en": "Attacks with a warm wave of light and supports the frontline.",
+    "ko": "따뜻한 빛의 파동으로 적을 공격하고 전열을 돕는다.",
+    "zh_CN": "以温暖的光波攻击敌人并支援前线。",
+    "ja": "温かな光の波で敵を攻撃し、前線を支える。"
+  },
+  "unit.u28.name": {
+    "en": "Sun Priest",
+    "ko": "태양 사제",
+    "zh_CN": "太阳祭司",
+    "ja": "太陽の司祭"
+  },
+  "unit.u29.description": {
+    "en": "Halts distant foes with a star sigil.",
+    "ko": "별의 인장으로 멀리 있는 적을 멈춘다.",
+    "zh_CN": "以星之印记定住远处的敌人。",
+    "ja": "星の印で遠くの敵を止める。"
+  },
+  "unit.u29.name": {
+    "en": "Starlight Adept",
+    "ko": "별빛 도사",
+    "zh_CN": "星辉道士",
+    "ja": "星明かりの道士"
+  },
+  "unit.u30.description": {
+    "en": "A forest beast lashes out with vines to hinder foes.",
+    "ko": "숲의 짐승이 덩굴을 뻗어 적의 이동을 방해한다.",
+    "zh_CN": "森林野兽伸出藤蔓阻碍敌人行动。",
+    "ja": "森の獣がツタを伸ばし、敵の動きを妨げる。"
+  },
+  "unit.u30.name": {
+    "en": "Forest Warden",
+    "ko": "숲의 파수꾼",
+    "zh_CN": "森林守望者",
+    "ja": "森の番人"
+  },
+  "unit.u31.description": {
+    "en": "Calls down lightning on a distant group.",
+    "ko": "벼락을 내려 먼 무리 전체를 타격한다.",
+    "zh_CN": "召下雷霆打击远处整群敌人。",
+    "ja": "遠くの敵の群れに雷を落とす。"
+  },
+  "unit.u31.name": {
+    "en": "Storm Lord",
+    "ko": "폭풍 군주",
+    "zh_CN": "风暴领主",
+    "ja": "嵐の君主"
+  },
+  "unit.u32.description": {
+    "en": "Slows enemy groups with a lunar web.",
+    "ko": "달의 거미줄로 적 무리를 느리게 만든다.",
+    "zh_CN": "以月之蛛网减缓敌群行动。",
+    "ja": "月の蜘蛛糸で敵の群れを遅くする。"
+  },
+  "unit.u32.name": {
+    "en": "Eclipse Queen",
+    "ko": "월식 여왕",
+    "zh_CN": "月蚀女王",
+    "ja": "月蝕の女王"
+  },
+  "unit.u33.description": {
+    "en": "Attacks with a sanctuary breath and strengthens a wide frontline.",
+    "ko": "성역의 숨결로 공격하며 넓은 전열을 강화한다.",
+    "zh_CN": "以圣域吐息攻击，并强化较大范围的前线。",
+    "ja": "聖域の息吹で攻撃し、広い前線を強化する。"
+  },
+  "unit.u33.name": {
+    "en": "Sanctuary Dragon",
+    "ko": "성역 수호룡",
+    "zh_CN": "圣域守护龙",
+    "ja": "聖域の守護竜"
+  },
+  "unit.u34.description": {
+    "en": "Disrupts enemy movement repeatedly with a ring of time.",
+    "ko": "시간의 고리로 적의 발걸음을 여러 번 끊는다.",
+    "zh_CN": "以时间之环多次打断敌人的行动。",
+    "ja": "時の輪で敵の足取りを何度も止める。"
+  },
+  "unit.u34.name": {
+    "en": "Timekeeper",
+    "ko": "시간의 관측자",
+    "zh_CN": "时间观测者",
+    "ja": "時の観測者"
+  },
+  "upgrade.already_maxed": {
+    "en": "Already fully upgraded",
+    "ko": "최대 강화입니다",
+    "zh_CN": "已达到最高强化",
+    "ja": "すでに最大まで強化済みです"
+  },
+  "upgrade.amount": {
+    "en": "Attack +%d%%",
+    "ko": "공격 +%d%%",
+    "zh_CN": "攻击 +%d%%",
+    "ja": "攻撃 +%d%%"
+  },
+  "upgrade.button": {
+    "en": "Upgrade   ◈ %d",
+    "ko": "강화   ◈ %d",
+    "zh_CN": "强化   ◈ %d",
+    "ja": "強化   ◈ %d"
+  },
+  "upgrade.maxed_label": {
+    "en": "Fully Upgraded",
+    "ko": "최대 강화",
+    "zh_CN": "已满级",
+    "ja": "最大強化済み"
+  },
+  "upgrade.open": {
+    "en": "Upgrade",
+    "ko": "강화",
+    "zh_CN": "强化",
+    "ja": "強化"
+  },
+  "upgrade.success": {
+    "en": "All %d-star mercenaries gain attack power!",
+    "ko": "%d성 공통 공격력 강화!",
+    "zh_CN": "全体%d星佣兵攻击力提升！",
+    "ja": "星%dの傭兵全員の攻撃力が上昇！"
+  },
+  "upgrade.title": {
+    "en": "Guild Workshop",
+    "ko": "길드 공방 · 공통 공격력 강화",
+    "zh_CN": "公会工坊 · 攻击强化",
+    "ja": "ギルド工房 · 攻撃力強化"
+  },
+  "upgrade.unavailable": {
+    "en": "Cannot upgrade",
+    "ko": "강화할 수 없습니다",
+    "zh_CN": "无法强化",
+    "ja": "強化できません"
   }
 }

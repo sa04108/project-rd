@@ -88,7 +88,9 @@ export ANDROID_SERIAL='DEVICE_SERIAL'
 
 ## 로컬 확인과 테스트 코드
 
-언어는 `data/localization.json`의 한국어 원문 키와 `en`·`zh_CN`·`ja` 번역으로 관리합니다. `game/localization.gd`가 Godot TranslationServer에 등록하며, 숫자·이름을 넣는 문장은 원문 템플릿을 먼저 번역한 뒤 포맷합니다. 저장된 정의 ID와 전투 종료 사유는 언어를 바꿔도 보존합니다. CJK 번역을 바꾸면 [폰트 제작 절차](RESOURCE_GUIDE.md#배경ui폰트)에 따라 부분집합을 다시 만들고 네 언어의 작은 화면 줄바꿈, 드롭다운, 저장 후 재시작을 확인합니다.
+언어는 `data/localization.json`의 의미 기반 고정 키로 관리합니다. 예를 들어 `settings.language` 아래에 `en`·`ko`·`zh_CN`·`ja` 값을 모두 두며 한국어 문장을 키로 쓰지 않습니다. 용병은 `unit.u01.name`·`unit.u01.description`, 적은 `enemy.n01.name`처럼 기존 정의 ID를 사용하므로 이름이나 설명을 수정해도 키는 유지합니다. 문구를 추가할 때 네 언어 값과 포맷 인자의 종류·순서를 맞춥니다.
+
+`game/localization.gd`가 Godot TranslationServer에 등록하며, 호출부는 `L.text("settings.language")`처럼 키를 명시합니다. 숫자·이름을 넣는 문장은 템플릿을 먼저 번역한 뒤 포맷하고, Label·Button·알림의 표시 함수에 완성된 문장을 전달합니다. 저장 오류는 고정 키로 표시 계층에 전달하고, 새 전투 종료 사유도 고정 키로 저장합니다. 이전 저장의 한국어 종료 사유는 호환 처리로 읽습니다. CJK 번역을 바꾸면 [폰트 제작 절차](RESOURCE_GUIDE.md)에 따라 부분집합을 다시 만들고 네 언어의 작은 화면 줄바꿈, 드롭다운, 저장 후 재시작을 확인합니다.
 
 게임을 바꾸면 편집기나 내보낸 실행본에서 해당 동작을 직접 살펴보고, 저장·입력·화면·오디오 중 영향을 받는 경로를 실제 실행으로 확인합니다. 내보내기 전 프로젝트 리소스 import가 끝났는지, 원하는 플랫폼 preset을 선택했는지, 출력 파일이 `artifacts/`에 생성됐는지 확인합니다. 결과 캡처와 로그도 같은 디렉터리에 둡니다.
 

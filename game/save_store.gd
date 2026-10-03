@@ -22,7 +22,7 @@ func _init(path: String = "user://") -> void:
 			profile.settings.music_track = "mist_guard"
 			profile.settings.ui_sound = "tap"
 		else:
-			last_error = "기록 파일 형식이 맞지 않습니다. 원본을 보존했습니다."
+			last_error = "error.save.profile_invalid"
 			mark_corrupt("profile.json")
 
 func _valid_profile(value: Dictionary) -> bool:
@@ -77,7 +77,7 @@ func mark_corrupt(filename: String) -> void:
 	if FileAccess.file_exists(path):
 		var quarantine := path + ".corrupt-%d-%d" % [Time.get_unix_time_from_system(), Time.get_ticks_usec()]
 		if DirAccess.rename_absolute(path, quarantine) != OK:
-			last_error = "손상된 저장을 격리하지 못했습니다. 원본을 보존합니다."
+			last_error = "error.save.quarantine_failed"
 
 func _read(filename: String) -> Dictionary:
 	var path := directory.path_join(filename)
@@ -85,7 +85,7 @@ func _read(filename: String) -> Dictionary:
 		return {}
 	var value = JSON.parse_string(FileAccess.get_file_as_string(path))
 	if not value is Dictionary or value.is_empty():
-		last_error = "저장 파일을 읽을 수 없습니다. 원본을 보존했습니다."
+		last_error = "error.save.read_failed"
 		mark_corrupt(filename)
 		return {}
 	return value
@@ -95,12 +95,12 @@ func _write(filename: String, value: Dictionary) -> bool:
 	var temp := path + ".tmp"
 	var file := FileAccess.open(temp, FileAccess.WRITE)
 	if file == null:
-		last_error = "저장 공간에 쓸 수 없습니다. 이전 기록은 유지됩니다."
+		last_error = "error.save.write_failed"
 		return false
 	file.store_string(JSON.stringify(value))
 	file.flush()
 	if file.get_error() != OK:
-		last_error = "저장 도중 오류가 발생했습니다."
+		last_error = "error.save.failed"
 		file.close()
 		return false
 	file.close()
@@ -112,10 +112,10 @@ func _write(filename: String, value: Dictionary) -> bool:
 			valid = _valid_profile(old) if filename == "profile.json" else Simulation.new()._valid_snapshot(old)
 		var backup := path + ".bak" if valid and not corrupt_files.has(filename) else path + ".corrupt-%d-%d" % [Time.get_unix_time_from_system(), Time.get_ticks_usec()]
 		if DirAccess.copy_absolute(path, backup) != OK:
-			last_error = "이전 저장의 백업을 만들 수 없습니다."
+			last_error = "error.save.backup_failed"
 			return false
 	if DirAccess.rename_absolute(temp, path) != OK:
-		last_error = "저장 파일을 교체할 수 없습니다."
+		last_error = "error.save.replace_failed"
 		return false
 	last_error = ""
 	corrupt_files.erase(filename)
@@ -127,7 +127,7 @@ func load_run() -> Dictionary:
 		return {}
 	if not Simulation.new()._valid_snapshot(value):
 		mark_corrupt("run.json")
-		last_error = "이어하기 파일이 손상되었거나 버전이 다릅니다. 원본은 보존됩니다."
+		last_error = "error.continue.invalid_save"
 		return {}
 	if value.has("run_id") and profile.ended_runs.has(value.run_id):
 		return {}

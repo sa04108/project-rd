@@ -95,7 +95,7 @@ func _change_language(language: String) -> void:
 		_show_menu()
 	_open_panel("settings")
 	if not saved:
-		_toast(store.last_error)
+		_toast(L.text(store.last_error))
 
 func _setup_web_input() -> void:
 	if not OS.has_feature("web"):
@@ -172,7 +172,7 @@ func _label(parent: Node, text_value: String, pos: Vector2, width: float, font_s
 	# 긴 문장은 트리에 들어가기 전에 줄바꿈을 설정해 최소 폭이 커지는 것을 막는다.
 	if wrap:
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.text = L.text(text_value)
+	label.text = text_value
 	label.position = pos
 	label.size = Vector2(width, font_size + 14)
 	label.add_theme_color_override("font_color", color)
@@ -196,7 +196,7 @@ func _button(parent: Node, text_value: String, rect: Rect2, callback: Callable, 
 	var button := Button.new()
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	button.action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
-	button.text = L.text(text_value)
+	button.text = text_value
 	button.position = rect.position
 	button.size = rect.size
 	for state in ["normal", "hover", "pressed", "disabled"]:
@@ -242,7 +242,7 @@ func _hud_button(parent: Node, text_value: String, rect: Rect2, callback: Callab
 
 func _battle_action(text_value: String, rect: Rect2, callback: Callable, action: String, icon_kind: String) -> Button:
 	var button := _hud_button(screen, "", rect, callback, action, "", action == "summon")
-	button.tooltip_text = L.text("용병 소환") if action == "summon" else text_value
+	button.tooltip_text = L.text("unit.summon.title") if action == "summon" else text_value
 	button.accessibility_name = button.tooltip_text
 	_hud_icon(button, icon_kind, Rect2((rect.size.x - 44) * 0.5, 9, 44, 44))
 	var caption := _label(button, text_value, Vector2(9, 57), rect.size.x - 18, 22, PALE)
@@ -286,7 +286,7 @@ func _show_menu() -> void:
 		var check = Simulation.new()
 		if not check.restore(resume_data) or resume_data.result != "active":
 			resume_data = {}
-			store.last_error = L.text("이어하기 파일이 손상되었거나 버전이 다릅니다. 원본은 보존됩니다.")
+			store.last_error = "error.continue.invalid_save"
 	# 표시 이름은 프로젝트 설정 한 곳에서만 읽고 저장·리소스 식별자로 사용하지 않는다.
 	var display_name := str(ProjectSettings.get_setting("presentation/display_name"))
 	DisplayServer.window_set_title(display_name)
@@ -303,15 +303,15 @@ func _show_menu() -> void:
 	labels.menu_title.add_theme_constant_override("shadow_offset_y", 3)
 	labels.menu_title.add_theme_constant_override("shadow_outline_size", 1)
 	labels.menu_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hud_button(screen, L.text("새 게임"), Rect2(126, 688, 468, 108), _request_new, "new_game", "", true)
-	var resume := _hud_button(screen, L.text("이어하기"), Rect2(126, 808, 468, 100), _resume, "continue")
+	_hud_button(screen, L.text("menu.new_game"), Rect2(126, 688, 468, 108), _request_new, "new_game", "", true)
+	var resume := _hud_button(screen, L.text("menu.continue"), Rect2(126, 808, 468, 100), _resume, "continue")
 	resume.disabled = resume_data.is_empty()
-	_hud_button(screen, L.text("도감"), Rect2(126, 920, 228, 100), func(): _open_panel("codex"), "codex")
-	_hud_button(screen, L.text("설정"), Rect2(366, 920, 228, 100), func(): _open_panel("settings"), "settings")
+	_hud_button(screen, L.text("menu.codex.open"), Rect2(126, 920, 228, 100), func(): _open_panel("codex"), "codex")
+	_hud_button(screen, L.text("settings.title"), Rect2(366, 920, 228, 100), func(): _open_panel("settings"), "settings")
 	labels.menu_footer = _label(screen, "© 2026 %s  ·  v0.4" % display_name, Vector2(48, 1222), 624, 18, MUTED)
 	labels.menu_footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	if not store.last_error.is_empty():
-		_toast(store.last_error)
+		_toast(L.text(store.last_error))
 
 func _request_new() -> void:
 	if resume_data.is_empty():
@@ -329,7 +329,7 @@ func _start_new() -> void:
 
 func _resume() -> void:
 	if resume_data.is_empty() or not sim.restore(resume_data):
-		_toast(L.text("이어하기를 불러올 수 없습니다"))
+		_toast(L.text("error.continue.load_failed"))
 		return
 	mode = "battle"
 	selected = -1
@@ -348,7 +348,7 @@ func _show_battle() -> void:
 	_panel(screen, Rect2(202, 135, 276, 51), INK, GOLD, "brass")
 	labels.wave = _label(screen, "", Vector2(217, 141), 246, 26, PALE)
 	labels.wave.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var tools := [["recipes", L.text("조합법")], ["codex", L.text("도감")], ["settings", L.text("설정")]]
+	var tools := [["recipes", L.text("recipes.open")], ["codex", L.text("menu.codex.open")], ["settings", L.text("settings.title")]]
 	for index in range(tools.size()):
 		var action: String = tools[index][0]
 		var rect := Rect2(394 + index * 102, 20, 100, 100)
@@ -357,7 +357,7 @@ func _show_battle() -> void:
 		var button := _hud_button(screen, "", rect, func(): _open_panel(action), action, "" if action == "recipes" else action, action == "recipes")
 		if action == "recipes":
 			_hud_icon(button, "recipes", Rect2(17, 23, 54, 54))
-			var caption := _label(button, L.text("조합법"), Vector2(79, 33), 110, 28, Color("fff5d7"))
+			var caption := _label(button, L.text("recipes.open"), Vector2(79, 33), 110, 28, Color("fff5d7"))
 			caption.size.y = 42
 		button.tooltip_text = tools[index][1]
 		button.accessibility_name = tools[index][1]
@@ -366,11 +366,11 @@ func _show_battle() -> void:
 	labels.gold = _label(screen, "", Vector2(558, 141), 123, 26, PALE)
 	labels.gold.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	labels.speed = _hud_button(screen, "×1", Rect2(486, 192, 100, 100), func(): sim.cycle_speed(); _mark_dirty(); _refresh(), "speed")
-	labels.speed.tooltip_text = L.text("배속 변경 · ×1 / ×2 / ×3 / ×5")
-	labels.speed.accessibility_name = L.text("배속 변경")
+	labels.speed.tooltip_text = L.text("battle.speed.options")
+	labels.speed.accessibility_name = L.text("battle.speed.open")
 	labels.pause = _hud_button(screen, "Ⅱ", Rect2(598, 192, 100, 100), _toggle_pause, "pause")
-	labels.pause.tooltip_text = L.text("일시정지 / 재개")
-	labels.pause.accessibility_name = L.text("일시정지 / 재개")
+	labels.pause.tooltip_text = L.text("battle.pause.toggle")
+	labels.pause.accessibility_name = L.text("battle.pause.toggle")
 	var banner := TextureRect.new()
 	banner.texture = UiSkin.banner_texture()
 	banner.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -402,9 +402,9 @@ func _show_battle() -> void:
 	_panel(screen, Rect2(225, 1132, 270, 35), INK, GOLD, "brass")
 	labels.count = _label(screen, "", Vector2(234, 1138), 252, 13, PALE)
 	labels.count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_battle_action(L.text("강화"), Rect2(27, 1172, 216, 100), func(): _open_panel("upgrade"), "upgrade", "upgrade")
-	_battle_action(L.text("도박"), Rect2(252, 1172, 216, 100), func(): _open_panel("gamble"), "gamble", "gamble")
-	_battle_action(L.text("특수몬스터"), Rect2(477, 1172, 216, 100), func(): _open_panel("special"), "special", "special")
+	_battle_action(L.text("upgrade.open"), Rect2(27, 1172, 216, 100), func(): _open_panel("upgrade"), "upgrade", "upgrade")
+	_battle_action(L.text("gamble.open"), Rect2(252, 1172, 216, 100), func(): _open_panel("gamble"), "gamble", "gamble")
+	_battle_action(L.text("special.open"), Rect2(477, 1172, 216, 100), func(): _open_panel("special"), "special", "special")
 	_refresh()
 
 func _cell_pressed(cell: int) -> void:
@@ -450,7 +450,7 @@ func _save() -> bool:
 		if not store.save_run(sim):
 			# 저장 실패를 매 프레임 반복하지 않는다. 사용자 저장 요청은 즉시 시도한다.
 			save_retry_time = wall_time + SAVE_RETRY_SECONDS
-			_toast(store.last_error)
+			_toast(L.text(store.last_error))
 			return false
 		save_retry_time = 0.0
 		save_time = wall_time
@@ -463,14 +463,14 @@ func _refresh() -> void:
 	labels.lives.text = "♥ × %d" % sim.lives
 	labels.wave.text = "%d / 100" % sim.wave
 	labels.gold.text = "%d" % sim.gold
-	labels.count.text = L.text("전장 적  %d / %d") % [sim.enemies.size(), sim.enemy_limit()]
+	labels.count.text = L.text("battle.enemy.count") % [sim.enemies.size(), sim.enemy_limit()]
 	labels.count.add_theme_color_override("font_color", Color("ff8871") if sim.enemies.size() >= sim.enemy_limit() - 10 else MUTED)
-	labels.clock.text = L.text("마왕을 처치하세요") if sim.wave == 100 else L.text("다음 웨이브  %04.1f초") % maxf(0, sim.wave * 30.0 - sim.time)
+	labels.clock.text = L.text("battle.objective.demon_king") if sim.wave == 100 else L.text("battle.next_wave.timer") % maxf(0, sim.wave * 30.0 - sim.time)
 	if sim.developer_run:
-		labels.clock.text += L.text("  [개발 기록]")
+		labels.clock.text += L.text("debug.run.marker")
 	labels.speed.text = "×%d" % sim.speed
 	labels.pause.text = "▶" if sim.pause_reasons.has("user") else "Ⅱ"
-	labels.summon.get_meta("caption").text = L.text("소환   ◈ %d") % int(sim.catalog.rules.T.summon_cost)
+	labels.summon.get_meta("caption").text = L.text("unit.summon.button") % int(sim.catalog.rules.T.summon_cost)
 	labels.summon.disabled = sim.gold < int(sim.catalog.rules.T.summon_cost) or sim.units.size() >= 36 or sim.result != "active"
 	var unit: Dictionary = sim.unit_by_id(selected)
 	labels.selection_panel.visible = not unit.is_empty()
@@ -481,14 +481,14 @@ func _refresh() -> void:
 		labels.detail.text = ""
 	else:
 		var definition: Dictionary = sim.catalog.units[unit.kind]
-		labels.selection.text = "%s  %s" % ["★".repeat(int(definition.tier)), L.text(definition.name)]
+		labels.selection.text = "%s  %s" % ["★".repeat(int(definition.tier)), L.unit_name(str(unit.kind))]
 		var coverage: String = PlacementFeedback.attack_coverage(float(definition.range), sim.cell_position(int(unit.cell)))
 		var attack_note := ""
 		if coverage == "none":
-			attack_note = L.text("직접 공격 불가")
+			attack_note = L.text("unit.attack.out_of_range")
 		elif coverage == "tangent":
-			attack_note = L.text("직접 공격 접점이 좁음")
-		labels.detail.text = L.text("공격 %.0f · 사거리 %.1f%s\n%s") % [sim.attack_damage(unit), definition.range, " · " + attack_note if not attack_note.is_empty() else "", UnitDescription.attack_type(definition)]
+			attack_note = L.text("unit.attack.limited_coverage")
+		labels.detail.text = L.text("unit.attack.selected_details") % [sim.attack_damage(unit), definition.range, " · " + attack_note if not attack_note.is_empty() else "", UnitDescription.attack_type(definition)]
 		labels.detail.add_theme_color_override("font_color", Color("ffe365") if coverage != "reachable" else MUTED)
 	board.selected_id = selected
 	for update in dynamic:
@@ -565,7 +565,7 @@ func _open_panel(kind: String, force: bool = false) -> void:
 	var panel := _panel(overlay, Rect2(35, top - 44.0, 650, body_height + 44.0), Color("172b39"), GOLD)
 	if is_instance_valid(board):
 		board.blocked_screen_rects.assign([Rect2(0, 0, 720, 1280) if kind in ["settings", "result", "confirm_new"] else panel.get_global_rect()])
-	var titles := {"upgrade": L.text("길드 공방 · 공통 공격력 강화"), "gamble": L.text("운명의 계약 · 영입 도전"), "special": L.text("특수몬스터 · 보상형 적"), "recipes": L.text("조합 도감"), "codex": L.text("길드 기록관"), "settings": L.text("설정"), "result": L.text("마왕 격파") if sim.result == "victory" else L.text("전투 종료"), "confirm_new": L.text("새로운 출정")}
+	var titles := {"upgrade": L.text("upgrade.title"), "gamble": L.text("gamble.title"), "special": L.text("special.title"), "recipes": L.text("recipes.codex.title"), "codex": L.text("catalog.codex.title"), "settings": L.text("settings.title"), "result": L.text("result.title.victory") if sim.result == "victory" else L.text("result.title.defeat"), "confirm_new": L.text("expedition.new.title")}
 	var heading := _panel(panel, Rect2(9, 5, 632, 100), INK, GOLD, "blue")
 	_label(heading, titles[kind], Vector2(20, 31), 500, 26, PALE)
 	var close_button: Button
@@ -582,9 +582,9 @@ func _open_panel(kind: String, force: bool = false) -> void:
 			_settings_panel(panel)
 		"result": _result_panel(panel)
 		"confirm_new":
-			_paragraph(panel, L.text("진행 중인 전투가 있습니다. 새 게임을 시작하면 이번 판의 배치와 골드를 잃습니다."), Rect2(38, 140, 560, 150), 25, PALE)
-			_button(panel, L.text("새 게임 시작"), Rect2(75, 360, 500, 100), _start_new, true, "confirm_new")
-			_button(panel, L.text("이어하기 유지"), Rect2(75, 480, 500, 100), _close_panel, false, "cancel_new")
+			_paragraph(panel, L.text("menu.new_game.confirm.warning"), Rect2(38, 140, 560, 150), 25, PALE)
+			_button(panel, L.text("menu.new_game.start"), Rect2(75, 360, 500, 100), _start_new, true, "confirm_new")
+			_button(panel, L.text("menu.new_game.keep_current"), Rect2(75, 480, 500, 100), _close_panel, false, "cancel_new")
 	if kind in ["settings", "result", "confirm_new"] or mode == "menu":
 		_capture_modal_focus()
 
@@ -616,8 +616,8 @@ func _upgrade_panel(panel: Control) -> void:
 		var card := _panel(panel, Rect2(x, y, 298, 214))
 		_label(card, "%s +%d" % ["★".repeat(tier), level], Vector2(90, 14), 194, 26, GOLD)
 		_portrait(card, ["u02", "u07", "u12", "u15"][tier - 1], Vector2(10, 8), Vector2(72, 84))
-		_label(card, L.text("공격 +%d%%") % roundi(level * float(sim.catalog.rules.T.upgrade_factor) * 100), Vector2(90, 62), 194, 22, MUTED)
-		var button := _button(card, L.text("최대 강화") if level >= 10 else L.text("강화   ◈ %d") % sim.upgrade_cost(tier), Rect2(8, 106, 282, 100), func(): _transaction(sim.upgrade(tier), true, true), true)
+		_label(card, L.text("upgrade.amount") % roundi(level * float(sim.catalog.rules.T.upgrade_factor) * 100), Vector2(90, 62), 194, 22, MUTED)
+		var button := _button(card, L.text("upgrade.maxed_label") if level >= 10 else L.text("upgrade.button") % sim.upgrade_cost(tier), Rect2(8, 106, 282, 100), func(): _transaction(sim.upgrade(tier), true, true), true)
 		button.add_theme_font_size_override("font_size", 26)
 		var update := func(): button.disabled = sim.gold < sim.upgrade_cost(tier) or int(sim.upgrades[str(tier)]) >= 10 or sim.result != "active"
 		dynamic.append(update)
@@ -628,10 +628,10 @@ func _gamble_panel(panel: Control) -> void:
 		var x: int = 20 + (tier - 2) * 312
 		var rule: Dictionary = sim.catalog.rules.T.gamble[str(tier)]
 		_panel(panel, Rect2(x, 73, 297, 253), Color("112332"), Color("726754"))
-		_label(panel, "★".repeat(tier) + L.text(" 도전"), Vector2(x + 53, 86), 240, 27, GOLD)
-		_label(panel, L.text("성공 확률  %d%%") % roundi(rule.chance * 100), Vector2(x + 38, 139), 260, 22, PALE)
-		_label(panel, L.text("실패 시 보상 없음"), Vector2(x + 52, 181), 250, 18, MUTED)
-		var button := _button(panel, L.text("계약   ◈ %d") % int(rule.cost), Rect2(x + 14, 224, 269, 100), func(): _transaction(sim.gamble(tier), true, true), true)
+		_label(panel, "★".repeat(tier) + L.text("gamble.challenge.suffix"), Vector2(x + 53, 86), 240, 27, GOLD)
+		_label(panel, L.text("gamble.success_chance") % roundi(rule.chance * 100), Vector2(x + 38, 139), 260, 22, PALE)
+		_label(panel, L.text("gamble.failure.no_reward"), Vector2(x + 52, 181), 250, 18, MUTED)
+		var button := _button(panel, L.text("gamble.contract.button") % int(rule.cost), Rect2(x + 14, 224, 269, 100), func(): _transaction(sim.gamble(tier), true, true), true)
 		var update := func(): button.disabled = sim.gold < rule.cost or sim.first_empty() < 0 or sim.result != "active"
 		dynamic.append(update)
 		update.call()
@@ -642,16 +642,16 @@ func _special_panel(panel: Control) -> void:
 		var definition: Dictionary = sim.catalog.enemies[id]
 		var x := 14 + index * 209
 		var card := _panel(panel, Rect2(x, 74, 201, 359))
-		_label(card, L.text(definition.name), Vector2(12, 8), 181, 24, GOLD)
+		_label(card, L.enemy_name(str(id)), Vector2(12, 8), 181, 24, GOLD)
 		_portrait(card, id, Vector2(38, 48), Vector2(126, 84))
-		_label(card, L.text("처치 ◈ %d") % definition.reward, Vector2(16, 139), 181, 22, INK)
+		_label(card, L.text("special.defeat.reward") % definition.reward, Vector2(16, 139), 181, 22, INK)
 		var status := _label(card, "", Vector2(12, 177), 183, 20, MUTED)
-		var button := _button(card, L.text("무료 소환"), Rect2(10, 250, 181, 100), func(): _transaction(sim.summon_special(id), true))
+		var button := _button(card, L.text("unit.summon.free"), Rect2(10, 250, 181, 100), func(): _transaction(sim.summon_special(id), true))
 		button.add_theme_font_size_override("font_size", 24)
 		var update := func():
 			var left: float = maxf(0, float(sim.cooldowns.get(id, 0)) - sim.time)
-			status.text = L.text("%d웨이브 완료 후") % definition.unlock if sim.wave <= definition.unlock else (L.text("대기 %d게임초") % ceili(left) if left > 0 else L.text("처치하고 보상 획득"))
-			button.text = L.text("소환 시 패배") if sim.enemies.size() >= sim.enemy_limit() - 1 else L.text("무료 소환")
+			status.text = L.text("special.unlock_wave") % definition.unlock if sim.wave <= definition.unlock else (L.text("special.cooldown") % ceili(left) if left > 0 else L.text("special.claim_reward"))
+			button.text = L.text("unit.summon.blocked_by_enemy_limit") if sim.enemies.size() >= sim.enemy_limit() - 1 else L.text("unit.summon.free")
 			button.disabled = sim.wave <= definition.unlock or left > 0 or sim.result != "active"
 		dynamic.append(update)
 		update.call()
@@ -722,7 +722,7 @@ func _unit_summary(parent: Container, definition: Dictionary) -> void:
 		_catalog_text(parent, abilities, 24, MUTED)
 
 func _unit_base_stats(parent: Container, definition: Dictionary) -> void:
-	_catalog_text(parent, L.text("기본 능력 · 공격 %d\n사거리 %.1f · 주기 %s초") % [definition.damage, definition.range, String.num(float(definition.interval), 2)], 24, PALE)
+	_catalog_text(parent, L.text("unit.attack.base_stats") % [definition.damage, definition.range, String.num(float(definition.interval), 2)], 24, PALE)
 
 func _recipe_anchor(recipe: Dictionary) -> int:
 	var unit: Dictionary = sim.unit_by_id(selected)
@@ -741,7 +741,7 @@ func _recipes_panel(panel: Control) -> void:
 	for recipe in available + unavailable:
 		var result_def: Dictionary = sim.catalog.units[recipe.result]
 		var body := _catalog_row(list, recipe.result)
-		var details := _catalog_header(body, recipe.result, "%s  %s" % ["★".repeat(int(result_def.tier)), L.text(result_def.name)])
+		var details := _catalog_header(body, recipe.result, "%s  %s" % ["★".repeat(int(result_def.tier)), L.unit_name(str(recipe.result))])
 		_unit_summary(details, result_def)
 		_unit_base_stats(body, result_def)
 		var footer := HBoxContainer.new()
@@ -753,10 +753,10 @@ func _recipes_panel(panel: Control) -> void:
 			for unit in sim.units:
 				if unit.kind == id:
 					owned += 1
-			material_names.append("%s %d/%d" % [L.text(sim.catalog.units[id].name), owned, recipe.ingredients[id]])
+			material_names.append("%s %d/%d" % [L.unit_name(str(id)), owned, recipe.ingredients[id]])
 		var materials := _catalog_text(footer, " + ".join(material_names), 24, PALE)
 		materials.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		var button := _button(footer, L.text("조합"), Rect2(0, 0, 120, 100), func():
+		var button := _button(footer, L.text("recipes.merge.button"), Rect2(0, 0, 120, 100), func():
 			var response: Dictionary = sim.combine(recipe.id, _recipe_anchor(recipe))
 			if response.ok:
 				selected = int(response.unit_id)
@@ -767,14 +767,14 @@ func _recipes_panel(panel: Control) -> void:
 
 func _codex_panel(panel: Control) -> void:
 	var units_tab := codex_tab == "units"
-	_button(panel, L.text("용병 %d") % sim.catalog.units.size(), Rect2(20, 70, 285, 100), func(): codex_tab = "units"; _open_panel("codex", true), codex_tab == "units", "codex_units")
-	_button(panel, L.text("적 %d") % sim.catalog.enemies.size(), Rect2(322, 70, 306, 100), func(): codex_tab = "enemies"; _open_panel("codex", true), codex_tab == "enemies", "codex_enemies")
+	_button(panel, L.text("catalog.units.tab") % sim.catalog.units.size(), Rect2(20, 70, 285, 100), func(): codex_tab = "units"; _open_panel("codex", true), codex_tab == "units", "codex_units")
+	_button(panel, L.text("catalog.enemies.tab") % sim.catalog.enemies.size(), Rect2(322, 70, 306, 100), func(): codex_tab = "enemies"; _open_panel("codex", true), codex_tab == "enemies", "codex_enemies")
 	if codex_tab == "units":
 		for tier in range(5):
-			_button(panel, L.text("전체") if tier == 0 else L.text("%d성") % tier, Rect2(20 + tier * 124, 182, 112, 100), func(): unit_tier_filter = tier; _open_panel("codex", true), unit_tier_filter == tier, "codex_tier_%d" % tier)
+			_button(panel, L.text("catalog.filter.all") if tier == 0 else L.text("catalog.filter.tier") % tier, Rect2(20 + tier * 124, 182, 112, 100), func(): unit_tier_filter = tier; _open_panel("codex", true), unit_tier_filter == tier, "codex_tier_%d" % tier)
 	else:
 		var filters := ["all", "normal", "boss", "special"]
-		var names := [L.text("전체"), L.text("일반"), L.text("보스"), L.text("특수")]
+		var names := [L.text("catalog.filter.all"), L.text("catalog.filter.normal"), L.text("catalog.filter.boss"), L.text("catalog.filter.special")]
 		for index in range(4):
 			_button(panel, names[index], Rect2(20 + index * 154, 182, 145, 100), func(): enemy_filter = filters[index]; _open_panel("codex", true), enemy_filter == filters[index], "codex_filter_" + filters[index])
 	var list := _scroll(panel, 296)
@@ -787,31 +787,31 @@ func _codex_panel(panel: Control) -> void:
 			continue
 		var body := _catalog_row(list, id)
 		var found: bool = store.profile.units.has(id) or sim.discovered_units.has(id) if codex_tab == "units" else store.profile.enemies.has(id) or sim.discovered_enemies.has(id)
-		var title: String = "%s  %s" % ["★".repeat(int(definition.tier)), L.text(definition.name)] if codex_tab == "units" else L.text(definition.name)
-		var details := _catalog_header(body, id, title, L.text("발견") if found else L.text("미발견"))
+		var title: String = "%s  %s" % ["★".repeat(int(definition.tier)), L.unit_name(str(id))] if codex_tab == "units" else L.enemy_name(str(id))
+		var details := _catalog_header(body, id, title, L.text("catalog.status.discovered") if found else L.text("catalog.status.undiscovered"))
 		var badge := details.find_child("DiscoveryBadge", true, false) as Label
 		var kill_label: Label
 		var shown := {"found": found, "kills": _codex_kills(id) if not units_tab else 0}
 		if codex_tab == "units":
 			_unit_summary(details, definition)
 			_unit_base_stats(body, definition)
-			_catalog_text(body, definition.description, 24, MUTED)
+			_catalog_text(body, L.unit_description(str(id)), 24, MUTED)
 		else:
-			_catalog_text(details, L.text("기본 체력 %d · 처치 ◈ %d") % [definition.hp, definition.reward], 24, PALE)
-			kill_label = _catalog_text(body, L.text("기본 이동 %.0f초 · 누적 처치 %d") % [definition.travel, shown.kills], 24, MUTED)
+			_catalog_text(details, L.text("catalog.enemy.stats") % [definition.hp, definition.reward], 24, PALE)
+			kill_label = _catalog_text(body, L.text("catalog.enemy.progress") % [definition.travel, shown.kills], 24, MUTED)
 			if definition.kind == "special":
-				_catalog_text(body, L.text("%d웨이브 완료 후 해금") % definition.unlock, 24, MUTED)
+				_catalog_text(body, L.text("catalog.enemy.unlock_wave") % definition.unlock, 24, MUTED)
 		# 행을 다시 만들지 않고 변경된 기록만 갱신해 스크롤과 입력 상태를 보존한다.
 		var update := func():
 			var discovered: bool = store.profile.units.has(id) or sim.discovered_units.has(id) if units_tab else store.profile.enemies.has(id) or sim.discovered_enemies.has(id)
 			if discovered != bool(shown.found):
 				shown.found = discovered
-				badge.text = L.text("발견") if discovered else L.text("미발견")
+				badge.text = L.text("catalog.status.discovered") if discovered else L.text("catalog.status.undiscovered")
 			if kill_label != null:
 				var count := _codex_kills(id)
 				if count != int(shown.kills):
 					shown.kills = count
-					kill_label.text = L.text("기본 이동 %.0f초 · 누적 처치 %d") % [definition.travel, count]
+					kill_label.text = L.text("catalog.enemy.progress") % [definition.travel, count]
 		dynamic.append(update)
 
 func _codex_kills(identity: String) -> int:
@@ -842,22 +842,22 @@ func _settings_panel(panel: Control) -> void:
 	_settings_language_row(panel)
 	for index in range(2):
 		var key := "music" if index == 0 else "effects"
-		_settings_audio_row(panel, key, L.text("배경음악") if index == 0 else L.text("효과음"), 184 + index * 112)
-	var vibration := _settings_toggle(panel, L.text("진동"), 408, bool(store.profile.settings.haptics), "haptics")
+		_settings_audio_row(panel, key, L.text("settings.audio.music") if index == 0 else L.text("settings.audio.effects"), 184 + index * 112)
+	var vibration := _settings_toggle(panel, L.text("settings.haptics"), 408, bool(store.profile.settings.haptics), "haptics")
 	vibration.toggled.connect(func(value):
 		audio.play_ui()
 		audio.set_haptics(value)
 		store.profile.settings.haptics = value
-		if not store.save_settings(): _toast(store.last_error))
-	var motion := _settings_toggle(panel, L.text("동작 연출 줄이기"), 520, store.profile.settings.reduced_motion, "reduced_motion")
+		if not store.save_settings(): _toast(L.text(store.last_error)))
+	var motion := _settings_toggle(panel, L.text("settings.reduced_motion"), 520, store.profile.settings.reduced_motion, "reduced_motion")
 	motion.toggled.connect(func(value):
 		audio.play_ui()
 		store.profile.settings.reduced_motion = value
 		if is_instance_valid(board): board.set("reduced_motion", value)
-		if not store.save_settings(): _toast(store.last_error))
-	_button(panel, L.text("전투로 돌아가기") if mode == "battle" else L.text("닫기"), Rect2(35, 632, 579, 100), _close_panel, true, "close_panel")
+		if not store.save_settings(): _toast(L.text(store.last_error)))
+	_button(panel, L.text("battle.return") if mode == "battle" else L.text("ui.close"), Rect2(35, 632, 579, 100), _close_panel, true, "close_panel")
 	if mode == "battle":
-		_button(panel, L.text("저장 후 메인 메뉴"), Rect2(35, 744, 579, 100), func():
+		_button(panel, L.text("menu.return_to_main"), Rect2(35, 744, 579, 100), func():
 			if _save(): _show_menu(), false, "save_menu")
 
 func _settings_language_row(panel: Control) -> void:
@@ -866,7 +866,7 @@ func _settings_language_row(panel: Control) -> void:
 	row.size = Vector2(579, 100)
 	row.add_theme_constant_override("separation", 16)
 	panel.add_child(row)
-	var caption := _label(row, L.text("언어"), Vector2.ZERO, 135, 24, PALE)
+	var caption := _label(row, L.text("settings.language"), Vector2.ZERO, 135, 24, PALE)
 	caption.custom_minimum_size.x = 135
 	caption.size_flags_vertical = Control.SIZE_FILL
 	caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -912,7 +912,7 @@ func _settings_audio_row(panel: Control, key: String, title: String, y: float) -
 	slider.step = 0.05
 	slider.value = store.profile.settings[key]
 	slider.name = key + "_volume"
-	slider.accessibility_name = L.text("%s 음량") % title
+	slider.accessibility_name = L.text("settings.audio.volume") % title
 	var mute := _button(row, "", Rect2(0, 0, 100, 100), func():
 		_toggle_audio_mute(key)
 		slider.set_value_no_signal(store.profile.settings[key]), false, key + "_mute")
@@ -928,7 +928,7 @@ func _settings_audio_row(panel: Control, key: String, title: String, y: float) -
 		store.profile.settings[key + "_muted"] = false
 		_apply_audio()
 		_refresh_audio_mute(mute, key, title)
-		if not store.save_settings(): _toast(store.last_error))
+		if not store.save_settings(): _toast(L.text(store.last_error)))
 	_refresh_audio_mute(mute, key, title)
 
 func _toggle_audio_mute(key: String) -> void:
@@ -938,17 +938,17 @@ func _toggle_audio_mute(key: String) -> void:
 	if was_muted and float(store.profile.settings[key]) <= 0.0:
 		store.profile.settings[key] = SaveStore.DEFAULT_SETTINGS[key]
 	_apply_audio()
-	if not store.save_settings(): _toast(store.last_error)
+	if not store.save_settings(): _toast(L.text(store.last_error))
 
 func _refresh_audio_mute(button: Button, key: String, title: String) -> void:
 	var muted: bool = audio.effective_volume(key) <= 0.0
 	button.icon = UiSkin.icon_texture("sound_muted" if muted else "sound")
-	button.tooltip_text = (L.text("%s 켜기") if muted else L.text("%s 음소거")) % title
+	button.tooltip_text = (L.text("settings.toggle.enable") if muted else L.text("settings.audio.mute")) % title
 	button.accessibility_name = button.tooltip_text
 
 func _settings_toggle(panel: Control, title: String, y: float, enabled: bool, action: String) -> CheckButton:
 	var toggle := CheckButton.new()
-	toggle.text = L.text(title)
+	toggle.text = title
 	toggle.add_theme_font_size_override("font_size", 26)
 	for state in ["checked", "unchecked", "checked_disabled", "unchecked_disabled"]:
 		toggle.add_theme_icon_override(state, UiSkin.switch_texture(state.begins_with("checked")))
@@ -962,14 +962,14 @@ func _settings_toggle(panel: Control, title: String, y: float, enabled: bool, ac
 	return toggle
 
 func _result_panel(panel: Control) -> void:
-	_label(panel, "VICTORY" if sim.result == "victory" else "THE GUILD REMEMBERS", Vector2(60, 131), 570, 35, GOLD)
-	_paragraph(panel, L.result_reason(sim.result_reason), Rect2(58, 220, 550, 110), 29, PALE)
-	_label(panel, L.text("도달 웨이브  %d / 100") % sim.wave, Vector2(64, 344), 560, 26, PALE)
-	var tip := L.text("길드는 다음 출정을 기다립니다")
+	_label(panel, L.text("result.victory.banner") if sim.result == "victory" else L.text("result.defeat.banner"), Vector2(60, 131), 570, 35, GOLD)
+	_paragraph(panel, L.result_reason(sim.result_reason, sim.enemy_limit()), Rect2(58, 220, 550, 110), 29, PALE)
+	_label(panel, L.text("battle.wave.reached") % sim.wave, Vector2(64, 344), 560, 26, PALE)
+	var tip := L.text("result.guidance.next_expedition")
 	if sim.result == "defeat":
-		tip = L.text("적을 묶는 동안 화력을 높이세요. 조합과 성급 강화로 밀린 적을 처치할 수 있습니다.") if sim.enemies.size() >= sim.enemy_limit() else L.text("일시정지 중 조합과 재배치를 활용하세요. 짧은 사거리 용병은 길 가장자리가 유리합니다.")
+		tip = L.text("battle.menu.tip.wait_then_upgrade") if sim.enemies.size() >= sim.enemy_limit() else L.text("battle.menu.tip.pause_reposition")
 	_paragraph(panel, tip, Rect2(64, 403, 535, 95), 20, MUTED)
-	_button(panel, L.text("메인 메뉴"), Rect2(62, 523, 526, 100), func():
+	_button(panel, L.text("menu.main.open"), Rect2(62, 523, 526, 100), func():
 		if _save(): _show_menu(), true, "result_menu")
 
 func _toast(message: String) -> void:
@@ -988,7 +988,7 @@ func _toast(message: String) -> void:
 	toast_label.position = Vector2(30, 8)
 	toast_label.size = Vector2(660, 76)
 	toast_label.show()
-	toast_label.text = L.text(message)
+	toast_label.text = message
 	toast_until = wall_time + 3.0
 	move_child(toast_label, get_child_count() - 1)
 
@@ -1047,7 +1047,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		if event.keycode == KEY_F8 and mode == "battle" and sim.result == "active":
 			sim.debug_jump_wave(mini(100, sim.wave + 10))
 			sim.gold += 500
-			_toast(L.text("개발용 점프 · 최고 기록에 반영되지 않습니다"))
+			_toast(L.text("debug.wave.skip"))
 
 func _handle_back() -> void:
 	_save()

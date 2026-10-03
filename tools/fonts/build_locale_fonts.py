@@ -14,7 +14,7 @@ def build(source: Path, locale: str, suffix: str) -> dict:
     text = ''.join(entry[locale] for entry in messages.values())
     text += 'English한국어简体中文日本語' + ''.join(chr(c) for c in range(32, 127))
     text += '★♥◇◈×▶Ⅱ©·–−…'
-    font = TTFont(source)
+    font = TTFont(source, recalcTimestamp=False)
     cmap = font.getBestCmap()
     # 한글·기호는 기존 폰트 fallback도 쓰지만 해당 언어 번역 본문은 전부 포함해야 한다.
     fallback = set(TTFont(ROOT / 'assets/fonts/GuildSymbols.ttf').getBestCmap())

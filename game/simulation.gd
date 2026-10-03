@@ -97,8 +97,8 @@ func first_empty() -> int:
 			return cell
 	return -1
 
-func _fail(reason: String) -> Dictionary:
-	return {"ok": false, "reason": reason}
+func _fail(message_key: String) -> Dictionary:
+	return {"ok": false, "reason": L.text(message_key)}
 
 func _allowed() -> bool:
 	return result == "active"
@@ -115,27 +115,27 @@ func add_unit(kind: String, cell: int) -> Dictionary:
 
 func summon() -> Dictionary:
 	if not _allowed():
-		return _fail("이미 종료된 전투입니다")
+		return _fail("error.game.already_ended")
 	var cell := first_empty()
 	if cell < 0:
-		return _fail("빈 칸이 없습니다 · 조합으로 공간을 만드세요")
+		return _fail("error.unit.no_space.merge_hint")
 	var cost: int = catalog.rules.T.summon_cost
 	if gold < cost:
-		return _fail("골드가 부족합니다")
+		return _fail("error.gold.insufficient")
 	var pool: Array = catalog.pool(1)
 	var unit := add_unit(pool[rng.randi_range(0, pool.size() - 1)], cell)
 	gold -= cost
 	revision += 1
-	return {"ok": true, "unit_id": unit.id, "reason": L.text("%s 합류!") % L.text(catalog.units[unit.kind].name)}
+	return {"ok": true, "unit_id": unit.id, "reason": L.text("transaction.unit.joined") % L.unit_name(str(unit.kind))}
 
 func move_unit(id: int, cell: int) -> Dictionary:
 	if not _allowed() or cell < 0 or cell >= 36:
-		return _fail("배치할 수 없는 칸입니다")
+		return _fail("error.unit.invalid_cell")
 	var unit := unit_by_id(id)
 	if unit.is_empty():
-		return _fail("선택한 용병이 없습니다")
+		return _fail("error.unit.none_selected")
 	if int(unit.cell) == cell:
-		return {"ok": true, "reason": L.text("이미 같은 칸에 있습니다")}
+		return {"ok": true, "reason": L.text("error.unit.already_in_cell")}
 	var other := unit_at(cell)
 	if not other.is_empty():
 		other.cell = unit.cell
@@ -144,7 +144,7 @@ func move_unit(id: int, cell: int) -> Dictionary:
 	unit_presented.emit({"id": int(unit.id), "kind": str(unit.kind), "cell": cell, "time": time, "action": "move"})
 	if not other.is_empty():
 		unit_presented.emit({"id": int(other.id), "kind": str(other.kind), "cell": int(other.cell), "time": time, "action": "move"})
-	return {"ok": true, "reason": L.text("배치를 변경했습니다")}
+	return {"ok": true, "reason": L.text("transaction.formation.updated")}
 
 func recipe_materials(recipe: Dictionary, anchor_id: int = -1) -> Array:
 	var chosen: Array = []
@@ -169,16 +169,16 @@ func recipe_materials(recipe: Dictionary, anchor_id: int = -1) -> Array:
 
 func combine(recipe_id: String, anchor_id: int = -1) -> Dictionary:
 	if not _allowed():
-		return _fail("이미 종료된 전투입니다")
+		return _fail("error.game.already_ended")
 	var recipe: Dictionary = {}
 	for entry in catalog.recipes:
 		if entry.id == recipe_id:
 			recipe = entry
 	if recipe.is_empty():
-		return _fail("없는 조합법입니다")
+		return _fail("recipes.not_found")
 	var materials := recipe_materials(recipe, anchor_id)
 	if materials.is_empty():
-		return _fail("조합 재료가 부족하거나 기준 용병이 맞지 않습니다")
+		return _fail("recipes.materials_missing")
 	var target: int = materials[0].cell
 	if anchor_id >= 0:
 		target = unit_by_id(anchor_id).cell
@@ -186,17 +186,17 @@ func combine(recipe_id: String, anchor_id: int = -1) -> Dictionary:
 		units.erase(material)
 	var created := add_unit(recipe.result, target)
 	revision += 1
-	return {"ok": true, "unit_id": created.id, "reason": L.text("%s 조합 완료!") % L.text(catalog.units[recipe.result].name)}
+	return {"ok": true, "unit_id": created.id, "reason": L.text("recipes.merge.success") % L.unit_name(str(recipe.result))}
 
 func gamble(tier: int) -> Dictionary:
 	if not _allowed() or not catalog.rules.T.gamble.has(str(tier)):
-		return _fail("지금 도전할 수 없습니다")
+		return _fail("gamble.unavailable")
 	var cell := first_empty()
 	if cell < 0:
-		return _fail("빈 칸이 없습니다")
+		return _fail("error.unit.no_space")
 	var rule: Dictionary = catalog.rules.T.gamble[str(tier)]
 	if gold < int(rule.cost):
-		return _fail("골드가 부족합니다")
+		return _fail("error.gold.insufficient")
 	gold -= int(rule.cost)
 	var won := rng.randf() < float(rule.chance)
 	var unit_id := -1
@@ -204,36 +204,36 @@ func gamble(tier: int) -> Dictionary:
 		var pool: Array = catalog.pool(tier)
 		unit_id = add_unit(pool[rng.randi_range(0, pool.size() - 1)], cell).id
 	revision += 1
-	return {"ok": true, "won": won, "unit_id": unit_id, "reason": L.text("%d성 영입 성공!") % tier if won else L.text("도전 실패 · 보상 없음")}
+	return {"ok": true, "won": won, "unit_id": unit_id, "reason": L.text("gamble.success") % tier if won else L.text("gamble.failure")}
 
 func upgrade_cost(tier: int) -> int:
 	return int(catalog.rules.T.upgrade_cost) * tier * (int(upgrades.get(str(tier), 0)) + 1)
 
 func upgrade(tier: int) -> Dictionary:
 	if not _allowed() or not upgrades.has(str(tier)):
-		return _fail("강화할 수 없습니다")
+		return _fail("upgrade.unavailable")
 	if int(upgrades[str(tier)]) >= int(catalog.rules.T.upgrade_max):
-		return _fail("최대 강화입니다")
+		return _fail("upgrade.already_maxed")
 	var cost := upgrade_cost(tier)
 	if gold < cost:
-		return _fail("골드가 부족합니다")
+		return _fail("error.gold.insufficient")
 	gold -= cost
 	upgrades[str(tier)] += 1
 	revision += 1
-	return {"ok": true, "reason": L.text("%d성 공통 공격력 강화!") % tier}
+	return {"ok": true, "reason": L.text("upgrade.success") % tier}
 
 func summon_special(kind: String) -> Dictionary:
 	if not _allowed() or not catalog.enemies.has(kind):
-		return _fail("소환할 수 없습니다")
+		return _fail("unit.summon.unavailable")
 	var definition: Dictionary = catalog.enemies[kind]
 	if definition.kind != "special" or wave <= int(definition.unlock):
-		return _fail("해당 웨이브를 완료하면 해금됩니다")
+		return _fail("special.unlock_after_wave")
 	if float(cooldowns.get(kind, 0.0)) > time:
-		return _fail("아직 재소환 대기 중입니다")
+		return _fail("special.cooldown_active")
 	add_enemy(kind, wave)
 	cooldowns[kind] = time + 300.0
 	revision += 1
-	return {"ok": true, "reason": L.text("%s 출현 · 처치하고 보상을 받으세요") % L.text(definition.name)}
+	return {"ok": true, "reason": L.text("special.spawned") % L.enemy_name(str(kind))}
 
 func add_enemy(kind: String, spawn_wave: int) -> Dictionary:
 	if not _allowed() or not catalog.enemies.has(kind):
@@ -248,7 +248,7 @@ func add_enemy(kind: String, spawn_wave: int) -> Dictionary:
 	discovered_enemies[kind] = true
 	# 생성 직후 판정하여 같은 프레임의 공격이나 입력으로 한도를 우회할 수 없게 한다.
 	if enemies.size() >= enemy_limit():
-		_finish("defeat", "전장의 적이 %d마리에 도달했습니다" % enemy_limit())
+		_finish("defeat", "result.reason.enemy_limit")
 	return enemy
 
 func enemy_limit() -> int:
@@ -372,7 +372,7 @@ func _tick(delta: float) -> void:
 			if catalog.enemies[enemy.kind].kind == "special":
 				_reward(enemy)
 		enemies.clear()
-		_finish("victory", "마왕을 처치했습니다")
+		_finish("victory", "result.reason.victory")
 		return
 	for enemy in enemies.duplicate():
 		var strongest := 0.0
@@ -397,10 +397,10 @@ func _tick(delta: float) -> void:
 			enemies.erase(enemy)
 			lives = maxi(0, lives - 1)
 			if catalog.enemies[enemy.kind].kind == "final":
-				_finish("defeat", "마왕이 탈출했습니다")
+				_finish("defeat", "result.reason.demon_escaped")
 				return
 			if lives <= 0:
-				_finish("defeat", "길드를 지킬 목숨이 남지 않았습니다")
+				_finish("defeat", "result.reason.lives_depleted")
 				return
 	if wave < 100 and time + 0.000001 >= wave * 30.0:
 		wave += 1
@@ -475,7 +475,7 @@ func restore(saved: Dictionary) -> bool:
 	revision += 1
 	# 이전 버전의 무제한 군중 저장은 원본 전투 상태를 보존한 채 새 패배 조건을 적용한다.
 	if result == "active" and enemies.size() >= enemy_limit():
-		_finish("defeat", "전장의 적이 %d마리에 도달했습니다" % enemy_limit())
+		_finish("defeat", "result.reason.enemy_limit")
 	return true
 
 func _valid_snapshot(s: Dictionary) -> bool:
