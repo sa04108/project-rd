@@ -476,7 +476,7 @@ func _refresh() -> void:
 	if mode != "battle" or labels.is_empty():
 		return
 	labels.lives.text = "♥ × %d" % sim.lives
-	labels.wave.text = "%d / 100" % sim.wave
+	labels.wave.text = L.text("battle.wave.current") % sim.wave
 	labels.gold.text = "%d" % sim.gold
 	labels.count.text = L.text("battle.enemy.count") % [sim.enemies.size(), sim.enemy_limit()]
 	labels.count.add_theme_color_override("font_color", Color("ff8871") if sim.enemies.size() >= sim.enemy_limit() - 10 else MUTED)
