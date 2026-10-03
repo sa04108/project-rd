@@ -61,7 +61,7 @@ bash scripts/web-export.sh artifacts/web-local
 python3 scripts/web-serve.py --directory artifacts/web-local --port 4180
 ```
 
-`.github/workflows/web-preview.yml`은 `main` push 또는 `workflow_dispatch` 수동 실행으로 Web 빌드와 GitHub Pages 배포를 수행합니다. 자동 테스트 단계는 없습니다. 최초 공개 전 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 설정하고, 배포 뒤 실제 Pages 주소를 브라우저에서 확인합니다. 로컬 export 성공만으로 공개 배포가 끝났다고 판단하지 않습니다.
+`.github/workflows/web-deploy.yml`은 `main` push 또는 `workflow_dispatch` 수동 실행마다 같은 체크아웃의 production과 development를 모두 빌드해 GitHub Pages로 함께 배포합니다. 스테이지 선택 입력은 없습니다. production은 사이트 루트, development는 `/development/`이며 두 경로를 포함한 하나의 Pages 산출물을 올립니다. 자동 테스트 단계는 없습니다. 최초 공개 전 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 설정하고, 배포 뒤 실제 Pages 주소를 브라우저에서 확인합니다. 로컬 export 성공만으로 공개 배포가 끝났다고 판단하지 않습니다.
 
 ### 물리 선택과 Web 메모리
 
@@ -110,11 +110,11 @@ export ANDROID_SERIAL='DEVICE_SERIAL'
 
 레시피 추적은 `RecipeTracking` 인스턴스의 메모리에만 두고 프로필·전투 스냅샷에는 저장하지 않습니다. 켤 때 하위 재료 전체를 순서대로 순회해 중복 없이 추가하며, 기존 순서는 유지합니다. 조합식이 없는 재료는 추적 준비 버튼을 만들지 않고, 해제는 선택한 대상에만 적용합니다. 프로필 스키마 4부터 이전 `preferences.recipe_tracking`을 제거합니다. 스키마 1·2만 기존 경제 초기값을 추가하고, 스키마 3의 경제·원장·기록·설정과 다른 환경설정은 보존합니다. 이전 추적 필드는 호환 검증에만 사용하며 더 이상 복원하지 않습니다. 더 높은 숫자 스키마는 읽기 전용으로 열어 덮어쓰지 않습니다.
 
-다이아몬드·영구 단계는 프로필 스키마 5의 `economy`에 저장되는 로컬 진행 시스템입니다. `data/permanent_progression.json`이 시작 잔액·보상·업그레이드 가격·상한·효과의 단일 원본이며, 저장소 API는 예상 단계와 원장 revision을 비교한 뒤 구매 차감·단계 변경·원장 기록을 프로필에 함께 저장합니다. run 종료의 보상·기록도 같은 프로필 갱신에 포함하고 milestone/run 식별자로 재저장 중 중복 지급을 막습니다. 진행 중 스냅샷은 새 전투 시작 시 고정된 영구 단계와 준비 시간·사용자 정지를 보존하므로, 이어하기에 나중 구매를 섞지 않습니다. 이 로컬 지갑은 변조 방지나 유료 재화의 신뢰 가능한 권위 저장소가 아닙니다. 실제 구매·소셜 계정은 서버 권위 지갑·원장, 영수증 검증, 멱등 거래 및 계정 연결 정책을 결정한 뒤 구현하며 [REMAINING](REMAINING.md)의 D03에서 관리합니다.
+다이아몬드·영구 단계는 프로필 스키마 6의 `economy`에 저장되는 로컬 진행 시스템입니다. 스테이지별 시작 잔액은 빌드 상수로 확정하고, `data/permanent_progression.json`이 보상·업그레이드 가격·상한·효과의 단일 원본이며, 저장소 API는 예상 단계와 원장 revision을 비교한 뒤 구매 차감·단계 변경·원장 기록을 프로필에 함께 저장합니다. run 종료의 보상·기록도 같은 프로필 갱신에 포함하고 milestone/run 식별자로 재저장 중 중복 지급을 막습니다. 진행 중 스냅샷은 새 전투 시작 시 고정된 영구 단계와 준비 시간·사용자 정지를 보존하므로, 이어하기에 나중 구매를 섞지 않습니다. 이 로컬 지갑은 변조 방지나 유료 재화의 신뢰 가능한 권위 저장소가 아닙니다. 실제 구매·소셜 계정은 서버 권위 지갑·원장, 영수증 검증, 멱등 거래 및 계정 연결 정책을 결정한 뒤 구현하며 [REMAINING](REMAINING.md)의 D03에서 관리합니다.
 
 경제 원장의 과거 차감·지급 금액은 거래 당시 확정값입니다. 현재 튜닝 가격으로 과거 원장을 다시 계산하지 않으며, 저장된 금액으로 잔액·누적 수입·지출·단계를 재구성해 일관성을 검사합니다. 신규 거래는 현재 데이터의 가격·해금·단계와 기대 revision을 검증한 뒤 실행합니다. 로컬 파일을 의도적으로 함께 수정하는 행위를 인증할 수 있는 구조는 아니므로 유료 구매를 활성화할 때 서버 검증으로 교체해야 합니다.
 
-전투 스냅샷 스키마 5는 `paid_summons`와 기존 남은 준비 초, `permanent_levels`, `user_paused`를 검증해 보존합니다. 소환 비용은 `Simulation.summon_cost()` 한 곳에서 계산하며 소환 성공 시에만 횟수를 한 번 늘립니다. 소환 횟수는 0 이상 정수이며 생성 개체 수(`next_id - 1`)를 넘을 수 없습니다. 스키마 1·2는 횟수가 없으므로 업데이트 후 소환부터 0에서 시작하고 골드·개체·RNG는 그대로 읽습니다. 스키마 1에는 준비·영구 단계·사용자 정지 값도 없으므로 준비 없이 시작하고 영구 보너스를 0으로 적용하며 사용자 수동 정지를 복원하지 않습니다. 스냅샷 버전 상한은 `Simulation.SNAPSHOT_SCHEMA`를 저장소에서도 공유합니다. 미래 스키마를 기존 상태로 추측해 바꾸지 않으며, 누락되거나 잘못된 횟수는 이어하기를 거부합니다.
+전투 스냅샷 스키마 6은 `stage`, `paid_summons`와 기존 남은 준비 초, `permanent_levels`, `user_paused`를 검증해 보존합니다. 소환 비용은 `Simulation.summon_cost()` 한 곳에서 계산하며 소환 성공 시에만 횟수를 한 번 늘립니다. 소환 횟수는 0 이상 정수이며 생성 개체 수(`next_id - 1`)를 넘을 수 없습니다. 스키마 1·2는 횟수가 없으므로 업데이트 후 소환부터 0에서 시작하고 골드·개체·RNG는 그대로 읽습니다. 스키마 1에는 준비·영구 단계·사용자 정지 값도 없으므로 준비 없이 시작하고 영구 보너스를 0으로 적용하며 사용자 수동 정지를 복원하지 않습니다. 스냅샷 버전 상한은 `Simulation.SNAPSHOT_SCHEMA`를 저장소에서도 공유합니다. 미래 스키마를 기존 상태로 추측해 바꾸지 않으며, 누락되거나 잘못된 횟수는 이어하기를 거부합니다.
 
 영구 성장 변경을 확인할 때는 새 프로필의 시작 잔액, 최초 최고 웨이브 milestone 보상, 보스 처치와 승리 보상, 같은 run 저장 반복 시 중복 지급 방지, 잔액 부족·해금 웨이브·최대 단계·읽기 전용 구매 차단을 함께 검사합니다. 저장 원자성은 구매 전후 wallet/upgrade/ledger/revision과 실패 시 원본 보존으로 확인합니다. 이어하기는 저장 당시 단계·사용자 정지를 유지하고 새 판만 최신 구매를 받는지 확인합니다.
 
@@ -132,7 +132,7 @@ export ANDROID_SERIAL='DEVICE_SERIAL'
 
 ## 출시 기능과 로컬 저장 보호
 
-개발 웨이브 점프는 실제 debug 빌드에서만 허용한다. UI의 `--dev`와 F8 처리, 시뮬레이션의 직접 점프 호출을 모두 검사한다. Web 배포는 기존 release 기본값을 유지하며 Android Debug preset에는 사용하지 않는 QA 시작 인자를 넣지 않는다. 현재 Android 명령은 이름대로 디버그 APK를 만드는 개발 절차이며 스토어 출시본이 아니다. 정식 서명 키를 저장소에 추가하지 않는다.
+개발 웨이브 점프는 development 스테이지에만 포함한다. production 전처리는 F8·개발 초기화·직접 점프 본문을 제거하며 직접 호출 API에는 무동작 stub만 남긴다. 엔진 debug/release 형식과 게임 스테이지는 별개이며, `--dev`나 런타임 설정으로 production을 전환할 수 없다. Web 배포는 두 스테이지 모두 release 형식을 기본으로 사용하며 Android Debug preset에는 QA 시작 인자를 넣지 않는다. 현재 Android 명령은 이름대로 디버그 APK를 만드는 개발 절차이며 스토어 출시본이 아니다. 정식 서명 키를 저장소에 추가하지 않는다.
 
 저장 입력은 파싱 전에 파일당 16 MiB와 중첩 깊이 32를 확인한다. 파싱 후에는 컬렉션당 100,000개, 전체 값 250,000개, 문자열 4,096자, 유한 숫자의 절댓값 2^53−1 범위를 확인한다. 출력에도 같은 구조·크기 제한을 적용하므로 다시 읽을 수 없는 새 파일로 교체하지 않는다. 정상적인 누적 기록도 한도에 도달하면 원본을 보존하고 저장 실패를 알린다. 제한을 맞추기 위해 구매 원장이나 보상 기록을 자동으로 버리지 않는다.
 
@@ -162,7 +162,7 @@ export ANDROID_SERIAL='DEVICE_SERIAL'
 
 신규 프로필의 배속은 ×1·×2뿐입니다. `battle_speed`의 각 단계는 해당 보스 처치와 다이아몬드가 모두 필요하며, 저장소와 UI는 `upgrade_unlocked()`를 공유합니다. 가격·보스 웨이브는 `data/permanent_progression.json`을 따릅니다. 개발 판과 단순 웨이브 도달은 처치 조건을 충족하지 않습니다.
 
-프로필·전투 스키마 5는 `battle_speed`를 필수로 검증합니다. 이전 버전만 이 키의 누락을 허용하고 0으로 채웁니다. 과거 `speed` 구매 원장은 ID·금액·순서를 유지하며, 유효 단계는 기존 단계 1·2·3을 새 단계 3·4·5로 인정합니다. 원장 재생은 각 거래 직전까지의 권리만 사용하므로 뒤의 구매를 근거로 앞의 건너뛰기를 정당화하지 않습니다. 보스 처치 정보는 정상 종료 원장에 연결된 `run_counts` 또는 검증된 정상 진행 run에서만 이전합니다.
+프로필·전투 스키마 5부터 `battle_speed`를 필수로 검증합니다. 이전 버전만 이 키의 누락을 허용하고 0으로 채웁니다. 과거 `speed` 구매 원장은 ID·금액·순서를 유지하며, 유효 단계는 기존 단계 1·2·3을 새 단계 3·4·5로 인정합니다. 원장 재생은 각 거래 직전까지의 권리만 사용하므로 뒤의 구매를 근거로 앞의 건너뛰기를 정당화하지 않습니다. 보스 처치 정보는 정상 종료 원장에 연결된 `run_counts` 또는 검증된 정상 진행 run에서만 이전합니다.
 
 로컬 검증에서는 각 단계의 자금 부족·보스 미처치·성공, 중복 콜백, 구버전 유료 배속 승계, 무료 ×3·×5의 ×2 이전, 개발 판 제외, 실패한 저장의 지갑·원장·처치 정보 복원, 이후 구매가 이전 run에 섞이지 않는지를 확인합니다. 스키마 4에서 이미 저장한 보스 기한은 스키마 5 이전 시 연장하지 않습니다. 테스트 코드와 결과는 무시되는 `artifacts/`에만 두고 커밋하지 않습니다.
 
@@ -171,3 +171,23 @@ export ANDROID_SERIAL='DEVICE_SERIAL'
 `PanelScroll` 아래의 버튼과 중간 컨테이너는 입력을 부모까지 전달하도록 `MOUSE_FILTER_PASS`를 사용합니다. 버튼의 실행 시점은 release를 유지합니다. 터치 환경에서는 Godot `ScrollContainer.scroll_deadzone`(논리20px)과 `NOTIFICATION_SCROLL_BEGIN`의 기본 버튼 클릭 취소를 사용하며 별도의 터치 스크롤을 겹쳐 실행하지 않습니다. 일반 마우스용 `DragScrollContainer` 보완도 버튼 시작을 허용하고 임계값을 넘긴 뒤 같은 취소 알림을 보냅니다. 스크롤바 자체 입력은 보완 드래그에서 제외합니다.
 
 로컬 검증은 버튼 시작 긴 드래그, 임계값 이하 짧은 터치, 다른 버튼 위 통과, 목록 끝에서 바깥으로 끌기, 취소·포커스 이탈·팝업 재진입을 포함합니다. 구매·조합·추적이 드래그로 실행되지 않고 새 정상 터치는 한 번만 실행되는지 지갑·원장·개체 상태도 확인합니다. 작은 화면에서 논리 좌표가 실제 화면 픽셀로 축소되는 점을 구분하고, 네이티브 입력 에뮬레이션은 실제 Android 기기 검사로 보고하지 않습니다.
+
+## 스테이지 전처리와 두 경로 배포
+
+기본 소스·편집기 실행은 production입니다. `scripts/stage-build.py`의 빌드 정의가 독립 사본에 `game/build_stage.gd`를 생성하며 production은100개, development는10,000,000개 초기 다이아몬드를 갖습니다. `STAGE_DEVELOPMENT_BEGIN`/`STAGE_DEVELOPMENT_END` 주석으로 감싼 코드만 development에 남깁니다. 알 수 없는 스테이지·잘못된 경계·중첩 경계·심볼릭 링크 입력·관리 대상이 아닌 출력 경로는 거부합니다. 두 스테이지의 조건부 코드를 런타임에 골라 실행하는 방식이나 GDScript의 네이티브 AOT 컴파일이라고 설명하지 않습니다.
+
+```sh
+bash scripts/web-export.sh --stage production artifacts/web
+bash scripts/web-export.sh --stage development artifacts/web/development
+python3 scripts/web-serve.py --directory artifacts/web
+```
+
+첫 경로와 `/development/`를 같은 로컬 서버에서 확인합니다. 각 export는 임시 프로젝트 사본을 별도로 import하고 종료 때 제거하므로 원본 소스와 반대편 빌드를 덮어쓰지 않습니다. `--stage`를 생략하면 production이며 development의 기본 출력은 `artifacts/web/development`입니다. workflow는 두 명령이 모두 성공해야 하나의 `artifacts/web` Pages 패키지를 올립니다. 테스트 단계는 추가하지 않습니다.
+
+Android 준비 후 `bash scripts/android-export.sh --stage production` 또는 `--stage development`를 사용합니다. 이는 여전히 Android Debug APK 절차이며 AAB·스토어 서명 release 지원을 뜻하지 않습니다.
+
+저장 스키마6은 프로필과 run에 고정 스테이지를 기록하고 다른 스테이지를 거부합니다. production의 기존 저장 경로는 유지해 스키마1~5를 이전하고, development는 별도 하위 경로를 사용합니다. 게임 초기화는 현재 경로의 profile/run 및 알려진 임시·백업·손상 복구 파일만 삭제합니다. 초기화 의도 marker를 먼저 기록하고, 부분 삭제·쓰기 실패 시 사용을 차단해 다음 시작에서 완료합니다. 성공 직후에는 이전 Simulation·추적·이어하기 참조를 비워 자동 저장으로 예전 판이 되살아나지 않게 합니다. Web의 완료 표시는 별도의 비동기 영구 저장 확정 상태도 확인해야 합니다.
+
+로컬 검증은 양쪽 신규/초기화 잔액, 상호 저장 거부, 기존 production 이전, marker 복구, 실패한 초기화, 취소·확정·재진입, 두 URL의 독립 저장을 포함합니다. 클라이언트 소스나 IndexedDB 전체를 수정할 권한을 가진 사용자의 변조, 동일 출처 스크립트 간 접근, 프로세스/탭 간 원자적 잠금은 이 빌드 분리만으로 해결되지 않습니다.
+
+Web은 각 빌드의 `GODOT_CONFIG.persistentPaths`도 고정합니다. production은 기존 `/userfs` IndexedDB를 유지하고 development는 `/userfs/godot/app_userdata/project-rd · 용병 길드/development`를 별도 IndexedDB 마운트로 사용합니다. 같은 마운트 안의 폴더만 분리하면 두 탭의 IDBFS 동기화가 서로의 파일을 삭제할 수 있으므로 충분하지 않습니다. 빌드 도구는 내부 application 이름과 기본 사용자 경로 설정을 검증하며, 경로가 달라지면 추측하지 않고 export를 실패시킵니다. 같은 스테이지를 여러 탭에서 동시에 수정하는 문제와 악의적인 동일 출처 접근 권한은 별도입니다.

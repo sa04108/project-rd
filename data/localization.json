@@ -1768,5 +1768,41 @@
     "ko": "%d초",
     "zh_CN": "%d秒",
     "ja": "%d秒"
+  },
+  "reset.title": {
+    "en": "Reset Game",
+    "ko": "게임 초기화",
+    "zh_CN": "重置游戏",
+    "ja": "ゲーム初期化"
+  },
+  "reset.warning": {
+    "en": "Delete all %s save data? Diamonds, upgrades, records, settings and the current battle will be reset. This cannot be undone. Other stages are not affected.",
+    "ko": "%s의 모든 저장 데이터를 삭제할까요? 다이아몬드, 강화, 기록, 설정, 진행 중인 전투가 초기화됩니다. 되돌릴 수 없으며 다른 스테이지에는 영향을 주지 않습니다.",
+    "zh_CN": "删除%s的全部存档？钻石、强化、记录、设置和当前战斗将被重置。无法恢复，其他阶段不受影响。",
+    "ja": "%sの全セーブデータを削除しますか？ダイヤ、強化、記録、設定、現在の戦闘を初期化します。元に戻せません。他のステージには影響しません。"
+  },
+  "reset.confirm": {
+    "en": "Delete and Reset",
+    "ko": "삭제하고 초기화",
+    "zh_CN": "删除并重置",
+    "ja": "削除して初期化"
+  },
+  "reset.cancel": {
+    "en": "Keep Data",
+    "ko": "데이터 유지",
+    "zh_CN": "保留数据",
+    "ja": "データを保持"
+  },
+  "reset.success": {
+    "en": "Game data reset.",
+    "ko": "게임 데이터가 초기화되었습니다.",
+    "zh_CN": "游戏数据已重置。",
+    "ja": "ゲームデータを初期化しました。"
+  },
+  "reset.error": {
+    "en": "Reset could not finish. Restart the game to retry.",
+    "ko": "초기화를 완료하지 못했습니다. 게임을 다시 실행해 주세요.",
+    "zh_CN": "重置未完成。请重新启动游戏重试。",
+    "ja": "初期化できませんでした。ゲームを再起動してください。"
   }
 }

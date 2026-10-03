@@ -1,5 +1,7 @@
 extends Control
 
+const Stage = preload("res://game/build_stage.gd")
+
 const L = preload("res://game/localization.gd")
 const UiSkin = preload("res://game/ui_skin.gd")
 const CurrencyLabel = preload("res://game/currency_label.gd")
@@ -80,7 +82,10 @@ func _ready() -> void:
 	get_tree().auto_accept_quit = false
 	get_tree().quit_on_go_back = false
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	dev_mode = OS.is_debug_build() and "--dev" in OS.get_cmdline_user_args()
+	dev_mode = false
+	# STAGE_DEVELOPMENT_BEGIN
+	dev_mode = Stage.DEVELOPMENT
+	# STAGE_DEVELOPMENT_END
 	store = SaveStore.new()
 	_apply_language()
 	_setup_sound()
@@ -431,6 +436,9 @@ func _show_menu() -> void:
 	labels.menu_diamonds = _diamond_text(screen, L.text("progression.wallet.balance") % store.diamond_balance(), Rect2(126, 1146, 468, 42), 25, PALE, true)
 	labels.menu_footer = _label(screen, "© 2026 %s  ·  v0.4" % display_name, Vector2(48, 1222), 624, 18, MUTED)
 	labels.menu_footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# STAGE_DEVELOPMENT_BEGIN
+	if Stage.DEVELOPMENT: labels.menu_footer.text += "  ·  DEVELOPMENT"
+	# STAGE_DEVELOPMENT_END
 	if not store.last_error.is_empty():
 		_toast(L.text(store.last_error))
 	_update_persistence_status(true)
@@ -576,7 +584,7 @@ func _special_timers() -> void:
 		labels.special_timers[identity] = {"row": row, "caption": caption}
 
 func _cell_pressed(cell: int) -> void:
-	if not panel_name.is_empty() and panel_name in ["settings", "result", "confirm_new"]:
+	if not panel_name.is_empty() and panel_name in ["settings", "result", "confirm_new", "confirm_reset"]:
 		return
 	var current: Dictionary = sim.unit_at(cell)
 	# 탭은 정보 선택만 수행하며 이동과 교환은 드래그에서만 처리한다.
@@ -789,7 +797,7 @@ func _capture_modal_focus() -> void:
 		# 아이콘 라벨의 접근성 포커스는 스크린 리더가 켜졌을 때만 사용한다.
 		if control.focus_mode == Control.FOCUS_ACCESSIBILITY and not get_tree().is_accessibility_enabled():
 			continue
-		if first == null or control.name == "cancel_new":
+		if first == null or control.name in ["cancel_new", "cancel_reset"]:
 			first = control
 	if first != null:
 		first.grab_focus()
@@ -819,14 +827,14 @@ func _open_panel(kind: String, force: bool = false, preserve_scroll: bool = true
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(overlay)
-	if kind in ["settings", "result", "confirm_new"] or mode == "menu":
+	if kind in ["settings", "result", "confirm_new", "confirm_reset"] or mode == "menu":
 		var shade := ColorRect.new()
 		shade.color = Color(0.02, 0.035, 0.055, 0.64)
 		shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		overlay.add_child(shade)
-	var large := kind in ["recipes", "codex", "settings", "result", "confirm_new"]
+	var large := kind in ["recipes", "codex", "settings", "result", "confirm_new", "confirm_reset"]
 	var top := 171.0 if kind == "settings" else (303.0 if large else 637.0)
-	var body_height := 884.0 if kind == "settings" else (694.0 if large else 360.0)
+	var body_height := (996.0 if mode == "battle" else 884.0) if kind == "settings" else (694.0 if large else 360.0)
 	if kind in ["recipes", "codex", "progression"]:
 		# 128px씩 대칭 여백을 두고 최상단 도구 바로 아래부터 표시한다.
 		top = 172.0
@@ -837,8 +845,8 @@ func _open_panel(kind: String, force: bool = false, preserve_scroll: bool = true
 	# 본문과 하단 HUD 위치를 보존하면서 닫기 버튼을 위한 머리말만 위로 확장한다.
 	var panel := _panel(overlay, Rect2(35, top - 44.0, 650, body_height + 44.0), Color("172b39"), GOLD)
 	panel.name = "PopupPanel"
-	overlay.set_meta("blocked_rect", Rect2(0, 0, 720, 1280) if kind in ["settings", "result", "confirm_new"] else panel.get_global_rect())
-	var titles := {"upgrade": L.text("upgrade.title"), "gamble": L.text("gamble.title"), "special": L.text("special.title"), "recipes": L.text("recipes.codex.title"), "codex": L.text("catalog.codex.title"), "settings": L.text("settings.title"), "result": L.text("result.title.victory") if sim.result == "victory" else L.text("result.title.defeat"), "confirm_new": L.text("expedition.new.title"), "progression": L.text("progression.shop.title")}
+	overlay.set_meta("blocked_rect", Rect2(0, 0, 720, 1280) if kind in ["settings", "result", "confirm_new", "confirm_reset"] else panel.get_global_rect())
+	var titles := {"upgrade": L.text("upgrade.title"), "gamble": L.text("gamble.title"), "special": L.text("special.title"), "recipes": L.text("recipes.codex.title"), "codex": L.text("catalog.codex.title"), "settings": L.text("settings.title"), "result": L.text("result.title.victory") if sim.result == "victory" else L.text("result.title.defeat"), "confirm_new": L.text("expedition.new.title"), "progression": L.text("progression.shop.title"), "confirm_reset": L.text("reset.title")}
 	var heading := _panel(panel, Rect2(9, 5, 632, 100), INK, GOLD, "blue")
 	_label(heading, titles[kind], Vector2(20, 31), 500, 26, PALE)
 	var close_button: Button
@@ -853,11 +861,15 @@ func _open_panel(kind: String, force: bool = false, preserve_scroll: bool = true
 		"settings": _settings_panel(panel)
 		"progression": ProgressionPanel.build(self, panel)
 		"result": _result_panel(panel)
+		"confirm_reset":
+			_paragraph(panel, L.text("reset.warning") % Stage.NAME, Rect2(38, 140, 560, 230), 24, PALE)
+			_button(panel, L.text("reset.confirm"), Rect2(75, 390, 500, 100), _reset_game_data, false, "confirm_reset")
+			_button(panel, L.text("reset.cancel"), Rect2(75, 510, 500, 100), func(): _open_panel("settings"), true, "cancel_reset")
 		"confirm_new":
 			_paragraph(panel, L.text("menu.new_game.confirm.warning"), Rect2(38, 140, 560, 150), 25, PALE)
 			_button(panel, L.text("menu.new_game.start"), Rect2(75, 360, 500, 100), _start_new, true, "confirm_new")
 			_button(panel, L.text("menu.new_game.keep_current"), Rect2(75, 480, 500, 100), _close_panel, false, "cancel_new")
-	if kind in ["settings", "result", "confirm_new"] or mode == "menu":
+	if kind in ["settings", "result", "confirm_new", "confirm_reset"] or mode == "menu":
 		_capture_modal_focus()
 
 	for child in panel.get_children():
@@ -1239,6 +1251,25 @@ func _settings_panel(panel: Control) -> void:
 	if mode == "battle":
 		_button(panel, L.text("menu.return_to_main"), Rect2(35, 744, 579, 100), _show_menu, false, "save_menu")
 
+	_button(panel, L.text("reset.title"), Rect2(35, 856 if mode == "battle" else 744, 579, 100), func(): _open_panel("confirm_reset"), false, "reset_game")
+
+func _reset_game_data() -> void:
+	# 이전 전투의 자동 저장이 초기화 직후 데이터를 다시 쓰지 못하도록 먼저 분리한다.
+	mode = "menu"
+	sim = Simulation.new()
+	resume_data.clear()
+	recipe_tracking.clear()
+	selected = -1
+	settings_dirty = false
+	dirty_time = -1.0
+	save_retry_time = 0.0
+	ended_saved = false
+	var reset_ok: bool = store.reset_all()
+	_apply_language()
+	_apply_audio()
+	_show_menu()
+	_toast(L.text("reset.success" if reset_ok else "reset.error"))
+
 func _settings_language_row(panel: Control) -> void:
 	var row := HBoxContainer.new()
 	row.position = Vector2(35, 72)
@@ -1546,11 +1577,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if is_instance_valid(pause_overlay): return
 	if event.is_action_pressed("ui_cancel"):
 		_handle_back()
-	if OS.is_debug_build() and dev_mode and event is InputEventKey and event.pressed and not event.echo:
+	# STAGE_DEVELOPMENT_BEGIN
+	if Stage.DEVELOPMENT and dev_mode and event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_F8 and mode == "battle" and sim.result == "active":
 			sim.debug_jump_wave(mini(100, sim.wave + 10))
 			sim.gold += 500
 			_toast(L.text("debug.wave.skip"))
+	# STAGE_DEVELOPMENT_END
 
 func _handle_back() -> void:
 	if is_instance_valid(pause_overlay): return

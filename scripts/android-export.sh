@@ -2,6 +2,23 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+STAGE="production"
+while (( $# )); do
+	case "$1" in
+		--stage)
+			(( $# >= 2 )) || { echo '--stage requires production or development' >&2; exit 2; }
+			STAGE="$2"; shift 2 ;;
+		--help|-h)
+			echo 'Usage: bash scripts/android-export.sh [--stage production|development]'
+			exit 0 ;;
+		*) echo "Unknown argument: $1" >&2; exit 2 ;;
+	esac
+done
+case "$STAGE" in
+	production) APK="$ROOT/artifacts/android/project-rd-debug.apk" ;;
+	development) APK="$ROOT/artifacts/android/project-rd-development-debug.apk" ;;
+	*) echo '--stage must be production or development' >&2; exit 2 ;;
+esac
 TOOLS_ROOT="/workspace/.tools"
 SDK_ROOT="$TOOLS_ROOT/android-sdk/sdk"
 GODOT_VERSION="${GODOT_VERSION:-}"
@@ -13,6 +30,9 @@ if [[ -z "$GODOT_VERSION" ]]; then
 	fi
 fi
 GODOT="$ROOT/.godot-tools/$GODOT_VERSION/godot"
+[[ "$GODOT_VERSION" == "$(tr -d '\r\n' < "$ROOT/.godot-version")" ]] || { echo 'Godot version does not match .godot-version' >&2; exit 1; }
+[[ -x "$GODOT" ]] || { echo 'Pinned Godot binary is missing' >&2; exit 1; }
+[[ "$($GODOT --version)" == "${GODOT_VERSION%-stable}.stable."* ]] || { echo 'Godot binary does not match .godot-version' >&2; exit 1; }
 JAVA_BIN="$(readlink -f "$(command -v java)")"
 export JAVA_HOME="$(dirname "$(dirname "$JAVA_BIN")")"
 export ANDROID_HOME="$SDK_ROOT"
@@ -24,7 +44,17 @@ export XDG_CACHE_HOME="$TOOLS_ROOT/android-sdk/cache"
 export PATH="$SDK_ROOT/platform-tools:$SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
 [[ -x "$GODOT" && -x "$SDK_ROOT/platform-tools/adb" ]]
-mkdir -p "$ROOT/artifacts/android" "$ROOT/artifacts/logs" "$XDG_CONFIG_HOME/godot" "$ANDROID_USER_HOME"
+mkdir -p "$ROOT/artifacts/android" "$ROOT/artifacts/logs" "$ROOT/artifacts/stage-build" "$XDG_CONFIG_HOME/godot" "$ANDROID_USER_HOME"
+touch "$ROOT/artifacts/.gdignore"
+BUILD_WORK="$(mktemp -d "$ROOT/artifacts/stage-build/android-$STAGE.XXXXXX")"
+BUILD_PROJECT="$BUILD_WORK/project"
+cleanup() {
+	case "$BUILD_WORK" in
+		"$ROOT/artifacts/stage-build/android-$STAGE."*) rm -rf -- "$BUILD_WORK" ;;
+	esac
+}
+trap cleanup EXIT
+python3 "$ROOT/scripts/stage-build.py" --stage "$STAGE" --output "$BUILD_PROJECT"
 python3 - "$XDG_CONFIG_HOME/godot/editor_settings-4.7.tres" "$SDK_ROOT" "$JAVA_HOME" <<'PYSETTINGS'
 from pathlib import Path
 import sys
@@ -52,13 +82,13 @@ path.parent.mkdir(parents=True, exist_ok=True)
 path.write_text("\n".join(lines) + "\n")
 PYSETTINGS
 
-"$GODOT" --headless --editor --path "$ROOT" --quit
-"$GODOT" --headless --path "$ROOT" --export-debug "Android Debug" "$ROOT/artifacts/android/project-rd-debug.apk"
-test -s "$ROOT/artifacts/android/project-rd-debug.apk"
-"$SDK_ROOT/build-tools/35.0.0/aapt" dump badging "$ROOT/artifacts/android/project-rd-debug.apk" | rg -F "package: name='com.puzzlemind.frd'"
+"$GODOT" --headless --editor --path "$BUILD_PROJECT" --import
+"$GODOT" --headless --path "$BUILD_PROJECT" --export-debug "Android Debug" "$APK"
+test -s "$APK"
+"$SDK_ROOT/build-tools/35.0.0/aapt" dump badging "$APK" | rg -F "package: name='com.puzzlemind.frd'"
 # Godot 4.7은 activity-alias에 런처를 선언하므로 구형 aapt badging 출력 대신 매니페스트를 읽는다.
-"$SDK_ROOT/build-tools/35.0.0/aapt" dump xmltree "$ROOT/artifacts/android/project-rd-debug.apk" AndroidManifest.xml | rg -F 'android.intent.category.LAUNCHER'
-python3 - "$ROOT/artifacts/android/project-rd-debug.apk" "$ROOT/assets/art/manifest.json" <<'PYAPK'
+"$SDK_ROOT/build-tools/35.0.0/aapt" dump xmltree "$APK" AndroidManifest.xml | rg -F 'android.intent.category.LAUNCHER'
+python3 - "$APK" "$BUILD_PROJECT/assets/art/manifest.json" <<'PYAPK'
 import json
 import sys
 import zipfile
@@ -98,4 +128,4 @@ with zipfile.ZipFile(apk_path) as apk:
         raise SystemExit("APK unexpectedly contains raw sprite sources")
 print("APK content verified: gameplay/localization JSON files, art manifest, 87 portraits, no tests/raw sprites")
 PYAPK
-sha256sum "$ROOT/artifacts/android/project-rd-debug.apk"
+sha256sum "$APK"

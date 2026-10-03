@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Stage = preload("res://game/build_stage.gd")
+
 var directory := "user://"
 var last_error := ""
 var profile: Dictionary = {}
@@ -9,7 +11,7 @@ var _blocked_error := "error.save.unsupported_version"
 var _observed_files: Dictionary = {}
 const Limits = preload("res://game/save_limits.gd")
 const WebPersistence = preload("res://game/web_save_persistence.gd")
-const PROFILE_SCHEMA := 5
+const PROFILE_SCHEMA := 6
 const Progression = preload("res://game/permanent_progression.gd")
 var economy: Dictionary:
 	get: return profile.economy
@@ -18,11 +20,13 @@ const DEFAULT_SETTINGS := {"language": "en", "music": 0.35, "effects": 0.65, "mu
 const LEGACY_MUSIC_TRACKS := ["hearth_watch", "mist_guard", "quiet_march"]
 const LEGACY_UI_SOUNDS := ["wood", "tap", "chime"]
 
-func _init(path: String = "user://") -> void:
+func _init(path: String = Stage.SAVE_DIRECTORY) -> void:
 	WebPersistence.initialize()
 	directory = path
 	DirAccess.make_dir_recursive_absolute(directory)
-	profile = {"schema": PROFILE_SCHEMA, "preferences": {}, "cleared_boss_waves": {}, "economy": _new_economy(), "best_wave": 0, "cleared": false, "settings": DEFAULT_SETTINGS.duplicate(true), "units": {}, "enemies": {}, "kills": {}, "run_counts": {}, "ended_runs": {}}
+	profile = _fresh_profile()
+	if FileAccess.file_exists(directory.path_join("reset.pending")):
+		if not _finish_reset(): return
 	# 이전 버전이 남긴 복구 파일도 신규 설치로 오인하지 않는다.
 	if not FileAccess.file_exists(directory.path_join("profile.json")):
 		for filename in DirAccess.get_files_at(directory):
@@ -49,6 +53,7 @@ func _init(path: String = "user://") -> void:
 			# 이전 영구 추적만 제거하며 경제·기록·나머지 설정은 그대로 보존한다.
 			profile.preferences.erase("recipe_tracking")
 			profile.schema = PROFILE_SCHEMA
+			profile.stage = Stage.NAME
 			profile.settings.merge(DEFAULT_SETTINGS, false)
 			# 이전 선택지는 받아들이되 새 고정 오디오 설정으로 옮긴다.
 			profile.settings.music_track = "mist_guard"
@@ -56,6 +61,79 @@ func _init(path: String = "user://") -> void:
 		else:
 			last_error = "error.save.profile_invalid"
 			mark_corrupt("profile.json")
+
+
+func _fresh_profile() -> Dictionary:
+	return {"schema": PROFILE_SCHEMA, "stage": Stage.NAME, "preferences": {}, "cleared_boss_waves": {}, "economy": _new_economy(), "best_wave": 0, "cleared": false, "settings": DEFAULT_SETTINGS.duplicate(true), "units": {}, "enemies": {}, "kills": {}, "run_counts": {}, "ended_runs": {}}
+
+func _reset_file_owned(filename: String) -> bool:
+	for base in ["profile.json", "run.json"]:
+		if filename == base or filename == base + ".tmp" or filename == base + ".bak" or filename.begins_with(base + ".corrupt-"):
+			return true
+	return false
+
+func reset_all() -> bool:
+	# UI에서 삭제 범위를 확인한 뒤에만 호출한다. 다른 스테이지의 하위 폴더는 건드리지 않는다.
+	var marker := FileAccess.open(directory.path_join("reset.pending"), FileAccess.WRITE)
+	if marker == null:
+		last_error = "reset.error"
+		return false
+	marker.store_string(Stage.NAME)
+	marker.flush()
+	var written := marker.get_error() == OK
+	marker.close()
+	if not written:
+		_block("reset.error")
+		return false
+	WebPersistence.mark_dirty()
+	return _finish_reset()
+
+func _finish_reset() -> bool:
+	# 중단된 초기화는 다음 시작에서 끝낸다. 부분 삭제 뒤 예전 run/백업을 복원하지 않는다.
+	var marker_path := directory.path_join("reset.pending")
+	var marker := FileAccess.open(marker_path, FileAccess.READ)
+	if marker == null or marker.get_length() != Stage.NAME.to_utf8_buffer().size():
+		_block("reset.error")
+		return false
+	var marker_stage := marker.get_as_text()
+	marker.close()
+	if marker_stage != Stage.NAME:
+		_block("reset.error")
+		return false
+	var folder := DirAccess.open(directory)
+	if folder == null:
+		_block("reset.error")
+		return false
+	for filename in folder.get_files():
+		if _reset_file_owned(filename) and folder.remove(filename) != OK:
+			_block("reset.error")
+			return false
+	var fresh := _fresh_profile()
+	var encoded := JSON.stringify(fresh)
+	var temp := directory.path_join("profile.json.tmp")
+	var file := FileAccess.open(temp, FileAccess.WRITE)
+	if file == null:
+		_block("reset.error")
+		return false
+	file.store_string(encoded)
+	file.flush()
+	var written := file.get_error() == OK
+	file.close()
+	if not written or DirAccess.rename_absolute(temp, directory.path_join("profile.json")) != OK:
+		_block("reset.error")
+		return false
+	if DirAccess.remove_absolute(marker_path) != OK:
+		_block("reset.error")
+		return false
+	profile = fresh
+	read_only = false
+	last_error = ""
+	corrupt_files.clear()
+	_observed_files.clear()
+	_observed_files["profile.json"] = encoded.sha256_text()
+	_observed_files["run.json"] = "missing"
+	WebPersistence.mark_dirty()
+	return true
 
 func _future_profile(value: Dictionary) -> bool:
 	var version = value.get("schema")
@@ -65,8 +143,10 @@ func _valid_profile(value: Dictionary) -> bool:
 	if not Limits.valid(value): return false
 	if not value.has_all(["schema", "best_wave", "cleared", "settings", "units", "enemies", "kills", "run_counts", "ended_runs"]) or not (value.schema is int or value.schema is float):
 		return false
-	if not is_finite(float(value.schema)) or float(value.schema) != floor(float(value.schema)) or not int(value.schema) in [1, 2, 3, 4, PROFILE_SCHEMA]:
+	if not is_finite(float(value.schema)) or float(value.schema) != floor(float(value.schema)) or not int(value.schema) in [1, 2, 3, 4, 5, PROFILE_SCHEMA]:
 		return false
+	if int(value.schema) < 6 and Stage.NAME != "production": return false
+	if value.get("stage", "production" if int(value.schema) < 6 else "") != Stage.NAME: return false
 	if int(value.schema) >= 2:
 		if not value.get("preferences") is Dictionary:
 			return false
@@ -304,7 +384,7 @@ func save_settings() -> bool:
 
 func _new_economy() -> Dictionary:
 	var state := {"schema": 1, "authority": "local", "revision": 0, "wallet": {"diamonds": 0, "total_earned": 0, "total_spent": 0}, "upgrades": Progression.defaults(), "ledger": []}
-	_grant(state, "welcome:v1", "welcome", int(Progression.rules().starter_diamonds))
+	_grant(state, "welcome:v1", "welcome", Stage.STARTER_DIAMONDS)
 	return state
 
 func _valid_economy(value: Variant, allow_legacy: bool = false) -> bool:

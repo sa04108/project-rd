@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Stage = preload("res://game/build_stage.gd")
+
 const SaveLimits = preload("res://game/save_limits.gd")
 
 const L = preload("res://game/localization.gd")
@@ -12,7 +14,7 @@ signal unit_presented(event: Dictionary)
 
 const Catalog = preload("res://game/catalog.gd")
 const Progression = preload("res://game/permanent_progression.gd")
-const SNAPSHOT_SCHEMA := 5
+const SNAPSHOT_SCHEMA := 6
 # 아군 한 칸을 1로 두고 폭 1인 외곽 길의 중심선을 따른다.
 const PATH_SIDE := 7.0
 const PATH_LENGTH := PATH_SIDE * 4.0
@@ -499,19 +501,20 @@ func _finish(outcome: String, reason: String) -> void:
 	revision += 1
 
 func debug_jump_wave(value: int) -> void:
-	# 배포용 실행에서는 직접 호출해도 개발 점프를 허용하지 않는다.
-	if not OS.is_debug_build(): return
-	if not _allowed():
-		return
-	developer_run = true
-	deployment_remaining = 0.0
-	wave = clampi(value, 1, 100)
-	time = (wave - 1) * 30.0
-	enemies.clear()
-	_start_wave()
+	# 운영 빌드에서는 전처리로 개발 코드 자체를 제외한다.
+	# STAGE_DEVELOPMENT_BEGIN
+	if Stage.DEVELOPMENT and _allowed():
+		developer_run = true
+		deployment_remaining = 0.0
+		wave = clampi(value, 1, 100)
+		time = (wave - 1) * 30.0
+		enemies.clear()
+		_start_wave()
+	# STAGE_DEVELOPMENT_END
+	return
 
 func snapshot() -> Dictionary:
-	return {"schema": SNAPSHOT_SCHEMA, "paid_summons": paid_summons, "deployment_remaining": deployment_remaining, "permanent_levels": permanent_levels.duplicate(), "user_paused": pause_reasons.has("user"), "path_length": PATH_LENGTH, "content_version": catalog.rules.content_version, "run_id": run_id, "time": time, "wave": wave, "spawn_index": spawn_index, "gold": gold, "speed": speed, "result": result, "result_reason": result_reason, "units": units.duplicate(true), "enemies": enemies.duplicate(true), "upgrades": upgrades.duplicate(true), "cooldowns": cooldowns.duplicate(true), "next_id": next_id, "rng_state": str(rng.state), "rng_seed": str(rng.seed), "discovered_units": discovered_units.duplicate(), "discovered_enemies": discovered_enemies.duplicate(), "kills": kills.duplicate(), "developer_run": developer_run}
+	return {"schema": SNAPSHOT_SCHEMA, "stage": Stage.NAME, "paid_summons": paid_summons, "deployment_remaining": deployment_remaining, "permanent_levels": permanent_levels.duplicate(), "user_paused": pause_reasons.has("user"), "path_length": PATH_LENGTH, "content_version": catalog.rules.content_version, "run_id": run_id, "time": time, "wave": wave, "spawn_index": spawn_index, "gold": gold, "speed": speed, "result": result, "result_reason": result_reason, "units": units.duplicate(true), "enemies": enemies.duplicate(true), "upgrades": upgrades.duplicate(true), "cooldowns": cooldowns.duplicate(true), "next_id": next_id, "rng_state": str(rng.state), "rng_seed": str(rng.seed), "discovered_units": discovered_units.duplicate(), "discovered_enemies": discovered_enemies.duplicate(), "kills": kills.duplicate(), "developer_run": developer_run}
 
 func restore(saved: Dictionary) -> bool:
 	if not _valid_snapshot(saved):
@@ -574,6 +577,8 @@ func _valid_snapshot(s: Dictionary) -> bool:
 	if not s.has("schema") or not Progression.integer(s.schema, 1, SNAPSHOT_SCHEMA):
 		return false
 	var snapshot_schema := int(s.schema)
+	if snapshot_schema < 6 and Stage.NAME != "production": return false
+	if s.get("stage", "production" if snapshot_schema < 6 else "") != Stage.NAME: return false
 	var required := ["content_version", "run_id", "time", "wave", "spawn_index", "gold", "speed", "result", "result_reason", "units", "enemies", "upgrades", "cooldowns", "next_id", "rng_state", "rng_seed", "discovered_units", "discovered_enemies", "kills", "developer_run"]
 	if snapshot_schema < 4:
 		required.append("lives")
