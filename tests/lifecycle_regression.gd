@@ -46,5 +46,7 @@ func _run() -> void:
 	_check(game.mode == "menu", "successful save permits menu transition")
 	game.queue_free()
 	await process_frame
+	# 실제 오디오 플레이어의 비동기 믹서 참조가 정리된 뒤 종료한다.
+	await create_timer(0.15).timeout
 	print("LIFECYCLE_REPORT ", JSON.stringify({"failed": failures}))
-	quit(0 if failures.is_empty() else 1)
+	call_deferred("quit", 0 if failures.is_empty() else 1)

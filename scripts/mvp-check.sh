@@ -30,6 +30,8 @@ run contracts timeout --kill-after=5s 60s "$GODOT" --headless --path . --script 
 rg -q '"failed":\[\]' artifacts/logs/contracts.log
 run lifecycle timeout --kill-after=5s 60s "$GODOT" --headless --path . --script res://tests/lifecycle_regression.gd -- --ui-test
 rg -Fq 'LIFECYCLE_REPORT {"failed":[]}' artifacts/logs/lifecycle.log
+run audio timeout --kill-after=5s 60s "$GODOT" --headless --path . --script res://tests/audio_regression.gd -- --ui-test
+rg -q '"failed":\[\]' artifacts/logs/audio.log
 run identity-animation timeout --kill-after=5s 60s "$GODOT" --headless --path . --script res://tests/identity_animation_test.gd
 rg -q '"failed":\[\]' artifacts/logs/identity-animation.log
 run mvp-smoke timeout --kill-after=5s 60s "$GODOT" --headless --path . --quit-after 300

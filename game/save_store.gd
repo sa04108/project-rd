@@ -5,15 +5,19 @@ var last_error := ""
 var profile: Dictionary = {}
 var corrupt_files: Dictionary = {}
 const Simulation = preload("res://game/simulation.gd")
+const DEFAULT_SETTINGS := {"music": 0.35, "effects": 0.65, "reduced_motion": false, "haptics": false, "music_track": "hearth_watch", "ui_sound": "wood"}
+const MUSIC_TRACKS := ["hearth_watch", "mist_guard", "quiet_march"]
+const UI_SOUNDS := ["wood", "tap", "chime"]
 
 func _init(path: String = "user://") -> void:
 	directory = path
 	DirAccess.make_dir_recursive_absolute(directory)
-	profile = {"schema": 1, "best_wave": 0, "cleared": false, "settings": {"music": 0.35, "effects": 0.65, "reduced_motion": false}, "units": {}, "enemies": {}, "kills": {}, "run_counts": {}, "ended_runs": {}}
+	profile = {"schema": 1, "best_wave": 0, "cleared": false, "settings": DEFAULT_SETTINGS.duplicate(true), "units": {}, "enemies": {}, "kills": {}, "run_counts": {}, "ended_runs": {}}
 	var loaded := _read("profile.json")
 	if not loaded.is_empty():
 		if _valid_profile(loaded):
 			profile = loaded
+			profile.settings.merge(DEFAULT_SETTINGS, false)
 		else:
 			last_error = "기록 파일 형식이 맞지 않습니다. 원본을 보존했습니다."
 			mark_corrupt("profile.json")
@@ -29,9 +33,15 @@ func _valid_profile(value: Dictionary) -> bool:
 	if not value.settings.has_all(["music", "effects", "reduced_motion"]):
 		return false
 	for key in ["music", "effects"]:
-		if not (value.settings[key] is int or value.settings[key] is float) or value.settings[key] < 0 or value.settings[key] > 1:
+		if not (value.settings[key] is int or value.settings[key] is float) or not is_finite(float(value.settings[key])) or value.settings[key] < 0 or value.settings[key] > 1:
 			return false
 	if not value.settings.reduced_motion is bool or not _valid_counts(value.kills):
+		return false
+	if value.settings.has("haptics") and not value.settings.haptics is bool:
+		return false
+	if value.settings.has("music_track") and not value.settings.music_track in MUSIC_TRACKS:
+		return false
+	if value.settings.has("ui_sound") and not value.settings.ui_sound in UI_SOUNDS:
 		return false
 	for key in value.run_counts:
 		if not key is String or not value.run_counts[key] is Dictionary or not _valid_counts(value.run_counts[key]):

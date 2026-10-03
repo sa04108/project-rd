@@ -7,6 +7,7 @@ var visuals = VisualAssets.new()
 
 const Simulation = preload("res://game/simulation.gd")
 const SaveStore = preload("res://game/save_store.gd")
+const AudioDirector = preload("res://game/audio_director.gd")
 const BattleBoard = preload("res://game/battle_board.gd")
 const MENU_BACKGROUND = preload("res://assets/art/backgrounds/guild.png")
 const FONT = preload("res://assets/fonts/GuildSans.otf")
@@ -36,8 +37,7 @@ var dirty_time := -1.0
 var ended_saved := false
 var dev_mode := false
 var ui_test_mode := false
-var sound: AudioStreamPlayer
-var ambience: AudioStreamPlayer
+var audio: Node
 var codex_tab := "units"
 var enemy_filter := "all"
 var visual_seed := false
@@ -154,7 +154,7 @@ func _button(parent: Node, text_value: String, rect: Rect2, callback: Callable, 
 	button.add_theme_color_override("font_pressed_color", PALE)
 	button.add_theme_color_override("font_disabled_color", Color("b5ac8d"))
 	button.add_theme_font_size_override("font_size", 20)
-	button.pressed.connect(func(): _play_tone(540.0); callback.call())
+	button.pressed.connect(func(): audio.play_ui(); callback.call())
 	parent.add_child(button)
 	return button
 
@@ -180,6 +180,7 @@ func _show_menu() -> void:
 			return
 		sim.set_pause("menu", true)
 	mode = "menu"
+	_sync_audio()
 	_clear_screen()
 	resume_data = store.load_run()
 	if not resume_data.is_empty():
@@ -230,6 +231,8 @@ func _resume() -> void:
 		_toast("이전 배치로 복원했습니다 · 재개 버튼을 누르세요")
 
 func _show_battle() -> void:
+	audio.reset_battle(sim.run_id, sim.lives, sim.result)
+	_sync_audio()
 	_clear_screen()
 	# 전장 원화는 전체 화면에 깔고 HUD는 그 위의 작은 장식판으로 배치한다.
 	_panel(screen, Rect2(22, 20, 126, 47), INK, GOLD, "dark")
@@ -308,9 +311,6 @@ func _transaction(response: Dictionary) -> void:
 	_toast(response.reason)
 	if response.ok:
 		_mark_dirty()
-		_play_tone(760.0)
-	else:
-		_play_tone(170.0)
 	_refresh()
 	if sim.result != "active":
 		_observe_result()
@@ -392,8 +392,8 @@ func _open_panel(kind: String, force: bool = false) -> void:
 		shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		overlay.add_child(shade)
 	var large := kind in ["recipes", "codex", "guide", "settings", "result", "confirm_new"]
-	var top := 303.0 if large else 637.0
-	var panel := _panel(overlay, Rect2(35, top, 650, 694 if large else 360), Color("172b39"), GOLD)
+	var top := 190.0 if kind == "settings" else (303.0 if large else 637.0)
+	var panel := _panel(overlay, Rect2(35, top, 650, 900 if kind == "settings" else (694 if large else 360)), Color("172b39"), GOLD)
 	if is_instance_valid(board):
 		board.blocked_screen_rects.assign([Rect2(0, 0, 720, 1280) if kind in ["settings", "result", "confirm_new"] else panel.get_global_rect()])
 	var titles := {"upgrade": "길드 공방 · 공통 공격력 강화", "gamble": "운명의 계약 · 영입 도전", "special": "특수몬스터 · 보상형 적", "recipes": "조합 도감", "codex": "길드 기록관", "settings": "설정", "guide": "전투 가이드", "result": "마왕 격파" if sim.result == "victory" else "전투 종료", "confirm_new": "새로운 출정"}
@@ -575,37 +575,71 @@ func _guide_panel(panel: Control) -> void:
 		_paragraph(row, entry[1], Rect2(10, 49, 570, 105), 20, PALE)
 
 func _settings_panel(panel: Control) -> void:
-	_label(panel, "전투가 정지되었습니다" if mode == "battle" else "길드 환경설정", Vector2(30, 78), 600, 18, MUTED)
+	_label(panel, "전투가 정지되었습니다" if mode == "battle" else "길드 환경설정 · 전투곡 미리듣기", Vector2(30, 78), 600, 18, MUTED)
 	for index in range(2):
 		var key := "music" if index == 0 else "effects"
-		_label(panel, "배경음" if index == 0 else "효과음", Vector2(35, 147 + index * 96), 200, 24, PALE)
+		var y := 124 + index * 160
+		_label(panel, "배경음악" if index == 0 else "효과음", Vector2(35, y + 8), 175, 24, PALE)
 		var slider := HSlider.new()
-		slider.position = Vector2(225, 157 + index * 96)
-		slider.size = Vector2(358, 35)
+		slider.position = Vector2(215, y)
+		slider.size = Vector2(350, 58)
 		slider.min_value = 0
 		slider.max_value = 1
 		slider.step = 0.05
 		slider.value = store.profile.settings[key]
-		slider.value_changed.connect(func(value): store.profile.settings[key] = value; _apply_audio(); store.save_settings())
+		slider.set_meta("qa_action", key + "_volume")
+		slider.value_changed.connect(func(value):
+			store.profile.settings[key] = value
+			_apply_audio()
+			if not store.save_settings(): _toast(store.last_error))
 		panel.add_child(slider)
-	var motion := CheckButton.new()
-	motion.text = "동작 연출 줄이기"
-	motion.add_theme_color_override("font_color", INK)
-	motion.add_theme_color_override("font_hover_color", Color("725019"))
-	motion.add_theme_color_override("font_pressed_color", INK)
-	motion.add_theme_color_override("font_hover_pressed_color", Color("725019"))
-	motion.position = Vector2(34, 350)
-	motion.size = Vector2(570, 55)
-	motion.button_pressed = store.profile.settings.reduced_motion
+		_label(panel, "0 = 끔", Vector2(565, y + 15), 80, 15, MUTED)
+	_audio_choice(panel, "music_track", ["01 · 성문 곁의 불빛", "02 · 안개의 파수", "03 · 조용한 행군"], AudioDirector.MUSIC_IDS, 193)
+	_audio_choice(panel, "ui_sound", ["버튼음 01 · 나무", "버튼음 02 · 부드러운 탭", "버튼음 03 · 작은 울림"], AudioDirector.UI_IDS, 353)
+	var vibration := _settings_toggle(panel, "진동", 444, bool(store.profile.settings.haptics), "haptics")
+	vibration.toggled.connect(func(value):
+		audio.play_ui()
+		audio.set_haptics(value)
+		store.profile.settings.haptics = value
+		if not store.save_settings(): _toast(store.last_error))
+	var motion := _settings_toggle(panel, "동작 연출 줄이기", 531, store.profile.settings.reduced_motion, "reduced_motion")
 	motion.toggled.connect(func(value):
+		audio.play_ui()
 		store.profile.settings.reduced_motion = value
 		if is_instance_valid(board): board.set("reduced_motion", value)
-		store.save_settings())
-	panel.add_child(motion)
-	_button(panel, "전투로 돌아가기" if mode == "battle" else "닫기", Rect2(35, 475, 579, 65), _close_panel, true, "close_panel")
+		if not store.save_settings(): _toast(store.last_error))
+	_label(panel, "진동: 켤 때 · 목숨 감소 · 클리어 / 지원 기기에서 동작", Vector2(35, 612), 590, 17, MUTED)
+	_button(panel, "전투로 돌아가기" if mode == "battle" else "닫기", Rect2(35, 664, 579, 80), _close_panel, true, "close_panel")
 	if mode == "battle":
-		_button(panel, "저장 후 메인 메뉴", Rect2(35, 563, 579, 65), func():
+		_button(panel, "저장 후 메인 메뉴", Rect2(35, 764, 579, 80), func():
 			if _save(): _show_menu(), false, "save_menu")
+
+func _settings_toggle(panel: Control, title: String, y: float, enabled: bool, action: String) -> CheckButton:
+	var toggle := CheckButton.new()
+	toggle.text = title
+	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color"]:
+		toggle.add_theme_color_override(state, INK)
+	toggle.position = Vector2(34, y)
+	toggle.size = Vector2(570, 75)
+	toggle.button_pressed = enabled
+	toggle.set_meta("qa_action", action)
+	panel.add_child(toggle)
+	return toggle
+
+func _audio_choice(panel: Control, key: String, titles: Array, ids: Array, y: float) -> void:
+	var choice := OptionButton.new()
+	choice.position = Vector2(35, y)
+	choice.size = Vector2(579, 66)
+	choice.set_meta("qa_action", key)
+	for title in titles:
+		choice.add_item(title)
+	choice.selected = ids.find(store.profile.settings[key])
+	choice.item_selected.connect(func(index):
+		store.profile.settings[key] = ids[index]
+		_apply_audio()
+		if key == "ui_sound": audio.play_ui()
+		if not store.save_settings(): _toast(store.last_error))
+	panel.add_child(choice)
 
 func _result_panel(panel: Control) -> void:
 	_label(panel, "VICTORY" if sim.result == "victory" else "THE GUILD REMEMBERS", Vector2(60, 131), 570, 35, GOLD)
@@ -635,6 +669,7 @@ func _toast(message: String) -> void:
 	move_child(toast_label, get_child_count() - 1)
 
 func _process(delta: float) -> void:
+	_sync_audio()
 	wall_time += delta
 	if mode == "battle" and sim.result == "active":
 		var old_wave: int = sim.wave
@@ -659,6 +694,8 @@ func _process(delta: float) -> void:
 		toast_label.hide()
 
 func _observe_result() -> void:
+	if mode == "battle":
+		audio.observe_battle(sim.run_id, sim.lives, sim.result)
 	if mode == "battle" and sim.result != "active":
 		if not ended_saved:
 			ended_saved = _save()
@@ -708,10 +745,12 @@ func _notification(what: int) -> void:
 		_handle_back()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
 		sim.set_pause("background" if what == NOTIFICATION_APPLICATION_FOCUS_OUT else "suspended", true)
+		_sync_audio()
 		_save()
 		_write_qa_state()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_APPLICATION_RESUMED:
 		sim.set_pause("background" if what == NOTIFICATION_APPLICATION_FOCUS_IN else "suspended", false)
+		_sync_audio()
 		_write_qa_state()
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -737,44 +776,17 @@ func _draw() -> void:
 		draw_rect(Rect2(0, 0, 720, 1280), Color(0.02, 0.05, 0.09, 0.15))
 
 func _setup_sound() -> void:
-	if android_qa or DisplayServer.get_name() == "headless" or AudioServer.get_driver_name() == "Dummy":
-		return
-	sound = AudioStreamPlayer.new()
-	add_child(sound)
-	ambience = AudioStreamPlayer.new()
-	add_child(ambience)
-	var stream := AudioStreamWAV.new()
-	stream.format = AudioStreamWAV.FORMAT_16_BITS
-	stream.mix_rate = 22050
-	var bytes := PackedByteArray()
-	bytes.resize(22050 * 4 * 2)
-	for i in range(22050 * 4):
-		var t := float(i) / 22050.0
-		var value := (sin(TAU * 110 * t) + sin(TAU * 165 * t) * 0.4 + sin(TAU * 220 * t) * 0.2) * 800
-		bytes.encode_s16(i * 2, int(value))
-	stream.data = bytes
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_end = 22050 * 4
-	ambience.stream = stream
+	audio = AudioDirector.new()
+	add_child(audio)
 	_apply_audio()
-	if DisplayServer.get_name() != "headless": ambience.play()
+	sim.attack_presented.connect(audio.play_attack)
 
 func _apply_audio() -> void:
-	if is_instance_valid(sound): sound.volume_db = linear_to_db(maxf(0.0001, store.profile.settings.effects)) - 15
-	if is_instance_valid(ambience): ambience.volume_db = linear_to_db(maxf(0.0001, store.profile.settings.music)) - 14
+	audio.apply_settings(store.profile.settings)
 
-func _play_tone(frequency: float) -> void:
-	if not is_instance_valid(sound) or DisplayServer.get_name() == "headless": return
-	var stream := AudioStreamWAV.new()
-	stream.format = AudioStreamWAV.FORMAT_16_BITS
-	stream.mix_rate = 22050
-	var bytes := PackedByteArray()
-	bytes.resize(2205 * 2)
-	for i in range(2205):
-		bytes.encode_s16(i * 2, int(sin(TAU * frequency * i / 22050.0) * 6500 * (1.0 - float(i) / 2205)))
-	stream.data = bytes
-	sound.stream = stream
-	sound.play()
+func _sync_audio() -> void:
+	if is_instance_valid(audio):
+		audio.set_context((mode == "battle" and sim.result == "active") or panel_name == "settings", not sim.pause_reasons.has("background") and not sim.pause_reasons.has("suspended"))
 
 func run_automation_tests() -> bool:
 	var report: Dictionary = load("res://tests/mvp_suite.gd").run_all()
@@ -792,7 +804,3 @@ func run_automation_tests() -> bool:
 
 func _exit_tree() -> void:
 	dynamic.clear()
-	for player in [sound, ambience]:
-		if is_instance_valid(player):
-			player.stop()
-			player.stream = null

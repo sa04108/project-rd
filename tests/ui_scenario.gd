@@ -163,6 +163,36 @@ func _run() -> void:
 	_check(game.sim.pause_reasons.has("user"), "pause before checking settings pause stacking")
 	await _tap(_action_center("settings"))
 	_check(game.panel_name == "settings" and game.sim.pause_reasons.has("settings"), "settings adds its independent pause reason")
+	var audio_sliders: Dictionary = {}
+	for node in game.overlay.find_children("*", "HSlider", true, false):
+		audio_sliders[node.get_meta("qa_action", "")] = node
+	_check(audio_sliders.has("music_volume") and audio_sliders.has("effects_volume"), "independent music and effect sliders exist")
+	if audio_sliders.has("music_volume") and audio_sliders.has("effects_volume"):
+		audio_sliders.music_volume.value = 0.0
+		audio_sliders.effects_volume.value = 0.4
+		_check(game.store.profile.settings.music == 0.0 and is_equal_approx(game.store.profile.settings.effects, 0.4), "settings sliders persist independently including zero")
+		audio_sliders.music_volume.value = 0.35
+		audio_sliders.effects_volume.value = 0.65
+	var vibration: CheckButton = null
+	for node in game.overlay.find_children("*", "CheckButton", true, false):
+		if node.get_meta("qa_action", "") == "haptics": vibration = node
+	_check(vibration != null, "haptics toggle exists")
+	if vibration != null:
+		vibration.set_pressed_no_signal(false)
+		game.store.profile.settings.haptics = false
+		game.audio.apply_settings(game.store.profile.settings)
+		await _touch(vibration.get_global_rect().get_center())
+		_check(game.store.profile.settings.haptics and game.audio.settings.haptics, "real touch enables haptics and saves preference")
+		await _touch(vibration.get_global_rect().get_center())
+		_check(not game.store.profile.settings.haptics, "real touch disables haptics")
+	for node in game.overlay.find_children("*", "OptionButton", true, false):
+		_check(node.item_count == 3, "three candidates available in sample selector")
+		node.select(1)
+		node.item_selected.emit(1)
+		var key: String = node.get_meta("qa_action")
+		_check(game.store.profile.settings[key] == ("mist_guard" if key == "music_track" else "tap"), "sample selection persists: " + key)
+		node.select(0)
+		node.item_selected.emit(0)
 	await _capture("settings")
 	await _tap(_action_center("close_panel"))
 	_check(game.panel_name.is_empty() and not game.sim.pause_reasons.has("settings"), "settings close clears only settings pause")
@@ -247,7 +277,9 @@ func _run() -> void:
 	var status := 1 if not errors.is_empty() else 0
 	game.queue_free()
 	await _frames(3)
-	quit(status)
+	# 비동기 오디오 믹서가 정지한 보이스를 반환한 뒤 종료한다.
+	await create_timer(0.15).timeout
+	call_deferred("quit", status)
 
 func _check(condition: bool, label: String) -> void:
 	checks += 1

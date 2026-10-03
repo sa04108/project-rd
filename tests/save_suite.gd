@@ -8,6 +8,8 @@ static func run_all() -> Dictionary:
         _test_rng_roundtrip_through_json_and_store,
         _test_run_count_high_water,
         _test_nested_profile_validation,
+        _test_profile_settings_migrate_and_roundtrip,
+        _test_invalid_audio_settings_are_quarantined,
         _test_corrupt_quarantine_survives_saves,
         _test_result_and_developer_run_records,
         _test_snapshot_rejects_invalid_state_atomically,
@@ -159,6 +161,80 @@ static func _test_nested_profile_validation() -> String:
         return "array-valued per-run kill counts must not be accepted as a valid profile"
     if recovered.last_error.is_empty():
         return "invalid nested profile field should produce a recovery error"
+    return ""
+
+static func _test_profile_settings_migrate_and_roundtrip() -> String:
+    var directory: String = _directory()
+    var initial: Variant = SAVE_STORE.new(directory)
+    var old_profile: Dictionary = initial.profile.duplicate(true)
+    old_profile.best_wave = 12
+    old_profile.cleared = true
+    old_profile.settings = {"music": 0.0, "effects": 0.42, "reduced_motion": true}
+    old_profile.units = {"u01": true}
+    old_profile.enemies = {"n01": true}
+    old_profile.kills = {"n01": 7}
+    old_profile.run_counts = {"legacy-run": {"n01": 7}}
+    old_profile.ended_runs = {"legacy-run": "victory"}
+    if not _write_json(directory.path_join("profile.json"), old_profile):
+        return "test could not write legacy profile without new audio settings"
+
+    var migrated: Variant = SAVE_STORE.new(directory)
+    if not migrated.last_error.is_empty():
+        return "legacy profile without new settings must remain valid"
+    if migrated.profile.settings.haptics != false or migrated.profile.settings.music_track != "hearth_watch" or migrated.profile.settings.ui_sound != "wood":
+        return "legacy profile must receive the new audio defaults"
+    for field in ["best_wave", "cleared", "units", "enemies", "kills", "run_counts", "ended_runs"]:
+        if not _same_saved_value(migrated.profile[field], old_profile[field]):
+            return "legacy migration must preserve profile field %s" % field
+    if migrated.profile.settings.music != 0.0 or migrated.profile.settings.effects != 0.42 or not migrated.profile.settings.reduced_motion:
+        return "legacy migration must preserve existing settings including zero volume"
+    migrated.profile.settings.haptics = true
+    migrated.profile.settings.music_track = "mist_guard"
+    migrated.profile.settings.ui_sound = "chime"
+    if not migrated.save_settings():
+        return "new audio settings should save"
+    var reloaded: Variant = SAVE_STORE.new(directory)
+    if reloaded.profile.settings.haptics != true or reloaded.profile.settings.music_track != "mist_guard" or reloaded.profile.settings.ui_sound != "chime":
+        return "new audio settings should roundtrip through profile JSON"
+    if reloaded.profile.settings.music != 0.0:
+        return "zero music volume must survive JSON roundtrip without being raised"
+    return ""
+
+static func _test_invalid_audio_settings_are_quarantined() -> String:
+    var invalid_settings: Array[Dictionary] = [
+        {"haptics": "true"},
+        {"music_track": "unknown_track"},
+        {"ui_sound": "unknown_sound"},
+    ]
+    for settings_patch in invalid_settings:
+        var directory: String = _directory()
+        var initial: Variant = SAVE_STORE.new(directory)
+        var invalid_profile: Dictionary = initial.profile.duplicate(true)
+        for key in settings_patch:
+            invalid_profile.settings[key] = settings_patch[key]
+        if not _write_json(directory.path_join("profile.json"), invalid_profile):
+            return "test could not write invalid audio settings"
+        var recovered: Variant = SAVE_STORE.new(directory)
+        if recovered.last_error.is_empty():
+            return "invalid new audio setting must be rejected"
+        if FileAccess.file_exists(directory.path_join("profile.json")):
+            return "invalid new audio setting must be quarantined"
+        var quarantined := false
+        for filename in DirAccess.get_files_at(ProjectSettings.globalize_path(directory)):
+            if filename.begins_with("profile.json.corrupt-"):
+                quarantined = true
+        if not quarantined:
+            return "invalid audio profile bytes must remain quarantined"
+
+    var nonfinite_store: Variant = SAVE_STORE.new(_directory())
+    var nonfinite: Dictionary = nonfinite_store.profile.duplicate(true)
+    nonfinite.settings.music = NAN
+    if nonfinite_store._valid_profile(nonfinite):
+        return "nonfinite music volume must be rejected"
+    nonfinite.settings.music = 0.35
+    nonfinite.settings.effects = NAN
+    if nonfinite_store._valid_profile(nonfinite):
+        return "nonfinite effects volume must be rejected"
     return ""
 
 static func _test_corrupt_quarantine_survives_saves() -> String:
