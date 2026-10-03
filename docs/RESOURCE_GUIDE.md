@@ -76,7 +76,8 @@ python3 tools/art/validate_manifest.py
 - [UI 레퍼런스 모음](art-generation/ui-reference.jpg)은 구성·색감·장식의 참고 원본으로 보존한다. 이미지 속 옛 수치·방어력·배속·기능은 현재 게임 규칙을 덮어쓰지 않는다.
 - 실제 메뉴 배경은 `assets/art/backgrounds/guild.png`, 전장 주변 풍경은 `assets/art/orthographic/battle-map.webp`다. 지면은 같은 폴더의 `meadow-grass.webp`·`meadow-dirt.webp`를 `game/terrain_blend.gdshader`로 혼합한다. `backgrounds/battlefield.png`와 `orthographic/battle-map.png`는 현재 화면 경로가 아니다.
 - 전장 그림은 소실점 없는 정투영과 720×1280 화면 구성을 따른다. 중앙 6×6칸과 폭 1칸인 외곽 길의 기준선은 엔진 좌표로 정의한다. 셰이더는 위치 기반 잡음으로 풀·흙의 가장자리만 부드럽고 불규칙하게 섞는다. 북서쪽 출입구는 하나이며 출입구/길드 글자·격자·웨이브·비용·문구를 원화에 굽지 않는다. 배치 격자는 드래그 중에만 엔진에서 표시한다.
-- `assets/ui/*.svg`는 9분할 가능한 금색 테두리·청색·양피지 장식이다. 실제 클릭 영역과 작은 화면의 글자 가독성을 함께 검증한다.
+- `assets/ui/diamond.svg`는 이 프로젝트용으로 직접 제작한 투명 배경 벡터 아이콘이다. `UiSkin`의 공통 텍스처 캐시와 `CurrencyLabel`을 통해 모든 다이아몬드 표시에 재사용하며 외부 이미지나 아이콘 폰트에 의존하지 않는다.
+- `assets/ui/*.svg`의 패널·버튼은 9분할 가능한 금색 테두리·청색·양피지 장식이다. 실제 클릭 영역과 작은 화면의 글자 가독성을 함께 검증한다.
 - 일반 UI는 영어·한국어용 `GuildSans.otf`, 간체 중국어용 `GuildCjkSC.otf`, 일본어용 `GuildCjkJP.otf`와 명시적 기호 fallback을 유지한다. CJK 두 폰트는 지역별 한자 자형을 보존한 Noto Sans CJK 부분집합이다. [출처와 재생성 방법](../assets/fonts/CJK-SOURCE.txt)에 따라 `tools/fonts/build_locale_fonts.py`로 현재 번역에 필요한 글자를 추린다. 새 번역을 추가하면 반드시 다시 생성하고 누락 글리프를 확인한다.
 - 메뉴 영문 제목은 별도 세리프 폰트를 사용하며 배경 패널 없이 표현한다. 새 문구·기호, 실제 작은 화면의 폭·가독성을 확인하고 각 폰트 라이선스를 내보내기에 포함한다. 시스템 fallback에 기대어 검증하지 않는다.
 

@@ -9,8 +9,8 @@ const MUTED := Color("69553c")
 
 static func build(host, panel: Control) -> void:
 	var balance := int(host.store.diamond_balance())
-	host._label(panel, L.text("progression.wallet.balance") % balance, Vector2(24, 102), 602, 26, INK)
-	host._label(panel, L.text("progression.next_run"), Vector2(24, 134), 602, 20, MUTED)
+	host._diamond_text(panel, L.text("progression.wallet.balance") % balance, Rect2(24, 102, 602, 42), 26, INK)
+	host._label(panel, L.text("progression.next_run"), Vector2(24, 148), 602, 20, MUTED)
 	# 메인 화면 헤더 아래와 목록 사이에 잔액·적용 시점을 두고 본문만 스크롤한다.
 	var list: VBoxContainer = host._scroll(panel, 200)
 	var levels: Dictionary = host.store.permanent_levels()
@@ -27,7 +27,8 @@ static func build(host, panel: Control) -> void:
 	_append_upgrade(host, panel, list, "starting_gold", levels, revision)
 	_append_upgrade(host, panel, list, "speed", levels, revision)
 	_append_upgrade(host, panel, list, "extra_lives", levels, revision)
-	host._catalog_text(list, L.text("progression.rewards.note"), 22, MUTED)
+	var rewards_note: RichTextLabel = host._diamond_text(list, L.text("progression.rewards.note"), Rect2(), 22, MUTED)
+	rewards_note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 static func _append_category(host, list: VBoxContainer, key: String) -> void:
 	host._catalog_text(list, L.text(key), 28, GOLD)
@@ -60,8 +61,13 @@ static func _append_upgrade(host, panel: Control, list: VBoxContainer, identity:
 		var footer := HBoxContainer.new()
 		footer.add_theme_constant_override("separation", 12)
 		body.add_child(footer)
-		var price: Label = host._catalog_text(footer, L.text("progression.cost_diamonds") % cost, 22, INK)
-		price.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		var price_column := VBoxContainer.new()
+		price_column.alignment = BoxContainer.ALIGNMENT_CENTER
+		price_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		price_column.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		footer.add_child(price_column)
+		var price: RichTextLabel = host._diamond_text(price_column, L.text("progression.cost_diamonds") % cost, Rect2(), 22, INK, true)
+		price.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var label_key := "progression.increase_chance" if identity == "double_summon" and current_level > 0 else "progression.purchase"
 		var purchase_callback := func() -> void:
 			host._purchase_permanent(identity, current_level, revision)

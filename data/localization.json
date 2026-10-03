@@ -1524,10 +1524,10 @@
     "ja": "永久強化"
   },
   "progression.wallet.balance": {
-    "en": "Diamonds: %d",
-    "ko": "다이아몬드: %d",
-    "zh_CN": "钻石：%d",
-    "ja": "ダイヤモンド：%d"
+    "en": "{diamond} × %d",
+    "ko": "{diamond} × %d",
+    "zh_CN": "{diamond} × %d",
+    "ja": "{diamond} × %d"
   },
   "progression.next_run": {
     "en": "Purchased upgrades apply to new battles.",
@@ -1620,10 +1620,10 @@
     "ja": "最高到達ウェーブ%dで解放"
   },
   "progression.cost_diamonds": {
-    "en": "%d diamonds",
-    "ko": "다이아몬드 %d개",
-    "zh_CN": "%d钻石",
-    "ja": "ダイヤモンド %d個"
+    "en": "{diamond} × %d",
+    "ko": "{diamond} × %d",
+    "zh_CN": "{diamond} × %d",
+    "ja": "{diamond} × %d"
   },
   "progression.purchase": {
     "en": "Purchase",
@@ -1692,22 +1692,22 @@
     "ja": "解放に必要なウェーブに到達してください。"
   },
   "progression.error.funds": {
-    "en": "Not enough diamonds.",
-    "ko": "다이아몬드가 부족합니다.",
-    "zh_CN": "钻石不足。",
-    "ja": "ダイヤモンドが足りません。"
+    "en": "Not enough {diamond}.",
+    "ko": "{diamond}가 부족합니다.",
+    "zh_CN": "{diamond}不足。",
+    "ja": "{diamond}が足りません。"
   },
   "progression.result.reward": {
-    "en": "Battle reward: %d diamonds",
-    "ko": "전투 보상: 다이아몬드 %d개",
-    "zh_CN": "战斗奖励：%d钻石",
-    "ja": "戦闘報酬：ダイヤモンド %d個"
+    "en": "Battle reward: {diamond} × %d",
+    "ko": "전투 보상: {diamond} × %d",
+    "zh_CN": "战斗奖励：{diamond} × %d",
+    "ja": "戦闘報酬：{diamond} × %d"
   },
   "progression.rewards.note": {
-    "en": "Bosses award 20 diamonds each when the battle ends; victory adds 100. First reaching each 10-wave milestone awards 50 once.",
-    "ko": "전투 종료 시 보스당 20개, 클리어 시 추가 100개를 얻습니다. 최고 웨이브 10단위 최초 도달마다 50개를 한 번 받습니다.",
-    "zh_CN": "战斗结束时每击败一种首领获得20钻石，通关额外获得100钻石。最高波数每首次达到10的倍数，获得50钻石。",
-    "ja": "戦闘終了時に倒したボス1種につき20個、クリアで追加100個。最高到達ウェーブが初めて10の倍数に達するごとに50個を獲得します。"
+    "en": "At battle end, each boss awards {diamond} × 20; victory adds {diamond} × 100. First reaching each 10-wave milestone awards {diamond} × 50 once.",
+    "ko": "전투 종료 시 보스당 {diamond} × 20, 클리어 시 추가 {diamond} × 100을 얻습니다. 최고 웨이브 10단위 최초 도달마다 {diamond} × 50을 한 번 받습니다.",
+    "zh_CN": "战斗结束时，每击败一种首领获得{diamond} × 20，通关额外获得{diamond} × 100。最高波数每首次达到10的倍数，获得{diamond} × 50。",
+    "ja": "戦闘終了時に倒したボス1種につき{diamond} × 20、クリアで追加{diamond} × 100。最高到達ウェーブが初めて10の倍数に達するごとに{diamond} × 50を獲得します。"
   },
   "progression.double_summon.note": {
     "en": "Each normal summon can add one random 1-star mercenary if a slot is free.",
@@ -1756,5 +1756,11 @@
     "ko": "판매 불가",
     "zh_CN": "不可出售",
     "ja": "売却不可"
+  },
+  "currency.diamond.name": {
+    "en": "Diamonds",
+    "ko": "다이아몬드",
+    "zh_CN": "钻石",
+    "ja": "ダイヤモンド"
   }
 }
