@@ -10,6 +10,7 @@ const Simulation = preload("res://game/simulation.gd")
 const SaveStore = preload("res://game/save_store.gd")
 const AudioDirector = preload("res://game/audio_director.gd")
 const BattleBoard = preload("res://game/battle_board.gd")
+const UnitDescription = preload("res://game/unit_description.gd")
 const PlacementFeedback = preload("res://game/placement_feedback.gd")
 const MENU_BACKGROUND = preload("res://assets/art/backgrounds/guild.png")
 const FONT = preload("res://assets/fonts/GuildSans.otf")
@@ -44,6 +45,7 @@ var dev_mode := false
 var audio: Node
 var codex_tab := "units"
 var enemy_filter := "all"
+var unit_tier_filter := 0
 var modal_focus_controls: Array[Dictionary] = []
 var modal_previous_focus: Control
 var web_input_canvas: JavaScriptObject
@@ -128,7 +130,7 @@ func _panel(parent: Node, rect: Rect2, _color: Color = INK, _border: Color = GOL
 	parent.add_child(panel)
 	return panel
 
-func _label(parent: Node, text_value: String, pos: Vector2, width: float, font_size: int = 22, color: Color = PALE, wrap: bool = false) -> Label:
+func _label(parent: Node, text_value: String, pos: Vector2, width: float, font_size: int = 22, color: Color = PALE, wrap: bool = true) -> Label:
 	var label := Label.new()
 	var ancestor := parent
 	while ancestor != null:
@@ -164,6 +166,8 @@ func _paragraph(parent: Node, text_value: String, rect: Rect2, font_size: int = 
 
 func _button(parent: Node, text_value: String, rect: Rect2, callback: Callable, accent: bool = false, action: String = "", sound_role: String = "tap") -> Button:
 	var button := Button.new()
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	button.action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
 	button.text = text_value
 	button.position = rect.position
 	button.size = rect.size
@@ -270,7 +274,6 @@ func _show_menu() -> void:
 	resume.disabled = resume_data.is_empty()
 	_hud_button(screen, "도감", Rect2(126, 920, 228, 100), func(): _open_panel("codex"), "codex")
 	_hud_button(screen, "설정", Rect2(366, 920, 228, 100), func(): _open_panel("settings"), "settings")
-	_hud_button(screen, "게임 가이드", Rect2(126, 1032, 468, 100), func(): _open_panel("guide"), "guide")
 	labels.menu_footer = _label(screen, "© 2026 %s  ·  v0.4" % display_name, Vector2(48, 1222), 624, 18, MUTED)
 	labels.menu_footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	if not store.last_error.is_empty():
@@ -311,12 +314,12 @@ func _show_battle() -> void:
 	_panel(screen, Rect2(202, 135, 276, 51), INK, GOLD, "brass")
 	labels.wave = _label(screen, "", Vector2(217, 141), 246, 26, PALE)
 	labels.wave.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var tools := [["recipes", "조합법"], ["guide", "게임 가이드"], ["codex", "도감"], ["settings", "설정"]]
+	var tools := [["recipes", "조합법"], ["codex", "도감"], ["settings", "설정"]]
 	for index in range(tools.size()):
 		var action: String = tools[index][0]
-		var rect := Rect2(292 + index * 102, 20, 100, 100)
+		var rect := Rect2(394 + index * 102, 20, 100, 100)
 		if action == "recipes":
-			rect = Rect2(190, 20, 202, 100)
+			rect = Rect2(292, 20, 202, 100)
 		var button := _hud_button(screen, "", rect, func(): _open_panel(action), action, "" if action == "recipes" else action, action == "recipes")
 		if action == "recipes":
 			_hud_icon(button, "recipes", Rect2(17, 23, 54, 54))
@@ -354,10 +357,11 @@ func _show_battle() -> void:
 	board.cell_dragged.connect(_cell_dragged)
 	screen.add_child(board)
 	screen.move_child(board, 0)
-	labels.selection_panel = _panel(screen, Rect2(28, 934, 664, 88), INK, GOLD, "brass")
+	labels.selection_panel = _panel(screen, Rect2(28, 902, 664, 120), INK, GOLD, "brass")
 	labels.selection = _label(labels.selection_panel, "", Vector2(15, 4), 634, 28, PALE)
 	labels.selection.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	labels.detail = _label(labels.selection_panel, "", Vector2(15, 44), 634, 22, MUTED)
+	labels.detail = _label(labels.selection_panel, "", Vector2(15, 44), 634, 20, MUTED)
+	labels.detail.size.y = 70
 	labels.detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# 하단의 소환 중심 배치와 강화·도박·특수몬스터 순서는 그대로 유지한다.
 	labels.summon = _battle_action("", Rect2(229, 1030, 262, 100), _summon, "summon", "summon")
@@ -445,12 +449,12 @@ func _refresh() -> void:
 		var definition: Dictionary = sim.catalog.units[unit.kind]
 		labels.selection.text = "%s  %s" % ["★".repeat(int(definition.tier)), definition.name]
 		var coverage: String = PlacementFeedback.attack_coverage(float(definition.range), sim.cell_position(int(unit.cell)))
-		var attack_note: String = str(definition.role)
+		var attack_note := ""
 		if coverage == "none":
 			attack_note = "직접 공격 불가"
 		elif coverage == "tangent":
 			attack_note = "직접 공격 접점이 좁음"
-		labels.detail.text = "공격 %.0f   사거리 %.1f   %s" % [sim.attack_damage(unit), definition.range, attack_note]
+		labels.detail.text = "공격 %.0f · 사거리 %.1f%s\n%s" % [sim.attack_damage(unit), definition.range, " · " + attack_note if not attack_note.is_empty() else "", UnitDescription.attack_type(definition)]
 		labels.detail.add_theme_color_override("font_color", Color("ffe365") if coverage != "reachable" else MUTED)
 	board.selected_id = selected
 	for update in dynamic:
@@ -518,17 +522,17 @@ func _open_panel(kind: String, force: bool = false) -> void:
 		shade.color = Color(0.02, 0.035, 0.055, 0.64)
 		shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		overlay.add_child(shade)
-	var large := kind in ["recipes", "codex", "guide", "settings", "result", "confirm_new"]
+	var large := kind in ["recipes", "codex", "settings", "result", "confirm_new"]
 	var top := 235.0 if kind == "settings" else (303.0 if large else 637.0)
 	var body_height := 810.0 if kind == "settings" else (694.0 if large else 360.0)
 	if kind in ["upgrade", "special"]:
-		body_height = 526.0 if kind == "upgrade" else 417.0
+		body_height = 526.0 if kind == "upgrade" else 449.0
 		top = 997.0 - body_height
 	# 본문과 하단 HUD 위치를 보존하면서 닫기 버튼을 위한 머리말만 위로 확장한다.
 	var panel := _panel(overlay, Rect2(35, top - 44.0, 650, body_height + 44.0), Color("172b39"), GOLD)
 	if is_instance_valid(board):
 		board.blocked_screen_rects.assign([Rect2(0, 0, 720, 1280) if kind in ["settings", "result", "confirm_new"] else panel.get_global_rect()])
-	var titles := {"upgrade": "길드 공방 · 공통 공격력 강화", "gamble": "운명의 계약 · 영입 도전", "special": "특수몬스터 · 보상형 적", "recipes": "조합 도감", "codex": "길드 기록관", "settings": "설정", "guide": "전투 가이드", "result": "마왕 격파" if sim.result == "victory" else "전투 종료", "confirm_new": "새로운 출정"}
+	var titles := {"upgrade": "길드 공방 · 공통 공격력 강화", "gamble": "운명의 계약 · 영입 도전", "special": "특수몬스터 · 보상형 적", "recipes": "조합 도감", "codex": "길드 기록관", "settings": "설정", "result": "마왕 격파" if sim.result == "victory" else "전투 종료", "confirm_new": "새로운 출정"}
 	var heading := _panel(panel, Rect2(9, 5, 632, 100), INK, GOLD, "blue")
 	_label(heading, titles[kind], Vector2(20, 31), 500, 26, PALE)
 	var close_button: Button
@@ -540,7 +544,6 @@ func _open_panel(kind: String, force: bool = false) -> void:
 		"special": _special_panel(panel)
 		"recipes": _recipes_panel(panel)
 		"codex": _codex_panel(panel)
-		"guide": _guide_panel(panel)
 		"settings":
 			sim.set_pause("settings", true)
 			_settings_panel(panel)
@@ -565,7 +568,9 @@ func _open_panel(kind: String, force: bool = false) -> void:
 func _set_scroll_input_pass(node: Node) -> void:
 	if node is ScrollBar:
 		return
-	if node is Control and not node is ScrollContainer and node.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+	if node is BaseButton:
+		node.mouse_filter = Control.MOUSE_FILTER_STOP
+	elif node is Control and not node is ScrollContainer and node.mouse_filter != Control.MOUSE_FILTER_IGNORE:
 		node.mouse_filter = Control.MOUSE_FILTER_PASS
 	for child in node.get_children():
 		_set_scroll_input_pass(child)
@@ -603,12 +608,12 @@ func _special_panel(panel: Control) -> void:
 		var id: String = ["s10", "s30", "s60"][index]
 		var definition: Dictionary = sim.catalog.enemies[id]
 		var x := 14 + index * 209
-		var card := _panel(panel, Rect2(x, 74, 201, 327))
+		var card := _panel(panel, Rect2(x, 74, 201, 359))
 		_label(card, definition.name, Vector2(12, 8), 181, 24, GOLD)
 		_portrait(card, id, Vector2(38, 48), Vector2(126, 84))
 		_label(card, "처치 ◈ %d" % definition.reward, Vector2(16, 139), 181, 22, INK)
 		var status := _label(card, "", Vector2(12, 177), 183, 20, MUTED)
-		var button := _button(card, "무료 소환", Rect2(10, 218, 181, 100), func(): _transaction(sim.summon_special(id), true))
+		var button := _button(card, "무료 소환", Rect2(10, 250, 181, 100), func(): _transaction(sim.summon_special(id), true))
 		button.add_theme_font_size_override("font_size", 24)
 		var update := func():
 			var left: float = maxf(0, float(sim.cooldowns.get(id, 0)) - sim.time)
@@ -631,18 +636,79 @@ func _scroll(panel: Control, top: float = 72.0) -> VBoxContainer:
 	scroller.add_child(list)
 	return list
 
+# 목록은 컨테이너가 줄바꿈된 내용의 최소 높이를 계산해 다음 행을 배치한다.
+func _catalog_row(list: VBoxContainer, identity: String) -> VBoxContainer:
+	var row := PanelContainer.new()
+	row.name = "Entry_" + identity
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_theme_stylebox_override("panel", UiSkin.panel_style("parchment"))
+	row.set_meta("parchment", true)
+	list.add_child(row)
+	var margin := MarginContainer.new()
+	for side in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 8)
+	row.add_child(margin)
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 10)
+	margin.add_child(body)
+	return body
+
+func _catalog_text(parent: Container, text_value: String, font_size: int = 22, color: Color = PALE) -> Label:
+	var label := _label(parent, text_value, Vector2.ZERO, 0, font_size, color)
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return label
+
+func _catalog_header(body: VBoxContainer, identity: String, title: String, status: String = "") -> VBoxContainer:
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 12)
+	body.add_child(header)
+	var portrait_slot := Control.new()
+	portrait_slot.custom_minimum_size = Vector2(84, 96)
+	portrait_slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	header.add_child(portrait_slot)
+	_portrait(portrait_slot, identity, Vector2.ZERO, Vector2(84, 96))
+	var details := VBoxContainer.new()
+	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	details.add_theme_constant_override("separation", 6)
+	header.add_child(details)
+	var heading := HBoxContainer.new()
+	heading.add_theme_constant_override("separation", 8)
+	details.add_child(heading)
+	_catalog_text(heading, title, 24, GOLD)
+	if not status.is_empty():
+		var badge := _catalog_text(heading, status, 18, MUTED)
+		badge.custom_minimum_size.x = 60
+		badge.size_flags_horizontal = Control.SIZE_SHRINK_END
+	return details
+
+func _unit_summary(parent: Container, definition: Dictionary) -> void:
+	_catalog_text(parent, UnitDescription.attack_type(definition), 22, PALE)
+	var abilities: String = UnitDescription.abilities(definition)
+	if not abilities.is_empty():
+		_catalog_text(parent, abilities, 20, MUTED)
+
+func _recipe_anchor(recipe: Dictionary) -> int:
+	var unit: Dictionary = sim.unit_by_id(selected)
+	return selected if not unit.is_empty() and recipe.ingredients.has(unit.kind) else -1
+
 func _recipes_panel(panel: Control) -> void:
-	_label(panel, "선택 용병을 기준으로 조합 · 조합 비용 무료", Vector2(23, 67), 600, 16, MUTED)
-	var list := _scroll(panel, 105)
+	var list := _scroll(panel)
+	var available: Array = []
+	var unavailable: Array = []
 	for recipe in sim.catalog.recipes:
+		if not sim.recipe_materials(recipe, _recipe_anchor(recipe)).is_empty():
+			available.append(recipe)
+		else:
+			unavailable.append(recipe)
+	# 두 묶음 안에서는 기존 도감 순서를 유지한다.
+	for recipe in available + unavailable:
 		var result_def: Dictionary = sim.catalog.units[recipe.result]
-		var row := Panel.new()
-		row.custom_minimum_size = Vector2(595, 154)
-		row.add_theme_stylebox_override("panel", UiSkin.panel_style("parchment"))
-		row.set_meta("parchment", true)
-		list.add_child(row)
-		_portrait(row, recipe.result, Vector2(10, 28), Vector2(84, 99))
-		_label(row, "%s  %s" % ["★".repeat(int(result_def.tier)), result_def.name], Vector2(105, 8), 346, 21, GOLD)
+		var body := _catalog_row(list, recipe.result)
+		var details := _catalog_header(body, recipe.result, "%s  %s" % ["★".repeat(int(result_def.tier)), result_def.name])
+		_unit_summary(details, result_def)
+		var footer := HBoxContainer.new()
+		footer.add_theme_constant_override("separation", 16)
+		body.add_child(footer)
 		var material_names: Array[String] = []
 		for id in recipe.ingredients:
 			var owned := 0
@@ -650,53 +716,49 @@ func _recipes_panel(panel: Control) -> void:
 				if unit.kind == id:
 					owned += 1
 			material_names.append("%s %d/%d" % [sim.catalog.units[id].name, owned, recipe.ingredients[id]])
-		_paragraph(row, " + ".join(material_names), Rect2(105, 47, 346, 56), 16, PALE)
-		var anchor := selected
-		if not sim.unit_by_id(anchor).is_empty() and not recipe.ingredients.has(sim.unit_by_id(anchor).kind):
-			anchor = -1
-		var materials: Array = sim.recipe_materials(recipe, anchor)
-		var target := -1
-		if not materials.is_empty():
-			target = int(sim.unit_by_id(anchor).cell) if anchor >= 0 else int(materials[0].cell)
-		_label(row, "재료 부족" if target < 0 else "결과 위치  %d열 %d행" % [target / 6 + 1, target % 6 + 1], Vector2(105, 113), 346, 15, MUTED)
-		var button := _button(row, "조합", Rect2(462, 36, 119, 100), func():
-			var response: Dictionary = sim.combine(recipe.id, anchor)
+		var materials := _catalog_text(footer, " + ".join(material_names), 22, PALE)
+		materials.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var button := _button(footer, "조합", Rect2(0, 0, 120, 100), func():
+			var response: Dictionary = sim.combine(recipe.id, _recipe_anchor(recipe))
 			if response.ok:
 				selected = int(response.unit_id)
-			_transaction(response, true), true)
-		button.disabled = target < 0 or mode != "battle" or sim.result != "active"
+			_transaction(response, true), true, "combine_" + recipe.id)
+		button.custom_minimum_size = Vector2(120, 100)
+		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		button.disabled = not recipe in available or mode != "battle" or sim.result != "active"
 
 func _codex_panel(panel: Control) -> void:
 	_button(panel, "용병 %d" % sim.catalog.units.size(), Rect2(20, 70, 285, 100), func(): codex_tab = "units"; _open_panel("codex", true), codex_tab == "units", "codex_units")
 	_button(panel, "적 %d" % sim.catalog.enemies.size(), Rect2(322, 70, 306, 100), func(): codex_tab = "enemies"; _open_panel("codex", true), codex_tab == "enemies", "codex_enemies")
-	var top := 184.0
-	if codex_tab == "enemies":
+	if codex_tab == "units":
+		for tier in range(5):
+			_button(panel, "전체" if tier == 0 else "%d성" % tier, Rect2(20 + tier * 124, 182, 112, 100), func(): unit_tier_filter = tier; _open_panel("codex", true), unit_tier_filter == tier, "codex_tier_%d" % tier)
+	else:
 		var filters := ["all", "normal", "boss", "special"]
 		var names := ["전체", "일반", "보스", "특수"]
 		for index in range(4):
 			_button(panel, names[index], Rect2(20 + index * 154, 182, 145, 100), func(): enemy_filter = filters[index]; _open_panel("codex", true), enemy_filter == filters[index], "codex_filter_" + filters[index])
-		top = 296
-	var list := _scroll(panel, top)
+	var list := _scroll(panel, 296)
 	var definitions: Dictionary = sim.catalog.units if codex_tab == "units" else sim.catalog.enemies
 	for id in definitions:
 		var definition: Dictionary = definitions[id]
+		if codex_tab == "units" and unit_tier_filter != 0 and int(definition.tier) != unit_tier_filter:
+			continue
 		if codex_tab == "enemies" and enemy_filter != "all" and definition.kind != enemy_filter and not (enemy_filter == "boss" and definition.kind == "final"):
 			continue
-		var row := Panel.new()
-		row.custom_minimum_size = Vector2(595, 127)
-		row.add_theme_stylebox_override("panel", UiSkin.panel_style("parchment"))
-		row.set_meta("parchment", true)
-		list.add_child(row)
+		var body := _catalog_row(list, id)
 		var found: bool = store.profile.units.has(id) or sim.discovered_units.has(id) if codex_tab == "units" else store.profile.enemies.has(id) or sim.discovered_enemies.has(id)
-		_portrait(row, id, Vector2(9, 12), Vector2(88, 96))
-		_label(row, definition.name, Vector2(104, 7), 300, 22, GOLD)
-		_label(row, "발견" if found else "미발견 · 열람 가능", Vector2(407, 10), 200, 16, MUTED)
+		var title: String = "%s  %s" % ["★".repeat(int(definition.tier)), definition.name] if codex_tab == "units" else str(definition.name)
+		var details := _catalog_header(body, id, title, "발견" if found else "미발견")
 		if codex_tab == "units":
-			_label(row, "%s   공격 %d   사거리 %.1f   주기 %.1f초" % ["★".repeat(int(definition.tier)), definition.damage, definition.range, definition.interval], Vector2(104, 48), 477, 16, PALE)
-			_paragraph(row, definition.description, Rect2(104, 80, 477, 41), 16, MUTED)
+			_unit_summary(details, definition)
+			_catalog_text(body, "공격 %d · 사거리 %.1f · 주기 %.1f초" % [definition.damage, definition.range, definition.interval], 22, PALE)
+			_catalog_text(body, definition.description, 20, MUTED)
 		else:
-			_label(row, "기본 체력 %d   처치 ◈ %d   무CC 이동 %.0f초" % [definition.hp, definition.reward, definition.travel], Vector2(104, 50), 477, 15, PALE)
-			_label(row, "누적 처치 %d   ·   %s" % [store.profile.kills.get(id, 0), "웨이브에 따라 체력 증가" if definition.kind != "special" else "%d웨이브 완료 후 해금" % definition.unlock], Vector2(104, 85), 477, 15, MUTED)
+			_catalog_text(details, "기본 체력 %d · 처치 ◈ %d" % [definition.hp, definition.reward], 22, PALE)
+			_catalog_text(body, "기본 이동 %.0f초 · 누적 처치 %d" % [definition.travel, store.profile.kills.get(id, 0)], 22, MUTED)
+			if definition.kind == "special":
+				_catalog_text(body, "%d웨이브 완료 후 해금" % definition.unlock, 20, MUTED)
 
 func _portrait(parent: Control, identity: String, position_value: Vector2, dimensions: Vector2) -> void:
 	var texture: Texture2D = visuals.portrait(identity)
@@ -711,22 +773,6 @@ func _portrait(parent: Control, identity: String, position_value: Vector2, dimen
 	portrait.size = dimensions
 	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(portrait)
-
-func _guide_panel(panel: Control) -> void:
-	var list := _scroll(panel)
-	for entry in [
-		["01  소환하고 전열을 갖추세요", "시작 골드로 1성 용병 세 명을 소환할 수 있습니다. 적을 처치해 골드를 얻고, 첫 빈칸부터 열 우선으로 채웁니다."],
-		["02  사거리와 배치가 전략입니다", "용병을 누르면 정보를 확인합니다. 이동할 용병을 목적지 칸까지 드래그하세요. 점유된 칸은 교환합니다. 아군은 다치지 않으며 배치한 자리에서 공격합니다."],
-		["배치 주의 · 직접 공격과 지원", "짧은 사거리 용병은 길에 가까운 바깥쪽 칸이 유리합니다. 선택 정보에 직접 공격 불가·접점이 좁음이 표시되면 배치를 확인하세요. 직접 공격이 닿지 않아도 범위 안 아군을 돕는 지원 효과는 유지됩니다."],
-		["03  조합으로 전력을 높이세요", "조합법 창에서 정확한 재료와 결과 칸을 확인한 뒤 조합합니다. 드래그만으로 조합되지는 않습니다. 강화는 해당 성급 전체에 적용됩니다."],
-		["04  100웨이브, 마왕을 처치하세요", "일반 웨이브는 30게임초마다 시작됩니다. 적은 한 바퀴를 돌면 탈출하며 목숨이 1 줄어듭니다. 100웨이브 마왕은 처치하면 승리, 탈출하면 즉시 패배합니다. 전장에 모든 종류의 적을 합쳐 %d마리가 모이면 즉시 패배합니다." % sim.enemy_limit()],
-		["05  위험을 감수하고 골드를 버세요", "특수몬스터는 아군이 아닌 보상형 적입니다. 10·30·60웨이브 완료 후 해금되며 종류마다 300게임초의 재소환 대기가 있습니다."],
-		["06  쉬어갈 때는 일시정지", "배속은 ×1·×2·×3·×5로 순환합니다. 설정만 자동 정지하며 다른 창을 열어도 전투는 계속됩니다. 이어하기는 정지된 상태로 복원됩니다."]]:
-		var row := Control.new()
-		row.custom_minimum_size = Vector2(590, 300)
-		list.add_child(row)
-		_label(row, entry[0], Vector2(10, 5), 570, 30, GOLD)
-		_paragraph(row, entry[1], Rect2(10, 55, 570, 235), 26, PALE)
 
 func _settings_panel(panel: Control) -> void:
 	_label(panel, "전투가 정지되었습니다" if mode == "battle" else "길드 환경설정", Vector2(30, 78), 600, 18, MUTED)
