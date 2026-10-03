@@ -118,14 +118,7 @@ func draw_feedback(board: Control, sim, reduced: bool) -> void:
 		var tint := Color(str(MATERIAL_COLORS[material]))
 		var ratio := age / FEEDBACK_LIFE
 		var alpha := 1.0 - ratio
-		if event.reason == "escaped":
-			# 탈출은 적 재질의 잔상과 붉은 바깥쪽 화살표를 함께 보여 사망과 구별한다.
-			var drift := 0.0 if reduced else ratio * 15.0
-			for sign_value in [-1, 1]:
-				var arrow := point + Vector2(sign_value * (12 + drift), -9)
-				board.draw_polyline(PackedVector2Array([arrow + Vector2(-sign_value * 5, -6), arrow, arrow + Vector2(-sign_value * 5, 6)]), Color(1.0, 0.37, 0.27, alpha), 3, true)
-			_draw_material(board, point + Vector2(0, -18), material, motif, 0.0 if reduced else ratio * 0.4, Color(tint, alpha * 0.6), 0.5, reduced)
-		elif event.reason == "killed":
+		if event.reason == "killed":
 			var definition: Dictionary = sim.catalog.enemies[event.kind]
 			var scale := 1.45 if definition.kind in ["boss", "final"] else 1.0
 			if not reduced:

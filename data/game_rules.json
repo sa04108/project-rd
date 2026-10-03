@@ -6,7 +6,6 @@
     "path_length": 28.0,
     "wave_seconds": 30.0,
     "max_wave": 100,
-    "start_lives": 20,
     "normal_count": 10,
     "special_cooldown": 300.0,
     "speeds": [
@@ -16,7 +15,9 @@
       5
     ],
     "deployment_seconds": 5.0,
-    "maximum_speed": 20
+    "maximum_speed": 20,
+    "promotion_ingredient_count": 3,
+    "enemy_timeout_seconds": 60.0
   },
   "I": {
     "normal_travel": 18.0,
@@ -67,9 +68,68 @@
     "same_type_specials_may_coexist": true,
     "save_resume_starts_paused": false,
     "enemy_limit_scope": "all_active_enemies_including_boss_and_special",
-    "enemy_limit_trigger": "immediate_on_spawn_at_or_above_limit",
+    "enemy_limit_trigger": "immediate_on_spawn_above_limit",
     "pause_only_by_button": true,
-    "background_progress": true
+    "background_progress": true,
+    "recipe_pair_groups": [
+      [
+        "u01",
+        "u02"
+      ],
+      [
+        "u03",
+        "u06"
+      ],
+      [
+        "u04",
+        "u05"
+      ],
+      [
+        "u07",
+        "u11"
+      ],
+      [
+        "u08",
+        "u17"
+      ],
+      [
+        "u09",
+        "u20"
+      ],
+      [
+        "u10",
+        "u19"
+      ],
+      [
+        "u18",
+        "u21"
+      ],
+      [
+        "u12",
+        "u13"
+      ],
+      [
+        "u14",
+        "u30"
+      ],
+      [
+        "u24",
+        "u29"
+      ],
+      [
+        "u23",
+        "u25"
+      ],
+      [
+        "u22",
+        "u28"
+      ],
+      [
+        "u26",
+        "u27"
+      ]
+    ],
+    "enemy_path_end": "loop_without_escape"
   },
   "T": {
     "summon_cost": 50,

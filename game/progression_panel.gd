@@ -26,7 +26,6 @@ static func build(host, panel: Control) -> void:
 	_append_category(host, list, "progression.category.expedition")
 	_append_upgrade(host, panel, list, "starting_gold", levels, revision)
 	_append_upgrade(host, panel, list, "speed", levels, revision)
-	_append_upgrade(host, panel, list, "extra_lives", levels, revision)
 	var rewards_note: RichTextLabel = host._diamond_text(list, L.text("progression.rewards.note"), Rect2(), 22, MUTED)
 	rewards_note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
@@ -35,7 +34,7 @@ static func _append_category(host, list: VBoxContainer, key: String) -> void:
 
 static func _append_upgrade(host, panel: Control, list: VBoxContainer, identity: String, levels: Dictionary, revision: int) -> void:
 	var definition: Dictionary = Progression.definition(identity)
-	if definition.is_empty():
+	if definition.is_empty() or bool(definition.get("retired", false)):
 		return
 	var current_level := int(levels.get(identity, 0))
 	var maximum := Progression.max_level(identity)
@@ -83,8 +82,6 @@ static func _title(identity: String, tier: int) -> String:
 			return L.text("progression.attack.title") % tier
 		"gamble_2", "gamble_3":
 			return L.text("progression.gamble.title") % tier
-		"extra_lives":
-			return L.text("progression.lives.title")
 		"speed":
 			return L.text("progression.speed.title")
 		"starting_gold":
@@ -102,8 +99,6 @@ static func _effect(host, identity: String, definition: Dictionary, levels: Dict
 			var tier := int(definition.get("tier", 0))
 			var base_chance := float(host.sim.catalog.rules.T.gamble[str(tier)].chance)
 			return L.text("progression.effect.gamble_chance") % roundi((base_chance + value) * 100.0)
-		"lives":
-			return L.text("progression.effect.extra_lives") % int(value)
 		"speed":
 			var maximum_speed := 5
 			if level > 0:

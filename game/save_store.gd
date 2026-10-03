@@ -367,7 +367,7 @@ func permanent_levels() -> Dictionary:
 func purchase_permanent(identity: String, expected_level: int, expected_revision: int) -> Dictionary:
 	if read_only:
 		return {"ok": false, "error": _blocked_error}
-	if not profile.economy.upgrades.has(identity):
+	if not profile.economy.upgrades.has(identity) or bool(Progression.definition(identity).get("retired", false)):
 		return {"ok": false, "error": "progression.error.unavailable"}
 	var level := int(profile.economy.upgrades[identity])
 	if expected_level != level or expected_revision != int(profile.economy.revision):

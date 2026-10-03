@@ -271,7 +271,8 @@
       "unlock_waves": [
         60,
         100
-      ]
+      ],
+      "retired": true
     },
     "speed": {
       "kind": "speed",

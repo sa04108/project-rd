@@ -12,7 +12,7 @@ signal unit_presented(event: Dictionary)
 
 const Catalog = preload("res://game/catalog.gd")
 const Progression = preload("res://game/permanent_progression.gd")
-const SNAPSHOT_SCHEMA := 3
+const SNAPSHOT_SCHEMA := 4
 # 아군 한 칸을 1로 두고 폭 1인 외곽 길의 중심선을 따른다.
 const PATH_SIDE := 7.0
 const PATH_LENGTH := PATH_SIDE * 4.0
@@ -26,7 +26,6 @@ var enemies: Array = []
 var effects: Array = []
 var gold := 150
 var paid_summons := 0
-var lives := 20
 var time := 0.0
 var wave := 1
 var spawn_index := 0
@@ -59,7 +58,6 @@ func new_run(seed_value: int = 0, permanent: Dictionary = {}) -> void:
 	effects.clear()
 	gold = int(catalog.rules.D.start_gold) + int(Progression.value("starting_gold", int(permanent_levels.starting_gold)))
 	paid_summons = 0
-	lives = 20 + int(Progression.value("extra_lives", int(permanent_levels.extra_lives)))
 	time = 0.0
 	wave = 1
 	speed = 1
@@ -275,13 +273,26 @@ func add_enemy(kind: String, spawn_wave: int) -> Dictionary:
 	if definition.kind != "special":
 		hp *= hp_multiplier(spawn_wave)
 	var enemy := {"id": next_id, "kind": kind, "hp": hp, "max_hp": hp, "progress": 0.0, "wave": spawn_wave, "slow": 0.0, "slow_until": 0.0, "stun_until": 0.0, "slows": []}
+	if definition.kind in ["boss", "final"]:
+		enemy.deadline = (float(spawn_wave) - 1.0) * float(catalog.rules.F.wave_seconds) + float(catalog.rules.F.enemy_timeout_seconds)
+	elif definition.kind == "special":
+		enemy.deadline = time + float(catalog.rules.F.enemy_timeout_seconds)
 	next_id += 1
 	enemies.append(enemy)
 	discovered_enemies[kind] = true
 	# 생성 직후 판정하여 같은 프레임의 공격이나 입력으로 한도를 우회할 수 없게 한다.
-	if enemies.size() >= enemy_limit():
+	if enemies.size() > enemy_limit():
 		_finish("defeat", "result.reason.enemy_limit")
 	return enemy
+
+func _is_timed_enemy(enemy: Dictionary) -> bool:
+	var identity := str(enemy.get("kind", ""))
+	return catalog.enemies.has(identity) and catalog.enemies[identity].kind in ["boss", "final", "special"]
+
+func enemy_time_left(enemy: Dictionary) -> float:
+	if not enemy.has("deadline"):
+		return 0.0
+	return maxf(0.0, float(enemy.deadline) - time)
 
 func enemy_limit() -> int:
 	return int(catalog.rules.T.enemy_limit)
@@ -345,8 +356,18 @@ func advance(game_delta: float) -> void:
 	if result != "active" or not pause_reasons.is_empty() or deployment_remaining > 0.0 or not is_finite(game_delta) or game_delta <= 0.0:
 		return
 	var remaining := game_delta
-	while remaining > 0.0000001 and result == "active":
+	while remaining > 0.000000001 and result == "active":
 		var step := minf(1.0 / 30.0, remaining)
+		var next_event_time := INF
+		if wave < 100:
+			next_event_time = minf(next_event_time, float(wave) * float(catalog.rules.F.wave_seconds))
+		for enemy in enemies:
+			if _is_timed_enemy(enemy):
+				var deadline := float(enemy.deadline)
+				if deadline > time:
+					next_event_time = minf(next_event_time, deadline)
+		if next_event_time < INF and next_event_time > time:
+			step = minf(step, maxf(0.000000001, next_event_time - time))
 		_tick(step)
 		remaining -= step
 
@@ -406,7 +427,7 @@ func _tick(delta: float) -> void:
 			effects.append({"from": [origin.x, origin.y], "to": [destination.x, destination.y], "color": definition.color, "life": 0.22})
 		if not presentation_suppressed:
 			attack_presented.emit({"unit_id": int(unit.id), "kind": str(unit.kind), "target_id": int(target.id), "from": origin, "to": destination, "time": time, "color": str(definition.color)})
-	# 같은 틱의 사망 확정 뒤 마왕 승리, 살아 있는 적의 탈출 순으로 처리한다.
+	# 같은 틱의 사망 확정 뒤 마왕 승리, 보스 시간초과 순으로 처리한다.
 	var final_dead := false
 	for enemy in enemies.duplicate():
 		if enemy.hp <= 0.0:
@@ -424,6 +445,15 @@ func _tick(delta: float) -> void:
 		_finish("victory", "result.reason.victory")
 		return
 	for enemy in enemies.duplicate():
+		if _is_timed_enemy(enemy) and catalog.enemies[enemy.kind].kind == "special" and time + 0.000001 >= float(enemy.deadline):
+			if not presentation_suppressed:
+				enemy_removed_presented.emit({"id": int(enemy.id), "kind": str(enemy.kind), "progress": float(enemy.progress), "time": time, "reason": "expired"})
+			enemies.erase(enemy)
+	for enemy in enemies:
+		if _is_timed_enemy(enemy) and catalog.enemies[enemy.kind].kind in ["boss", "final"] and time + 0.000001 >= float(enemy.deadline):
+			_finish("defeat", "result.reason.boss_timeout")
+			return
+	for enemy in enemies.duplicate():
 		var strongest := 0.0
 		var had_slows: bool = not enemy.slows.is_empty()
 		var until := 0.0
@@ -440,18 +470,7 @@ func _tick(delta: float) -> void:
 		enemy.slow_until = until if had_slows else float(enemy.slow_until)
 		if float(enemy.stun_until) <= time:
 			var travel: float = catalog.enemies[enemy.kind].travel
-			enemy.progress += delta * PATH_LENGTH / travel * (1.0 - strongest)
-		if float(enemy.progress) >= PATH_LENGTH - 0.000001:
-			if not presentation_suppressed:
-				enemy_removed_presented.emit({"id": int(enemy.id), "kind": str(enemy.kind), "progress": float(enemy.progress), "time": time, "reason": "escaped"})
-			enemies.erase(enemy)
-			lives = maxi(0, lives - 1)
-			if catalog.enemies[enemy.kind].kind == "final":
-				_finish("defeat", "result.reason.demon_escaped")
-				return
-			if lives <= 0:
-				_finish("defeat", "result.reason.lives_depleted")
-				return
+			enemy.progress = fposmod(float(enemy.progress) + delta * PATH_LENGTH / travel * (1.0 - strongest), PATH_LENGTH)
 	if wave < 100 and time + 0.000001 >= wave * 30.0:
 		wave += 1
 		_start_wave()
@@ -492,7 +511,7 @@ func debug_jump_wave(value: int) -> void:
 	_start_wave()
 
 func snapshot() -> Dictionary:
-	return {"schema": SNAPSHOT_SCHEMA, "paid_summons": paid_summons, "deployment_remaining": deployment_remaining, "permanent_levels": permanent_levels.duplicate(), "user_paused": pause_reasons.has("user"), "path_length": PATH_LENGTH, "content_version": catalog.rules.content_version, "run_id": run_id, "time": time, "wave": wave, "spawn_index": spawn_index, "gold": gold, "lives": lives, "speed": speed, "result": result, "result_reason": result_reason, "units": units.duplicate(true), "enemies": enemies.duplicate(true), "upgrades": upgrades.duplicate(true), "cooldowns": cooldowns.duplicate(true), "next_id": next_id, "rng_state": str(rng.state), "rng_seed": str(rng.seed), "discovered_units": discovered_units.duplicate(), "discovered_enemies": discovered_enemies.duplicate(), "kills": kills.duplicate(), "developer_run": developer_run}
+	return {"schema": SNAPSHOT_SCHEMA, "paid_summons": paid_summons, "deployment_remaining": deployment_remaining, "permanent_levels": permanent_levels.duplicate(), "user_paused": pause_reasons.has("user"), "path_length": PATH_LENGTH, "content_version": catalog.rules.content_version, "run_id": run_id, "time": time, "wave": wave, "spawn_index": spawn_index, "gold": gold, "speed": speed, "result": result, "result_reason": result_reason, "units": units.duplicate(true), "enemies": enemies.duplicate(true), "upgrades": upgrades.duplicate(true), "cooldowns": cooldowns.duplicate(true), "next_id": next_id, "rng_state": str(rng.state), "rng_seed": str(rng.seed), "discovered_units": discovered_units.duplicate(), "discovered_enemies": discovered_enemies.duplicate(), "kills": kills.duplicate(), "developer_run": developer_run}
 
 func restore(saved: Dictionary) -> bool:
 	if not _valid_snapshot(saved):
@@ -506,12 +525,21 @@ func restore(saved: Dictionary) -> bool:
 	gold = int(saved.gold)
 	# 횟수가 없던 이전 전투는 업데이트 후 첫 유료 소환부터 비용 증가를 시작한다.
 	paid_summons = int(saved.get("paid_summons", 0))
-	lives = int(saved.lives)
 	speed = int(saved.speed)
 	result = saved.result
 	result_reason = saved.result_reason
 	units = saved.units.duplicate(true)
 	enemies = saved.enemies.duplicate(true)
+	if int(saved.schema) < SNAPSHOT_SCHEMA:
+		# 구버전 보스는 저장된 생성 웨이브로 기한을 되살리고 특수 적은 복원 시점부터 잰다.
+		for enemy in enemies:
+			if not _is_timed_enemy(enemy):
+				continue
+			var definition_kind: String = str(catalog.enemies[enemy.kind].kind)
+			if definition_kind in ["boss", "final"]:
+				enemy.deadline = (float(enemy.wave) - 1.0) * float(catalog.rules.F.wave_seconds) + float(catalog.rules.F.enemy_timeout_seconds)
+			else:
+				enemy.deadline = time + float(catalog.rules.F.enemy_timeout_seconds)
 	# 길의 실제 폭을 넓혀도 이전 저장의 주회 비율과 남은 이동 시간은 유지한다.
 	var saved_path_length := float(saved.get("path_length", LEGACY_PATH_LENGTH))
 	if saved_path_length != PATH_LENGTH:
@@ -530,13 +558,26 @@ func restore(saved: Dictionary) -> bool:
 	pause_reasons = {"user": true} if bool(saved.get("user_paused", false)) else {}
 	revision += 1
 	# 이전 버전의 무제한 군중 저장은 원본 전투 상태를 보존한 채 새 패배 조건을 적용한다.
-	if result == "active" and enemies.size() >= enemy_limit():
+	if result == "active" and enemies.size() > enemy_limit():
 		_finish("defeat", "result.reason.enemy_limit")
+	elif result == "active":
+		for enemy in enemies:
+			if catalog.enemies[enemy.kind].kind in ["boss", "final"] and time + 0.000001 >= float(enemy.deadline):
+				_finish("defeat", "result.reason.boss_timeout")
+				break
 	return true
 
 func _valid_snapshot(s: Dictionary) -> bool:
 	if not SaveLimits.valid(s): return false
-	for key in ["schema", "content_version", "run_id", "time", "wave", "spawn_index", "gold", "lives", "speed", "result", "result_reason", "units", "enemies", "upgrades", "cooldowns", "next_id", "rng_state", "rng_seed", "discovered_units", "discovered_enemies", "kills", "developer_run"]:
+	if not s.has("schema") or not Progression.integer(s.schema, 1, SNAPSHOT_SCHEMA):
+		return false
+	var snapshot_schema := int(s.schema)
+	var required := ["content_version", "run_id", "time", "wave", "spawn_index", "gold", "speed", "result", "result_reason", "units", "enemies", "upgrades", "cooldowns", "next_id", "rng_state", "rng_seed", "discovered_units", "discovered_enemies", "kills", "developer_run"]
+	if snapshot_schema < SNAPSHOT_SCHEMA:
+		required.append("lives")
+	elif s.has("lives"):
+		return false
+	for key in required:
 		if not s.has(key):
 			return false
 	var saved_path_length: Variant = s.get("path_length", LEGACY_PATH_LENGTH)
@@ -544,7 +585,7 @@ func _valid_snapshot(s: Dictionary) -> bool:
 		return false
 	if not float(saved_path_length) in [LEGACY_PATH_LENGTH, PATH_LENGTH]:
 		return false
-	if not Progression.integer(s.schema, 1, SNAPSHOT_SCHEMA) or not s.content_version in ["0.2.0", catalog.rules.content_version] or not s.run_id is String or s.run_id.is_empty():
+	if not s.content_version in ["0.2.0", catalog.rules.content_version] or not s.run_id is String or s.run_id.is_empty():
 		return false
 	var saved_permanent: Dictionary = Progression.defaults()
 	var preparation := 0.0
@@ -555,12 +596,20 @@ func _valid_snapshot(s: Dictionary) -> bool:
 		preparation = float(s.deployment_remaining)
 	elif s.has("permanent_levels") or s.has("deployment_remaining") or s.has("user_paused"):
 		return false
-	for key in ["time", "wave", "spawn_index", "gold", "lives", "speed", "next_id"]:
+	var numeric_fields := ["time", "wave", "spawn_index", "gold", "speed", "next_id"]
+	if snapshot_schema < SNAPSHOT_SCHEMA:
+		numeric_fields.append("lives")
+	for key in numeric_fields:
 		if not (s[key] is float or s[key] is int) or not is_finite(float(s[key])):
 			return false
-	if s.wave < 1 or s.wave > 100 or s.time < 0 or s.gold < 0 or s.lives < 0 or s.lives > 20 + int(Progression.value("extra_lives", int(saved_permanent.extra_lives))) or s.next_id < 1 or not int(s.speed) in Progression.speeds(saved_permanent):
+	if s.wave < 1 or s.wave > 100 or s.time < 0 or s.gold < 0 or s.next_id < 1 or not int(s.speed) in Progression.speeds(saved_permanent):
 		return false
-	for key in ["wave", "spawn_index", "gold", "lives", "speed", "next_id"]:
+	if snapshot_schema < SNAPSHOT_SCHEMA and (s.lives < 0 or s.lives > 20 + int(Progression.value("extra_lives", int(saved_permanent.extra_lives)))):
+		return false
+	var integral_fields := ["wave", "spawn_index", "gold", "speed", "next_id"]
+	if snapshot_schema < SNAPSHOT_SCHEMA:
+		integral_fields.append("lives")
+	for key in integral_fields:
 		if float(s[key]) != floor(float(s[key])):
 			return false
 	if int(s.schema) >= 3:
@@ -581,7 +630,7 @@ func _valid_snapshot(s: Dictionary) -> bool:
 		return false
 	if not s.units is Array or not s.enemies is Array or s.units.size() > 36:
 		return false
-	if s.content_version != "0.2.0" and s.result == "active" and s.enemies.size() >= enemy_limit():
+	if s.content_version != "0.2.0" and s.result == "active" and s.enemies.size() > enemy_limit():
 		return false
 	for key in ["upgrades", "cooldowns", "discovered_units", "discovered_enemies", "kills"]:
 		if not s[key] is Dictionary:
@@ -628,6 +677,25 @@ func _valid_snapshot(s: Dictionary) -> bool:
 			if not (enemy[key] is float or enemy[key] is int) or not is_finite(float(enemy[key])):
 				return false
 		if float(enemy.id) != floor(float(enemy.id)) or float(enemy.wave) != floor(float(enemy.wave)) or enemy.wave < 1 or enemy.wave > s.wave or enemy.hp > enemy.max_hp or enemy.slow_until < 0 or enemy.stun_until < 0 or ids.has(int(enemy.id)) or enemy.id < 1 or enemy.id >= s.next_id or enemy.hp <= 0 or enemy.max_hp <= 0 or enemy.progress < 0 or enemy.progress > float(saved_path_length) or enemy.slow < 0 or enemy.slow >= 1:
+			return false
+		var timed: bool = catalog.enemies[enemy.kind].kind in ["boss", "final", "special"]
+		if snapshot_schema < SNAPSHOT_SCHEMA:
+			if enemy.has("deadline"):
+				return false
+		elif timed:
+			if not enemy.has("deadline") or not (enemy.deadline is int or enemy.deadline is float) or not is_finite(float(enemy.deadline)):
+				return false
+			var timeout := float(catalog.rules.F.enemy_timeout_seconds)
+			var earliest_deadline := (float(enemy.wave) - 1.0) * float(catalog.rules.F.wave_seconds) + timeout
+			var enemy_kind: String = str(catalog.enemies[enemy.kind].kind)
+			if enemy_kind in ["boss", "final"]:
+				if absf(float(enemy.deadline) - earliest_deadline) > 0.000001:
+					return false
+			elif float(enemy.deadline) < earliest_deadline - 0.000001 or float(enemy.deadline) > float(s.time) + timeout + 0.000001:
+				return false
+			if s.result == "active" and float(enemy.deadline) <= float(s.time) + 0.000001:
+				return false
+		elif enemy.has("deadline"):
 			return false
 		ids[int(enemy.id)] = true
 		for entry in enemy.slows:

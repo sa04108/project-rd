@@ -470,15 +470,12 @@ func _resume() -> void:
 	_observe_result()
 
 func _show_battle() -> void:
-	audio.reset_battle(sim.run_id, sim.lives, sim.result)
+	audio.reset_battle(sim.run_id, sim.result)
 	_sync_audio()
 	_clear_screen()
 	# 320px 화면에서도 44px 이상인 터치 영역을 유지하고, 도구는 오른쪽 위에 모은다.
-	_panel(screen, Rect2(22, 20, 166, 64), INK, GOLD, "brass")
-	labels.lives = _label(screen, "", Vector2(36, 32), 139, 28, Color("ff9484"))
-	labels.lives.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_panel(screen, Rect2(202, 135, 276, 51), INK, GOLD, "brass")
-	labels.wave = _label(screen, "", Vector2(217, 141), 246, 26, PALE)
+	_panel(screen, Rect2(22, 20, 252, 51), INK, GOLD, "brass")
+	labels.wave = _label(screen, "", Vector2(35, 26), 226, 26, PALE)
 	labels.wave.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var tools := [["recipes", L.text("recipes.open")], ["codex", L.text("menu.codex.open")], ["settings", L.text("settings.title")]]
 	for index in range(tools.size()):
@@ -500,23 +497,21 @@ func _show_battle() -> void:
 	_hud_icon(screen, "coin", Rect2(524, 143, 30, 30))
 	labels.gold = _label(screen, "", Vector2(558, 141), 123, 26, PALE)
 	labels.gold.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_panel(screen, Rect2(292, 132, 202, 54), INK, GOLD, "brass")
+	labels.count = _label(screen, "", Vector2(300, 141), 186, 24, PALE)
+	labels.count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	labels.speed = _hud_button(screen, "×1", Rect2(486, 192, 100, 100), func(): sim.cycle_speed(); _mark_dirty(); _refresh(), "speed")
 	labels.speed.tooltip_text = L.text("battle.speed.options")
 	labels.speed.accessibility_name = L.text("battle.speed.open")
 	labels.pause = _hud_button(screen, "Ⅱ", Rect2(598, 192, 100, 100), _toggle_pause, "pause")
 	labels.pause.tooltip_text = L.text("battle.pause.toggle")
 	labels.pause.accessibility_name = L.text("battle.pause.toggle")
-	var banner := TextureRect.new()
-	banner.texture = UiSkin.banner_texture()
-	banner.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	banner.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	banner.position = Vector2(24, 91)
-	banner.size = Vector2(82, 163)
-	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	screen.add_child(banner)
-	labels.clock_panel = _panel(screen, Rect2(209, 244, 270, 43), INK, GOLD, "brass")
-	labels.clock = _label(screen, "", Vector2(220, 251), 248, 15, PALE)
+	labels.clock_panel = _panel(screen, Rect2(22, 78, 252, 43), INK, GOLD, "brass")
+	labels.clock = _label(screen, "", Vector2(33, 85), 230, 15, PALE)
 	labels.clock.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	labels.boss_panel = _panel(screen, Rect2(22, 128, 252, 51), INK, GOLD, "brass")
+	labels.boss_timer = _label(labels.boss_panel, "", Vector2(10, 8), 232, 24, Color("ff9484"))
+	labels.boss_timer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	board = BattleBoard.new()
 	board.position = Vector2(0, 224)
 	board.size = Vector2(720, 716)
@@ -555,14 +550,30 @@ func _show_battle() -> void:
 	labels.detail_type.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# 하단의 소환 중심 배치와 강화·도박·특수몬스터 순서는 그대로 유지한다.
 	labels.summon = _battle_action("", Rect2(229, 1030, 262, 100), _summon, "summon", "summon")
-	_panel(screen, Rect2(225, 1132, 270, 35), INK, GOLD, "brass")
-	labels.count = _label(screen, "", Vector2(234, 1138), 252, 13, PALE)
-	labels.count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_battle_action(L.text("upgrade.open"), Rect2(27, 1172, 216, 100), func(): _open_panel("upgrade"), "upgrade", "upgrade")
 	_battle_action(L.text("gamble.open"), Rect2(252, 1172, 216, 100), func(): _open_panel("gamble"), "gamble", "gamble")
 	_battle_action(L.text("special.open"), Rect2(477, 1172, 216, 100), func(): _open_panel("special"), "special", "special")
+	_special_timers()
 	_refresh()
 	_sync_pause_overlay()
+
+func _special_timers() -> void:
+	var column := VBoxContainer.new()
+	column.name = "SpecialTimers"
+	column.position = Vector2(516, 1028)
+	column.size = Vector2(178, 138)
+	column.add_theme_constant_override("separation", 3)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	screen.add_child(column)
+	labels.special_timers = {}
+	for identity in ["s10", "s30", "s60"]:
+		var row := _panel(column, Rect2(0, 0, 178, 44), INK, GOLD, "brass")
+		row.custom_minimum_size = Vector2(178, 44)
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_portrait(row, identity, Vector2(2, 1), Vector2(42, 42), true)
+		var caption := _label(row, "", Vector2(49, 5), 125, 22, PALE)
+		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		labels.special_timers[identity] = {"row": row, "caption": caption}
 
 func _cell_pressed(cell: int) -> void:
 	if not panel_name.is_empty() and panel_name in ["settings", "result", "confirm_new"]:
@@ -686,7 +697,25 @@ func _save() -> bool:
 func _refresh() -> void:
 	if mode != "battle" or labels.is_empty():
 		return
-	labels.lives.text = "♥ × %d" % sim.lives
+	var boss_left := INF
+	for enemy in sim.enemies:
+		if sim.catalog.enemies[enemy.kind].kind in ["boss", "final"] and enemy.has("deadline"):
+			boss_left = minf(boss_left, maxf(0.0, float(enemy.deadline) - sim.time))
+	labels.boss_panel.visible = is_finite(boss_left)
+	if is_finite(boss_left):
+		labels.boss_timer.text = L.text("battle.boss.timer") % ceili(boss_left)
+	for identity in labels.special_timers:
+		var left := INF
+		var count := 0
+		for enemy in sim.enemies:
+			if enemy.kind == identity and enemy.has("deadline"):
+				left = minf(left, maxf(0.0, float(enemy.deadline) - sim.time))
+				count += 1
+		var timer: Dictionary = labels.special_timers[identity]
+		timer.row.visible = count > 0
+		if count > 0:
+			timer.caption.text = L.text("battle.special.timer") % ceili(left)
+			if count > 1: timer.caption.text += " ×%d" % count
 	labels.wave.text = L.text("battle.wave.current") % sim.wave
 	labels.gold.text = "%d" % sim.gold
 	labels.count.text = L.text("battle.enemy.count") % [sim.enemies.size(), sim.enemy_limit()]
@@ -898,7 +927,7 @@ func _special_panel(panel: Control) -> void:
 		var update := func():
 			var left: float = maxf(0, float(sim.cooldowns.get(id, 0)) - sim.time)
 			status.text = L.text("special.unlock_wave") % definition.unlock if sim.wave <= definition.unlock else (L.text("special.cooldown") % ceili(left) if left > 0 else L.text("special.claim_reward"))
-			button.text = L.text("unit.summon.blocked_by_enemy_limit") if sim.enemies.size() >= sim.enemy_limit() - 1 else L.text("unit.summon.free")
+			button.text = L.text("unit.summon.blocked_by_enemy_limit") if sim.enemies.size() >= sim.enemy_limit() else L.text("unit.summon.free")
 			button.disabled = sim.wave <= definition.unlock or left > 0 or sim.result != "active"
 		dynamic.append(update)
 		update.call()
@@ -1055,49 +1084,60 @@ func _sync_board_blockers() -> void:
 func _recipes_panel(panel: Control) -> void:
 	_catalog_filter_controls(panel, recipe_filters, "recipes", 72)
 	var list := _scroll(panel, 268)
-	var available: Array = []
-	var unavailable: Array = []
+	var groups: Dictionary = {}
+	var ready: Dictionary = {}
 	for recipe in sim.catalog.recipes:
 		if not recipe_filters.matches(sim.catalog.units[recipe.result]):
 			continue
+		if not groups.has(recipe.result):
+			groups[recipe.result] = []
+		groups[recipe.result].append(recipe)
 		if not sim.recipe_materials(recipe, _recipe_anchor(recipe)).is_empty():
-			available.append(recipe)
-		else:
-			unavailable.append(recipe)
-	# 두 묶음 안에서는 기존 도감 순서를 유지한다.
-	for recipe in available + unavailable:
-		var result_def: Dictionary = sim.catalog.units[recipe.result]
-		var body := _catalog_row(list, recipe.result)
-		var details := _catalog_header(body, recipe.result, "%s  %s" % ["★".repeat(int(result_def.tier)), L.unit_name(str(recipe.result))])
+			ready[recipe.id] = true
+	var available: Array = []
+	var unavailable: Array = []
+	for identity in groups:
+		var can_combine := false
+		for recipe in groups[identity]:
+			if ready.has(recipe.id): can_combine = true
+		(available if can_combine else unavailable).append(identity)
+	# 결과별로 묶어 초상과 추적은 한 번만 표시하고, 준비된 결과·재료식을 먼저 둔다.
+	for identity in available + unavailable:
+		var result_def: Dictionary = sim.catalog.units[identity]
+		var body := _catalog_row(list, identity)
+		var details := _catalog_header(body, identity, "%s  %s" % ["★".repeat(int(result_def.tier)), L.unit_name(str(identity))])
 		_unit_summary(details, result_def)
 		_unit_base_stats(details, result_def)
-		var footer := HBoxContainer.new()
-		footer.add_theme_constant_override("separation", 16)
-		body.add_child(footer)
-		var material_names: Array[String] = []
-		for id in recipe.ingredients:
-			var owned := 0
-			for unit in sim.units:
-				if unit.kind == id:
-					owned += 1
-			material_names.append("%s %d/%d" % [L.unit_name(str(id)), owned, recipe.ingredients[id]])
-		var materials := _catalog_text(body, " + ".join(material_names), 24, PALE)
-		materials.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		body.move_child(footer, body.get_child_count() - 1)
-		var track := _button(footer, L.text("recipes.tracking.stop") if recipe_tracking.is_tracked(recipe.result) else L.text("recipes.tracking.start"), Rect2(0, 0, 250, 100), func(): _toggle_recipe_tracking(str(recipe.result)), false, "track_" + recipe.result)
+		var track := _button(body, L.text("recipes.tracking.stop") if recipe_tracking.is_tracked(identity) else L.text("recipes.tracking.start"), Rect2(0, 0, 250, 100), func(): _toggle_recipe_tracking(str(identity)), false, "track_" + identity)
 		track.custom_minimum_size = Vector2(250, 100)
 		track.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var button := _button(footer, L.text("recipes.merge.button"), Rect2(0, 0, 120, 100), func():
-			var response: Dictionary = sim.combine(recipe.id, _recipe_anchor(recipe))
-			if response.ok:
-				selected = int(response.unit_id)
-			_transaction(response, true), true, "combine_" + recipe.id)
-		button.custom_minimum_size = Vector2(120, 100)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		button.disabled = not recipe in available or mode != "battle" or sim.result != "active"
+		var variants: Array = groups[identity].duplicate()
+		variants.sort_custom(func(a, b): return ready.has(a.id) and not ready.has(b.id))
+		for recipe in variants:
+			_recipe_variant(body, recipe, ready.has(recipe.id))
 	if list.get_child_count() == 0:
 		_catalog_text(list, L.text("catalog.filter.empty"))
+
+func _recipe_variant(body: VBoxContainer, recipe: Dictionary, ready: bool) -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 16)
+	body.add_child(row)
+	var material_names: Array[String] = []
+	for identity in recipe.ingredients:
+		var owned := 0
+		for unit in sim.units:
+			if unit.kind == identity: owned += 1
+		material_names.append("%s %d/%d" % [L.unit_name(str(identity)), owned, recipe.ingredients[identity]])
+	var materials := _catalog_text(row, " + ".join(material_names), 24, PALE if ready else MUTED)
+	materials.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var button := _button(row, L.text("recipes.merge.button"), Rect2(0, 0, 138, 100), func():
+		var response: Dictionary = sim.combine(recipe.id, _recipe_anchor(recipe))
+		if response.ok: selected = int(response.unit_id)
+		_transaction(response, true), true, "combine_" + recipe.id)
+	button.custom_minimum_size = Vector2(138, 100)
+	button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	button.disabled = not ready or mode != "battle" or sim.result != "active"
 
 func _codex_panel(panel: Control) -> void:
 	var units_tab := codex_tab == "units"
@@ -1304,7 +1344,7 @@ func _result_panel(panel: Control) -> void:
 	_label(panel, L.text("battle.wave.reached") % sim.wave, Vector2(64, 344), 560, 26, PALE)
 	var tip := L.text("result.guidance.next_expedition")
 	if sim.result == "defeat":
-		tip = L.text("battle.menu.tip.wait_then_upgrade") if sim.enemies.size() >= sim.enemy_limit() else L.text("battle.menu.tip.pause_reposition")
+		tip = L.text("battle.menu.tip.wait_then_upgrade") if sim.enemies.size() > sim.enemy_limit() else L.text("battle.menu.tip.pause_reposition")
 	_diamond_text(panel, L.text("progression.result.reward") % store.run_diamond_reward(sim) + "\n" + tip, Rect2(64, 403, 535, 95), 20, MUTED)
 	_button(panel, L.text("menu.main.open"), Rect2(62, 523, 526, 100), _show_menu, true, "result_menu")
 
@@ -1399,7 +1439,7 @@ func _process(_delta: float) -> void:
 
 func _observe_result() -> void:
 	if mode == "battle":
-		audio.observe_battle(sim.run_id, sim.lives, sim.result)
+		audio.observe_battle(sim.run_id, sim.result)
 	if mode == "battle" and sim.result != "active":
 		if not ended_saved and wall_time >= save_retry_time:
 			ended_saved = _save()

@@ -22,7 +22,6 @@ const ATTACK_GAP := 0.16
 const FAMILY_GAP := 0.32
 const HAPTIC_STRENGTH := 0.45
 const HAPTIC_ENABLE_MS := 100
-const HAPTIC_LIFE_MS := 35
 const HAPTIC_VICTORY_MS := 320
 
 var music: AudioStreamPlayer
@@ -40,9 +39,7 @@ var foreground := true
 var current_track := ""
 var ui_play_serial := 0
 var tracked_run := ""
-var last_lives := 20
 var last_result := "active"
-var last_life_pulse := -1.0
 
 func _ready() -> void:
 	sound_rng.randomize()
@@ -155,24 +152,18 @@ func set_haptics(enabled: bool) -> void:
 	if enabled and not was_enabled:
 		_pulse(HAPTIC_ENABLE_MS)
 
-func reset_battle(run: String, lives: int, result: String) -> void:
+func reset_battle(run: String, result: String) -> void:
 	tracked_run = run
-	last_lives = lives
 	last_result = result
 	next_attack = clock
 	next_family.clear()
-	last_life_pulse = -1.0
 
-func observe_battle(run: String, lives: int, result: String) -> void:
+func observe_battle(run: String, result: String) -> void:
 	if run != tracked_run:
-		reset_battle(run, lives, result)
+		reset_battle(run, result)
 		return
-	if lives < last_lives and clock - last_life_pulse >= 0.15:
-		_pulse(HAPTIC_LIFE_MS)
-		last_life_pulse = clock
 	if result == "victory" and last_result == "active":
 		_pulse(HAPTIC_VICTORY_MS)
-	last_lives = lives
 	last_result = result
 
 func _pulse(duration_ms: int) -> void:
