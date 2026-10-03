@@ -62,6 +62,13 @@ jobs:
         run: |
           CHROMIUM_PATH="$(node -e 'process.stdout.write(require("./tools/web/node_modules/playwright").chromium.executablePath())')" \
             node tools/web/browser-qa.cjs --base-url http://127.0.0.1:4173/ --output artifacts/web-qa
+      - name: Check repeated gameplay and WebAudio lifetime
+        timeout-minutes: 6
+        run: |
+          node tools/web/memory-soak.cjs --self-test
+          CHROMIUM_PATH="$(node -e 'process.stdout.write(require("./tools/web/node_modules/playwright").chromium.executablePath())')" \
+            node tools/web/memory-soak.cjs --base-url http://127.0.0.1:4173/ --output artifacts/web-memory-soak \
+              --allow-release --cycles 3 --warmup-cycles 0 --battle-seconds 20 --endurance-seconds 60
       - name: Stop the local preview server
         if: always()
         run: if [ -f artifacts/web-server.pid ]; then kill "$(cat artifacts/web-server.pid)" 2>/dev/null || true; fi
@@ -72,6 +79,7 @@ jobs:
           name: web-preview-qa
           path: |
             artifacts/web-qa/
+            artifacts/web-memory-soak/
             artifacts/logs/*.log
             artifacts/web-server.log
           if-no-files-found: ignore

@@ -33,6 +33,8 @@ var toast_label: Label
 var toast_until := 0.0
 var wall_time := 0.0
 var refresh_time := 0.0
+const SAVE_RETRY_SECONDS := 2.0
+var save_retry_time := 0.0
 var save_time := 0.0
 var dirty_time := -1.0
 var ended_saved := false
@@ -44,6 +46,8 @@ var enemy_filter := "all"
 var visual_seed := false
 var android_qa := false
 var qa_elapsed := 0.0
+var qa_max_frame_msec := 0.0
+var qa_frames_over_50_msec := 0
 var web_qa := false
 var qa_session := str(Time.get_unix_time_from_system()) + "-" + str(Time.get_ticks_usec())
 
@@ -387,8 +391,11 @@ func _save() -> bool:
 		return true
 	if mode == "battle":
 		if not store.save_run(sim):
+			# 저장 실패를 매 프레임 반복하지 않는다. 사용자 저장 요청은 즉시 시도한다.
+			save_retry_time = wall_time + SAVE_RETRY_SECONDS
 			_toast(store.last_error)
 			return false
+		save_retry_time = 0.0
 		save_time = wall_time
 		dirty_time = -1.0
 	return true
@@ -573,14 +580,14 @@ func _recipes_panel(panel: Control) -> void:
 		button.disabled = target < 0 or mode != "battle" or sim.result != "active"
 
 func _codex_panel(panel: Control) -> void:
-	_button(panel, "용병 %d" % sim.catalog.units.size(), Rect2(20, 70, 285, 49), func(): codex_tab = "units"; _open_panel("codex", true), codex_tab == "units")
-	_button(panel, "적 %d" % sim.catalog.enemies.size(), Rect2(322, 70, 306, 49), func(): codex_tab = "enemies"; _open_panel("codex", true), codex_tab == "enemies")
+	_button(panel, "용병 %d" % sim.catalog.units.size(), Rect2(20, 70, 285, 49), func(): codex_tab = "units"; _open_panel("codex", true), codex_tab == "units", "codex_units")
+	_button(panel, "적 %d" % sim.catalog.enemies.size(), Rect2(322, 70, 306, 49), func(): codex_tab = "enemies"; _open_panel("codex", true), codex_tab == "enemies", "codex_enemies")
 	var top := 133.0
 	if codex_tab == "enemies":
 		var filters := ["all", "normal", "boss", "special"]
 		var names := ["전체", "일반", "보스", "특수"]
 		for index in range(4):
-			_button(panel, names[index], Rect2(20 + index * 154, 130, 145, 43), func(): enemy_filter = filters[index]; _open_panel("codex", true), enemy_filter == filters[index])
+			_button(panel, names[index], Rect2(20 + index * 154, 130, 145, 43), func(): enemy_filter = filters[index]; _open_panel("codex", true), enemy_filter == filters[index], "codex_filter_" + filters[index])
 		top = 187
 	var list := _scroll(panel, top)
 	var definitions: Dictionary = sim.catalog.units if codex_tab == "units" else sim.catalog.enemies
@@ -692,7 +699,7 @@ func _result_panel(panel: Control) -> void:
 		tip = "적을 묶는 동안 화력을 높이세요. 조합과 성급 강화로 밀린 적을 처치할 수 있습니다." if sim.enemies.size() >= sim.enemy_limit() else "일시정지 중 조합과 재배치를 활용하세요. 짧은 사거리 용병은 길 가장자리가 유리합니다."
 	_paragraph(panel, tip, Rect2(64, 403, 535, 95), 20, MUTED)
 	_button(panel, "메인 메뉴", Rect2(62, 523, 526, 80), func():
-		if _save(): _show_menu(), true)
+		if _save(): _show_menu(), true, "result_menu")
 
 func _toast(message: String) -> void:
 	if not is_instance_valid(screen):
@@ -724,9 +731,13 @@ func _process(delta: float) -> void:
 			sim.advance(delta * sim.speed)
 		if sim.wave != old_wave:
 			_mark_dirty()
-		if sim.result == "active" and (wall_time - save_time >= 10.0 or (dirty_time > 0 and wall_time >= dirty_time)):
+		if sim.result == "active" and wall_time >= save_retry_time and (wall_time - save_time >= 10.0 or (dirty_time > 0 and wall_time >= dirty_time)):
 			_save()
 	_observe_result()
+	if android_qa or web_qa:
+		qa_max_frame_msec = maxf(qa_max_frame_msec, delta * 1000.0)
+		if delta > 0.05:
+			qa_frames_over_50_msec += 1
 	qa_elapsed += delta
 	if (android_qa or web_qa) and qa_elapsed >= 0.2:
 		qa_elapsed = 0.0
@@ -743,7 +754,7 @@ func _observe_result() -> void:
 	if mode == "battle":
 		audio.observe_battle(sim.run_id, sim.lives, sim.result)
 	if mode == "battle" and sim.result != "active":
-		if not ended_saved:
+		if not ended_saved and wall_time >= save_retry_time:
 			ended_saved = _save()
 		if panel_name != "result":
 			_open_panel("result", true)
@@ -761,6 +772,25 @@ func _write_qa_state() -> void:
 		"save_profile": store.profile.duplicate(true) if mode == "menu" else {},
 		"android_qa": android_qa, "session_id": qa_session, "process_id": OS.get_process_id(), "frame_size": [get_viewport_rect().size.x, get_viewport_rect().size.y],
 		"art_ready": visuals.ready_count() == 87 and visuals.portraits.size() == 87}
+	# 해제되지 않은 개체와 Wasm의 회수되지 않는 최대 용량을 구분하는 관측값이다.
+	# release에서 지원되지 않는 모니터의 0은 측정 도구가 별도로 표시한다.
+	state.qa_ticks_msec = Time.get_ticks_msec()
+	state.qa_process_frames = Engine.get_process_frames()
+	state.qa_max_frame_msec = qa_max_frame_msec
+	state.qa_frames_over_50_msec = qa_frames_over_50_msec
+	state.qa_debug_build = OS.is_debug_build()
+	state.codex_tab = codex_tab
+	state.enemy_filter = enemy_filter
+	state.memory = {
+		"static_bytes": int(Performance.get_monitor(Performance.MEMORY_STATIC)),
+		"static_peak_bytes": int(Performance.get_monitor(Performance.MEMORY_STATIC_MAX)),
+		"object_count": int(Performance.get_monitor(Performance.OBJECT_COUNT)),
+		"node_count": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
+		"orphan_node_count": int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)),
+		"resource_count": int(Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT)),
+		"video_bytes": int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)),
+		"texture_bytes": int(Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED)),
+		"buffer_bytes": int(Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED))}
 	state.buttons = {}
 	state.cell_centers = []
 	for node in find_children("*", "Button", true, false):

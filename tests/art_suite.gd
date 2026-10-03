@@ -9,7 +9,11 @@ static func run_all() -> Dictionary:
 		failed.append("모든 87종의 개별 원화 텍스처가 필요합니다")
 	for family in visuals.families:
 		var resource: Dictionary = visuals.families[family]
-		var dimensions: Vector2 = resource.texture.get_size()
+		var texture: Texture2D = visuals.family_texture(family)
+		if texture == null:
+			failed.append("%s의 아틀라스를 읽을 수 없습니다" % family)
+			continue
+		var dimensions: Vector2 = texture.get_size()
 		var rows: Dictionary = resource.layout.frame_layout.rows
 		for state in ["idle", "walk", "attack"]:
 			if not rows.has(state) or rows[state].is_empty():
