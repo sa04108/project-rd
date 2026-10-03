@@ -1,85 +1,52 @@
-# Working Principles
+# Godot 게임 개발 지침
 
-These instructions apply repository-wide.
+저장소 전체에 적용한다. 최신 사용자 지시를 우선하며, 변경 의도가 명확하면 승인된 범위에서 완료까지 진행한다. 조사·리뷰·설계만 요청받은 경우에는 파일을 수정하지 않는다.
 
-## Request Handling
+## 작업 시작과 문서
 
-- Understand the user's goal and relevant code flow before acting.
-- Write new or modified code comments and docstrings in Korean.
-- Stay read-only for investigation, review, or design-only requests. Ask and wait if implementation intent is unclear; when changes are clearly requested, proceed within scope using reasonable defaults for minor details.
+- `git status --short --branch`, `git worktree list`, 최근 커밋을 확인하고 기존 사용자 변경을 보존한다.
+- [게임 규칙](docs/GAME_RULES.md), [개발·검증](docs/DEVELOPMENT.md), [리소스 제작](docs/RESOURCE_GUIDE.md) 중 작업에 필요한 부분만 읽는다. 실제 데이터·스크립트와 문서가 다르면 최신 요구와 근거를 확인해 함께 정리한다.
+- 여러 단계의 작업은 범위, 보존할 계약, 완료 조건, 검증 방법과 의존 순서를 먼저 정한다. 작은 수정에 별도 계획 문서를 만들지 않는다.
+- 코드 주석·docstring과 유지보수 문서는 한국어로 쓴다. 식별자·명령·외부 출처는 원문을 유지한다.
+- 결정 대기·구현 미완료·미검증 항목은 [REMAINING](docs/REMAINING.md)에만 기록한다. 해결하면 해당 항목을 제거하고 필요한 규칙·절차를 상시 안내서에 반영한다.
+- 완료 보고서·단계별 진척 문서를 새로 쌓지 않는다. 실행 로그·캡처·빌드는 무시되는 `artifacts/`, 변경 이력은 Git에 남긴다. 리소스 출처·라이선스·실제 전송 프롬프트·테스트 fixture의 근거는 보존한다.
 
-## Execution and Context
+## Godot 구조와 구현
 
-- Optimize total cost to a verified result, including delegation, retries, integration, and repair. Do not weaken correctness, security, compatibility, or required verification to reduce tokens.
-- For nontrivial work, establish scope, invariants, acceptance checks, and dependency order before editing. Keep planning proportional to uncertainty and failure impact; small tasks do not require separate planning documents.
-- Use deterministic tools for mechanical edits and generated files, and review their output. Read relevant code and documentation progressively. Save verbose logs and inspect summaries, failures, and necessary context without hiding errors.
+- `.godot-version`의 standard GDScript 엔진과 동일 버전 export template을 사용한다. 시스템 `godot`, 다른 렌더러, C# 또는 엔진 업그레이드로 임의 전환하지 않는다. 현재 렌더러는 Compatibility다.
+- 규칙·거래·게임시간·전투 RNG는 `game/simulation.gd`, 정의는 `data/`와 `catalog.gd`, 저장은 `save_store.gd`가 소유한다. UI·애니메이션·음향은 상태/이벤트를 관측하고 전투 판정이나 저장 스냅샷을 바꾸지 않는다.
+- 타입을 명확히 하는 GDScript를 사용한다. `Variant`/Dictionary나 동적 호출 결과의 타입을 추론할 수 없는 곳에는 명시적으로 타입을 지정하고 외부 입력·저장 데이터를 경계에서 검증한다.
+- 게임시간과 실제 시간을 구분한다. 배속·정지는 시뮬레이션의 기존 시간 계약을 따르며, UI 반응·자동저장·음향 재생 제한에 배속을 무조건 곱하지 않는다. `_process`, 물리 갱신, 타이머에서 같은 게임 상태를 중복 진행하지 않는다.
+- 노드·시그널·비동기 작업의 소유자와 종료 경로를 명확히 한다. 장면 재구성·새 게임·복원 시 중복 연결을 방지하고, `await` 후 노드 유효성을 확인하며, 해제된 노드를 참조하지 않는다. 반복 진입으로 보이스·캐시·타이머가 누적되지 않게 한다.
+- 공유 `Resource`를 수정할 때 다른 사용처에 영향을 주는지 확인한다. 개체별 변경은 필요한 범위만 복제한다. 매 프레임 파일 I/O·리소스 로딩을 피하고, 캐시의 해제 시점과 최악의 메모리 사용량을 함께 고려한다.
+- 논리 좌표와 화면 좌표를 분리한다. `Control`의 실제 영역·입력 차단과 터치/마우스 흐름을 사용하며, 작은 화면·레터박스·팝업 위 드래그를 확인한다. UI 문구·수치는 이미지에 굽지 않는다.
+- 플레이 정의 ID와 저장 호환성을 유지한다. 거래는 검증 후 원자적으로 반영하고, 손상 파일은 보존한다. 표시 개선을 이유로 전투 RNG·보상·승패 순서를 변경하지 않는다.
+- `res://`는 배포 리소스, `user://`는 사용자 저장에 사용한다. 리소스 경로·`.uid`·`.import` 참조를 보존하고 이동/삭제 시 호출부와 내보내기를 확인한다. `.godot/` 캐시나 로컬 자격 증명은 커밋하지 않는다.
 
-## Subagents
+## 루트와 서브에이전트
 
-- These instructions explicitly request delegation when either routing condition below applies. Apply them once after initial scoping, before detailed investigation or implementation; reassess only when scope or dependencies change. Do not perform an open-ended cost comparison.
-- If there are multiple independent investigation questions and useful work remains for the root, spawn one worker for a bounded question before investigating it yourself.
-- If an implementation part has agreed contracts, owned paths, and acceptance checks, and the root can progress independently, assign that part to a worker before implementing it yourself.
-- Otherwise work directly, especially for small, sequential, or tightly coupled tasks. Use deterministic tools for mechanical work. Do not delegate work already completed by the root.
-- Use the worker preset `model: gpt-6-luna`, `reasoning_effort: medium`, and `fork_turns: none` through supported runtime controls. Do not reselect settings for every task or assume prose changes the active model. If the preset is unavailable, report the limitation and continue directly where safe; never silently substitute a model or weaken required review.
-- Send a compact task packet: objective, exact snapshot including relevant uncommitted changes, owned paths/symbols, contracts and evidence, exclusions, acceptance criteria, and validation commands. Reuse workers for related follow-ups and do not repeat reliable exploration.
-- The root owns architecture, data integrity, security, compatibility, concurrency, cross-cutting decisions, and integration. Workers implement approved bounded parts and escalate decision changes, contract conflicts, or repeated failures without new evidence instead of guessing or looping.
-- Avoid parallel edits to shared files or coupled code. Give shared contracts, migrations, dependency locks, and generated outputs one owner. Start with one worker; allow at most two concurrent subagents unless the user requests more. Subagents must not spawn further agents unless explicitly authorized by the root.
-- Use an independent, focused review for high-risk changes with model and reasoning settings appropriate to the risk; the routine worker preset does not govern that review. Do not require another agent for every edit.
-- When a routing condition applies, report the worker assignment or one concrete blocker in a single sentence. Keep a short checkpoint only when needed for handoff, interruption, or compaction; record the snapshot, decisions, changed paths, verification, and next action, not a running transcript.
+- 서브에이전트의 모델·추론 강도를 특정 값으로 고정하지 않는다. 작업 복잡도, 위험, 필요한 능력과 사용 가능한 실행 옵션에 맞춰 선택하며, 실제 사용 모델이나 비용을 근거 없이 추정하지 않는다.
+- 독립적인 조사 질문이 여러 개 있거나 계약·소유 파일·완료 조건을 분리할 수 있는 구현은 위임한다. 작고 순차적인 작업이나 루트가 이미 끝낸 작업은 중복 위임하지 않는다.
+- **이미지·스프라이트 프레임·음악·효과음 등 게임 리소스의 실제 생성과 편집, 최종 산출물 제작은 루트가 직접 수행한다.** 생성 도구 호출이나 리소스 제작 실행을 서브에이전트에 우회 위임하지 않는다.
+- 서브에이전트는 레퍼런스 조사, 프롬프트 초안, 제작 도구 코드, 게임 코드, 테스트·검토를 담당할 수 있다. 리소스 생성 모델과 에이전트의 추론 모델은 별개이며, 생성 도구가 노출하지 않는 모델 ID/등급을 주장하지 않는다.
+- 루트는 구조·저장/데이터 계약·공유 인터페이스·리소스 생성·통합·Git 작업을 소유한다. 작업자는 계약 충돌이나 반복 실패를 보고하고 독단적으로 범위를 넓히지 않는다.
+- 위임 시 목표, 기준 커밋과 관련 미커밋 변경, 소유 파일, 계약, 제외 범위, 완료 조건, 검증 명령을 전달한다. 공유 파일의 동시 편집을 피하고, 빌드·가져오기처럼 같은 출력을 쓰는 작업은 직렬화한다.
+- 기본적으로 작업자 1명부터 시작하고 동시 작업자는 2명 이내로 둔다. 추가 작업자와 재위임은 루트가 필요성을 판단해 명시적으로 허용한다. 관련 후속 작업은 기존 작업자를 재사용한다.
+- 저장·경제·종료 경합처럼 위험한 변경은 독립 검토를 활용한다. 루트가 통합 diff와 검증 근거를 직접 확인하며, 위임한 범위는 사용자에게 짧게 알린다.
 
-## Verification and Reporting
+## 검증과 완료 조건
 
-- Define required checks before implementation. Run focused checks while iterating, then required integration/regression gates on the final integrated snapshot. Do not weaken tests, assertions, fixtures, or resource limits merely to obtain a pass.
-- The root reviews the integrated diff and critical evidence, not just worker summaries. Reuse passing checks only while their tested inputs and relevant environment remain valid; rerun invalidated checks. Record the command, tested snapshot, exit status, and limitations concisely. Serialize builds and package checks that share output directories.
-- Keep tool output and intermediate updates concise. Completion reports contain only changes/findings, affected files, material decisions, actual verification, and unresolved risks. Never report unrun checks as passed. When evaluating delegation, distinguish requested from observed model/effort and include usage across the root, workers, and retries when available; otherwise mark it unknown. Do not infer savings from diff size or a successful spawn.
+- 게임 코드·데이터·리소스를 변경하면 `bash scripts/verify.sh`를 실행한다. import와 실행 검사만으로 게임 계약을 검증했다고 하지 않는다. 의미 있는 상태 단언과 제한된 대기로 바뀐 동작을 확인한다.
+- 화면·입력 변경에는 `VERIFY_VISUAL=1 bash scripts/verify.sh`와 출력 이미지 직접 확인을 추가한다. 리소스, Web, Android, 저장 호환성은 [개발·검증 안내](docs/DEVELOPMENT.md)의 해당 검사도 적용한다.
+- 문서만 바꾸면 링크·명령·참조 경로와 현행 코드의 일치를 검사한다. 빌드/검사 경로나 설정까지 바꿨다면 영향을 받는 실제 명령도 실행한다.
+- 기존 검사를 우선 사용한다. 누락된 계약이나 재현한 회귀에만 검사를 추가하고, 구현을 그대로 복제하는 테스트나 문구 변경용 테스트는 만들지 않는다. 통과를 위해 단언·제한·fixture를 약화하지 않는다.
+- 종료 코드와 로그의 엔진/스크립트 오류·시간 초과를 함께 확인한다. 통과한 검사는 관련 입력이 바뀌거나 새 우려가 생겼을 때만 반복한다.
+- 자동 검사, 이미지 도구를 통한 화면 확인, 실제 사람 플레이, 물리 기기 검증을 구분한다. 실행하지 않은 검사나 플랫폼은 통과로 보고하지 않는다. 봇 성공률은 사람의 첫 클리어율이 아니다.
+- 완료 보고에는 변경 결과, 검증 명령·결과, 확인이 남은 한계만 간결하게 적는다. 사용자가 이미 승인한 범위는 중간 확인을 반복하지 않고 마무리한다.
 
-## Git Workflow
+## Git과 클라우드 작업
 
-- Explicit user instructions about branches, commits, or pushes override these workflow defaults. The root agent manages branch/worktree setup, staging, commits, and pushes; subagents perform these operations only when explicitly delegated.
-- Before editing, inspect `git status --short --branch`, `git worktree list`, and recent commits. Preserve pre-existing changes, including staged changes; never overwrite them or include them in your commits.
-- Before the first edit, create a descriptive task branch if on `main`, an unrelated branch, or a detached HEAD. Use a separate branch and worktree for concurrent editing tasks or when the existing checkout must be preserved.
-- Base new independent tasks on freshly fetched remote `main`; if unavailable, use local `main` and report the limitation. Related subagent work must use the root's agreed task snapshot, including required parent changes.
-- Commit each complete unit with related tests and documentation only after required verification passes. If verification fails or is blocked, do not commit; report the cause.
-- Stage only task-owned changes by explicit path or hunk, and inspect the entire staged diff before committing.
-- After committing, push when the remote and authentication are available, setting upstream for new branches. If pushing is unavailable or fails, preserve the commit and report why.
-
-# Development in Codex Cloud
-
-Each cloud task is already isolated. Use the existing checkout; do not create a
-Git worktree unless the user explicitly requests one.
-
-## Godot verification
-
-- Use the standard GDScript Godot release pinned in `.godot-version`; do not
-  upgrade implicitly. This repository initially had no Godot project or version
-  metadata; the user explicitly selected 4.7.2-stable for the current project.
-  Keep engine and export templates on the same pinned release. C# requires a separate
-  .NET engine and SDK setup; the standard binary cannot validate C# games.
-- The engine is `.godot-tools/<version>/godot`, not the system `godot` (which
-  currently has a different version). `bash scripts/cloud-install.sh` installs
-  and verifies it, plus rootless Xvfb on the Debian 13 cloud base.
-- Locate `project.godot` before verification. The default project directory is
-  the repository root; set `GODOT_PROJECT_PATH` for a nested project. Keep its
-  automation runner under that project's `res://tests/`.
-- Run `bash scripts/verify.sh` after Godot-related changes. It runs import,
-  gameplay assertions, then the main scene for 300 engine iterations.
-- The automation runner requires the main scene's `run_automation_tests()` hook
-  to return true, or replace that hook with specific gameplay assertions in the
-  runner. A missing hook fails rather than claiming gameplay coverage.
-- For gameplay changes, exercise the changed contract with state assertions and
-  bounded waits. Import and smoke checks do not replace gameplay assertions.
-- Check exit codes and `artifacts/logs/`. Engine/script errors and timeouts fail.
-- For visual changes, run `VERIFY_VISUAL=1 bash scripts/verify.sh`, then inspect
-  the PNG output with an image tool or approved comparison. Software rendering
-  uses Compatibility, which does not validate Forward+ specific effects.
-- Do not claim manual playtesting, actual game coverage, or visual inspection
-  unless performed. Report rendering as blocked if unavailable.
-- Reuse tests; add committed tests only for a missing contract.
-- `VERIFY_VISUAL=1 bash scripts/environment-self-test.sh` checks the environment
-  using a generated diagnostic fixture in ignored `.godot-tools/`. It tests
-  initial state, right-input physics movement, input release, expected-failure
-  exits, and optional rendering. It never validates the actual game.
-- Keep setup reproducible in the repository and the saved environment settings.
-  Do not assume live processes survive publication or restoration. No server or
-  continuously running editor is required for these finite CLI checks.
-- Report executed commands, results, artifact paths, and remaining limitations.
+- 사용자가 별도 지시하지 않으면 기존 클라우드 체크아웃을 사용한다. 이 환경은 작업별로 격리되므로 worktree를 추가하지 않는다.
+- 새 독립 작업은 갱신한 원격 `main`에서 목적에 맞는 브랜치를 만든다. 연속 작업은 필요한 선행 변경을 포함한 브랜치를 사용한다. 원격 갱신이 불가능하면 기준과 한계를 알린다.
+- 루트가 작업 소유 경로만 명시적으로 stage하고 전체 staged diff를 검토한다. 필요한 검증이 통과한 완결된 변경을 커밋하고, 원격/인증이 가능하면 작업 브랜치를 push한다. 기존 사용자 변경을 포함하지 않는다.
+- 세션의 실행 프로세스·임시 설치·절대 경로가 다음 환경에서도 유지된다고 가정하지 않는다. 저장소 스크립트와 문서에 재현 가능한 준비·검증 경로를 남긴다.
