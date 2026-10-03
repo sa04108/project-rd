@@ -240,7 +240,15 @@
     },
     "battle_background": {
       "status": "generated_unreviewed",
-      "path": "assets/art/backgrounds/battlefield.png"
+      "path": "assets/art/orthographic/battle-map.webp"
+    },
+    "battle_grass": {
+      "status": "generated_unreviewed",
+      "path": "assets/art/orthographic/meadow-grass.webp"
+    },
+    "battle_dirt": {
+      "status": "generated_unreviewed",
+      "path": "assets/art/orthographic/meadow-dirt.webp"
     }
   },
   "identity_policy": "distinct portraits cover 87 catalog entries; allies use individual art with whole-texture motion, enemies share seven animated family atlases with tint; tint is not unique art",

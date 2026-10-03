@@ -1,0 +1,13 @@
+Cinzel Decorative Bold
+
+출처: Google Fonts 공식 저장소
+https://github.com/google/fonts/blob/main/ofl/cinzeldecorative/CinzelDecorative-Bold.ttf
+
+라이선스: SIL Open Font License 1.1 (TitleSerif-LICENSE.txt)
+https://github.com/google/fonts/blob/main/ofl/cinzeldecorative/OFL.txt
+
+2026-10-03 내려받은 원본 폰트 바이트를 수정하지 않고 TitleSerif.ttf로 보관한다.
+SHA-256: e854e68a388aa50d742a4415c1ae5c17a617ef7956c95a70021d0a4a44f20518
+용량: 62,300바이트
+
+제목은 presentation/display_name에서 읽는다. 폰트·파일·저장 식별자는 게임 표시 이름과 독립적이다.

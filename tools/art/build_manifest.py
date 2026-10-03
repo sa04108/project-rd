@@ -137,7 +137,9 @@ def build_manifest() -> dict:
     environment_resources = {}
     for name, path in (
         ("menu_background", "assets/art/backgrounds/guild.png"),
-        ("battle_background", "assets/art/backgrounds/battlefield.png"),
+        ("battle_background", "assets/art/orthographic/battle-map.webp"),
+        ("battle_grass", "assets/art/orthographic/meadow-grass.webp"),
+        ("battle_dirt", "assets/art/orthographic/meadow-dirt.webp"),
     ):
         environment_resources[name] = {
             "status": "generated_unreviewed" if (ROOT / path).is_file() else "pending_generation",

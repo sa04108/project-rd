@@ -12,6 +12,7 @@ const BattleBoard = preload("res://game/battle_board.gd")
 const MENU_BACKGROUND = preload("res://assets/art/backgrounds/guild.png")
 const FONT = preload("res://assets/fonts/GuildSans.otf")
 const SYMBOL_FONT = preload("res://assets/fonts/GuildSymbols.ttf")
+const TITLE_FONT = preload("res://assets/fonts/TitleSerif.ttf")
 const GOLD := Color("dfbb6c")
 const INK := Color("2b241d")
 const PALE := Color("f2e5c7")
@@ -229,8 +230,18 @@ func _show_menu() -> void:
 	# 표시 이름은 프로젝트 설정 한 곳에서만 읽고 저장·리소스 식별자로 사용하지 않는다.
 	var display_name := str(ProjectSettings.get_setting("presentation/display_name"))
 	DisplayServer.window_set_title(display_name)
-	_panel(screen, Rect2(46, 98, 628, 118), INK, GOLD, "brass")
-	labels.menu_title = _label(screen, display_name, Vector2(65, 123), 590, 50, GOLD)
+	# 제목에만 장식 명조를 적용하고 배경 그림 위에는 패널을 두지 않는다.
+	var title_font := TITLE_FONT.duplicate() as FontFile
+	title_font.fallbacks = [theme.default_font]
+	title_font.allow_system_fallback = false
+	labels.menu_title = _label(screen, display_name, Vector2(36, 123), 648, 41, GOLD)
+	labels.menu_title.add_theme_font_override("font", title_font)
+	labels.menu_title.add_theme_color_override("font_outline_color", Color(0.07, 0.04, 0.02, 0.8))
+	labels.menu_title.add_theme_constant_override("outline_size", 2)
+	labels.menu_title.add_theme_color_override("font_shadow_color", Color(0.02, 0.02, 0.02, 0.7))
+	labels.menu_title.add_theme_constant_override("shadow_offset_x", 1)
+	labels.menu_title.add_theme_constant_override("shadow_offset_y", 3)
+	labels.menu_title.add_theme_constant_override("shadow_outline_size", 1)
 	labels.menu_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hud_button(screen, "새 게임", Rect2(126, 688, 468, 108), _request_new, "new_game", "", true)
 	var resume := _hud_button(screen, "이어하기", Rect2(126, 808, 468, 100), _resume, "continue")

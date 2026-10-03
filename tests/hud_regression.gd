@@ -2,6 +2,7 @@ extends SceneTree
 
 const UiSkin = preload("res://game/ui_skin.gd")
 const SaveStore = preload("res://game/save_store.gd")
+const TITLE_FONT = preload("res://assets/fonts/TitleSerif.ttf")
 
 var failures: Array[String] = []
 var checks := 0
@@ -21,10 +22,16 @@ func _run() -> void:
 	var display_name := str(ProjectSettings.get_setting("presentation/display_name"))
 	var application_id := str(ProjectSettings.get_setting("application/config/name"))
 	var user_directory := OS.get_user_data_dir()
-	ProjectSettings.set_setting("presentation/display_name", "표시 이름 검증")
+	var store_directory: String = game.store.directory
+	var profile_before: Dictionary = game.store.profile.duplicate(true)
+	var font_path := TITLE_FONT.resource_path
+	ProjectSettings.set_setting("presentation/display_name", "Echoes of the Realm")
 	game._show_menu()
-	_check(game.labels.menu_title.text == "표시 이름 검증" and game.labels.menu_footer.text == "© 2026 표시 이름 검증  ·  v0.4", "one display setting updates both title and copyright")
+	_check(game.labels.menu_title.text == "Echoes of the Realm" and game.labels.menu_footer.text == "© 2026 Echoes of the Realm  ·  v0.4", "one display setting updates both title and copyright")
 	_check(str(ProjectSettings.get_setting("application/config/name")) == application_id and OS.get_user_data_dir() == user_directory, "display-name changes preserve the application and save-directory identities")
+	_check(game.store.directory == store_directory and _same_snapshot(game.store.profile, profile_before), "renaming the title preserves the active save store and profile keys")
+	_check(TITLE_FONT.resource_path == font_path, "renaming the title preserves the neutral font-resource identity")
+	_check_menu()
 	ProjectSettings.set_setting("presentation/display_name", display_name)
 	game._show_menu()
 	game.visual_seed = true
@@ -126,7 +133,21 @@ func _check_menu() -> void:
 	var menu_labels: Array[Node] = game.screen.find_children("*", "Label", true, false)
 	_check(menu_labels.size() == 2, "menu contains only its title and copyright/version labels")
 	_check(game.labels.menu_title.text == display_name and game.labels.menu_title.position.y < 250, "menu title comes from the display setting and stays at the top")
+	_check(game.labels.menu_title.get_parent() == game.screen and game.screen.find_children("*", "Panel", true, false).is_empty(), "menu title sits directly over the background without a backing panel")
+	var title_font := game.labels.menu_title.get_theme_font("font") as FontFile
+	_check(game.labels.menu_title.has_theme_font_override("font") and title_font.get_font_name() == TITLE_FONT.get_font_name() and title_font.get_font_name() != game.theme.default_font.get_font_name(), "menu title uses its dedicated English display serif")
+	var latin_supported := true
+	var latin_characters := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+	for index in range(latin_characters.length()):
+		latin_supported = latin_supported and TITLE_FONT.has_char(latin_characters.unicode_at(index))
+	_check(latin_supported, "title font includes the English alphabet and digits for future display names")
+	_check(not title_font.allow_system_fallback and not title_font.fallbacks.is_empty(), "title keeps a bundled fallback without depending on installed system fonts")
+	var title_size: int = game.labels.menu_title.get_theme_font_size("font_size")
+	var title_width := title_font.get_string_size(display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, title_size).x
+	_check(title_width + 8 <= game.labels.menu_title.size.x, "title text and its subtle outline fit inside the title area")
+	_check(Rect2(0, 0, 720, 250).encloses(game.labels.menu_title.get_global_rect()), "display title remains within the top of the portrait viewport")
 	_check(game.labels.menu_footer.text == "© 2026 %s  ·  v0.4" % display_name and game.labels.menu_footer.position.y >= 1184, "menu bottom contains only copyright and the preserved version")
+	_check(not game.labels.menu_footer.has_theme_font_override("font"), "title styling leaves the footer font unchanged")
 	var expected := {"new_game": "새 게임", "continue": "이어하기", "codex": "도감", "settings": "설정", "guide": "게임 가이드"}
 	_check(game.screen.find_children("*", "Button", true, false).size() == expected.size(), "menu retains exactly five functional actions")
 	var rectangles: Array[Rect2] = []
@@ -136,6 +157,7 @@ func _check_menu() -> void:
 		if button == null:
 			continue
 		_check(button.text == expected[action], "menu keeps the functional Korean label: " + action)
+		_check(not button.has_theme_font_override("font"), "title styling leaves the menu action font unchanged: " + action)
 		var style: StyleBoxTexture = button.get_theme_stylebox("normal")
 		_check(style.texture == UiSkin.button_style("brass_accent" if action == "new_game" else "brass").texture, "menu action shares the battle brass/wood skin: " + action)
 		var rect := button.get_global_rect()

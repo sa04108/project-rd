@@ -46,7 +46,7 @@ static func _test_initial_state_and_coordinates() -> String:
     if not sim.cell_position(14).is_equal_approx(Vector2(2.5, 2.5)):
         return "cell 14 must map to the center of row 3, column 3"
     var vertices: Array[Vector2] = [Vector2(-0.5, -0.5), Vector2(-0.5, 6.5), Vector2(6.5, 6.5), Vector2(6.5, -0.5), Vector2(-0.5, -0.5)]
-    if SIMULATION.PATH_SIDE != 7.0 or SIMULATION.PATH_LENGTH != 28.0:
+    if SIMULATION.PATH_SIDE != 7.0 or SIMULATION.PATH_LENGTH != 28.0 or float(sim.catalog.rules.F.path_length) != SIMULATION.PATH_LENGTH:
         return "the one-cell path centerline must have four seven-cell sides"
     for index in range(vertices.size()):
         if not sim.path_position(index * SIMULATION.PATH_SIDE).is_equal_approx(vertices[index]):

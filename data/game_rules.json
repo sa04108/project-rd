@@ -3,7 +3,7 @@
   "F": {
     "board_cols": 6,
     "board_rows": 6,
-    "path_length": 26.0,
+    "path_length": 28.0,
     "wave_seconds": 30.0,
     "max_wave": 100,
     "start_lives": 20,
