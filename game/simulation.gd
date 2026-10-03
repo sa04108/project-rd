@@ -206,41 +206,6 @@ func combine(recipe_id: String, anchor_id: int = -1) -> Dictionary:
 	revision += 1
 	return {"ok": true, "unit_id": created.id, "reason": L.text("recipes.merge.success") % L.unit_name(str(recipe.result))}
 
-func synthesis_materials(anchor_id: int) -> Array:
-	var anchor := unit_by_id(anchor_id)
-	if anchor.is_empty() or int(catalog.units[anchor.kind].tier) != int(catalog.rules.D.synthesis_tier): return []
-	var chosen: Array = [anchor]
-	var candidates := units.duplicate()
-	candidates.sort_custom(func(a, b): return a.cell < b.cell if a.cell != b.cell else a.id < b.id)
-	for unit in candidates:
-		if unit.kind == anchor.kind and int(unit.id) != anchor_id:
-			chosen.append(unit)
-			if chosen.size() == 3: return chosen
-	return []
-
-func synthesis_pool(kind: String) -> Array:
-	if not catalog.units.has(kind) or int(catalog.units[kind].tier) != int(catalog.rules.D.synthesis_tier): return []
-	var pool: Array = catalog.pool(int(catalog.units[kind].tier))
-	pool.erase(kind)
-	return pool
-
-func synthesize(anchor_id: int) -> Dictionary:
-	if not _allowed(): return _fail("error.game.already_ended")
-	var anchor := unit_by_id(anchor_id)
-	if anchor.is_empty(): return _fail("error.unit.none_selected")
-	if int(catalog.units[anchor.kind].tier) != int(catalog.rules.D.synthesis_tier): return _fail("unit.synthesis.one_star_only")
-	var materials := synthesis_materials(anchor_id)
-	if materials.is_empty(): return _fail("unit.synthesis.materials_missing")
-	var pool := synthesis_pool(str(anchor.kind))
-	if pool.is_empty(): return _fail("unit.synthesis.unavailable")
-	# 전부 검증한 뒤 난수를 한 번만 사용하고 선택한 칸에 결과를 생성한다.
-	var kind: String = pool[rng.randi_range(0, pool.size() - 1)]
-	var target := int(anchor.cell)
-	for material in materials: units.erase(material)
-	var created := add_unit(kind, target)
-	revision += 1
-	return {"ok": true, "unit_id": created.id, "reason": L.text("unit.synthesis.success") % L.unit_name(kind)}
-
 func sale_price(tier: int = 1) -> int:
 	var multipliers: Dictionary = catalog.rules.T.sale_summon_multipliers
 	if not multipliers.has(str(tier)): return -1

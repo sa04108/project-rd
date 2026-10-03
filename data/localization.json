@@ -1170,10 +1170,10 @@
     "ja": "黄金のトーテムのオーラで周囲の傭兵の攻撃力を高める。"
   },
   "unit.u14.name": {
-    "en": "Golden Goblin",
-    "ko": "황금 고블린",
-    "zh_CN": "黄金哥布林",
-    "ja": "黄金のゴブリン"
+    "en": "Goblin Elder",
+    "ko": "고블린 장로",
+    "zh_CN": "哥布林长老",
+    "ja": "ゴブリンの長老"
   },
   "unit.u15.description": {
     "en": "Slams a wide area with a lava hammer.",
@@ -1727,36 +1727,6 @@
     "zh_CN": "%d金币",
     "ja": "%dゴールド"
   },
-  "unit.synthesis.button": {
-    "en": "Fuse",
-    "ko": "합성",
-    "zh_CN": "融合",
-    "ja": "融合"
-  },
-  "unit.synthesis.hint": {
-    "en": "Replace 3 identical 1-star mercenaries with a different random 1-star mercenary.",
-    "ko": "같은 1성 용병 3명을 다른 무작위 1성 용병 1명으로 교체합니다.",
-    "zh_CN": "将3名相同的1星佣兵替换为1名其他随机1星佣兵。",
-    "ja": "同じ星1傭兵3体を、別の星1傭兵1体にランダムで交換します。"
-  },
-  "unit.synthesis.materials_missing": {
-    "en": "Requires 3 identical mercenaries.",
-    "ko": "같은 용병 3명이 필요합니다.",
-    "zh_CN": "需要3名相同的佣兵。",
-    "ja": "同じ傭兵が3体必要です。"
-  },
-  "unit.synthesis.unavailable": {
-    "en": "No other mercenary is available in this tier.",
-    "ko": "같은 성급의 다른 용병이 없습니다.",
-    "zh_CN": "此星级没有其他佣兵。",
-    "ja": "同じ星ランクの別の傭兵がいません。"
-  },
-  "unit.synthesis.success": {
-    "en": "Fused into %s.",
-    "ko": "%s 합성 완료",
-    "zh_CN": "融合获得%s。",
-    "ja": "%sに融合しました。"
-  },
   "unit.sale.button": {
     "en": "Sell",
     "ko": "판매",
@@ -1774,12 +1744,6 @@
     "ko": "용병을 판매했습니다.",
     "zh_CN": "佣兵已出售。",
     "ja": "傭兵を売却しました。"
-  },
-  "unit.synthesis.one_star_only": {
-    "en": "Only 1-star mercenaries can be fused.",
-    "ko": "1성 용병만 합성할 수 있습니다.",
-    "zh_CN": "仅限1星佣兵融合。",
-    "ja": "融合できるのは星1傭兵のみです。"
   },
   "unit.sale.unavailable": {
     "en": "Only mercenaries up to 3 stars can be sold.",

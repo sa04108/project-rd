@@ -495,20 +495,39 @@ func _show_battle() -> void:
 	# 격자 하단(850) 아래 흙길 안에만 선택 동작을 놓는다.
 	labels.unit_actions = Control.new()
 	labels.unit_actions.name = "UnitActions"
-	labels.unit_actions.position = Vector2(144, 850)
-	labels.unit_actions.size = Vector2(432, 76)
+	labels.unit_actions.position = Vector2(256, 850)
+	labels.unit_actions.size = Vector2(208, 76)
 	labels.unit_actions.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	screen.add_child(labels.unit_actions)
-	labels.synthesize = _button(labels.unit_actions, L.text("unit.synthesis.button"), Rect2(0, 0, 208, 76), _synthesize_selected, true, "synthesize")
-	labels.synthesize.tooltip_text = L.text("unit.synthesis.hint")
-	labels.sell = _gold_button(labels.unit_actions, L.text("unit.sale.button"), sim.sale_price(), Rect2(224, 0, 208, 76), _sell_selected, "sell_unit")
+	labels.sell = _gold_button(labels.unit_actions, L.text("unit.sale.button"), sim.sale_price(), Rect2(0, 0, 208, 76), _sell_selected, "sell_unit")
 	labels.sell.tooltip_text = L.text("unit.sale.hint")
-	labels.selection_panel = _panel(screen, Rect2(28, 926, 664, 96), INK, GOLD, "brass")
-	labels.selection = _label(labels.selection_panel, "", Vector2(15, 4), 634, 28, PALE)
+	labels.selection_panel = _panel(screen, Rect2(28, 926, 664, 100), INK, GOLD, "brass")
+	var selection_margin := MarginContainer.new()
+	selection_margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	selection_margin.add_theme_constant_override("margin_left", 8)
+	selection_margin.add_theme_constant_override("margin_right", 8)
+	selection_margin.add_theme_constant_override("margin_top", 5)
+	selection_margin.add_theme_constant_override("margin_bottom", 5)
+	selection_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	labels.selection_panel.add_child(selection_margin)
+	var selection_rows := VBoxContainer.new()
+	selection_rows.add_theme_constant_override("separation", 0)
+	selection_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	selection_rows.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	selection_rows.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	selection_margin.add_child(selection_rows)
+	labels.selection = _label(selection_rows, "", Vector2.ZERO, 648, 24, PALE)
+	labels.selection.custom_minimum_size.y = 26
+	labels.selection.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	labels.selection.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	labels.detail = _label(labels.selection_panel, "", Vector2(15, 40), 634, 18, MUTED)
-	labels.detail.size.y = 52
-	labels.detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	labels.detail_stats = _label(selection_rows, "", Vector2.ZERO, 648, 18, MUTED)
+	labels.detail_stats.custom_minimum_size.y = 21
+	labels.detail_stats.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	labels.detail_stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	labels.detail_type = _label(selection_rows, "", Vector2.ZERO, 648, 18, MUTED)
+	labels.detail_type.custom_minimum_size.y = 24
+	labels.detail_type.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	labels.detail_type.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# 하단의 소환 중심 배치와 강화·도박·특수몬스터 순서는 그대로 유지한다.
 	labels.summon = _battle_action("", Rect2(229, 1030, 262, 100), _summon, "summon", "summon")
 	_panel(screen, Rect2(225, 1132, 270, 35), INK, GOLD, "brass")
@@ -536,11 +555,6 @@ func _summon() -> void:
 	var response: Dictionary = sim.summon()
 	if response.ok:
 		selected = int(response.unit_id)
-	_transaction(response, true)
-
-func _synthesize_selected() -> void:
-	var response: Dictionary = sim.synthesize(selected)
-	if response.ok: selected = int(response.unit_id)
 	_transaction(response, true)
 
 func _sell_selected() -> void:
@@ -666,7 +680,6 @@ func _refresh() -> void:
 	var unit: Dictionary = sim.unit_by_id(selected)
 	labels.selection_panel.visible = not unit.is_empty()
 	labels.unit_actions.visible = not unit.is_empty() and panel_name.is_empty() and not sim.pause_reasons.has("user") and sim.result == "active"
-	labels.synthesize.disabled = sim.synthesis_materials(selected).is_empty() or (not unit.is_empty() and sim.synthesis_pool(str(unit.kind)).is_empty())
 	var refund: int = sim.sale_price(int(sim.catalog.units[unit.kind].tier)) if not unit.is_empty() else -1
 	labels.sell.disabled = refund < 0
 	var sale_caption: RichTextLabel = labels.sell.get_meta("gold_caption")
@@ -677,7 +690,8 @@ func _refresh() -> void:
 	if unit.is_empty():
 		selected = -1
 		labels.selection.text = ""
-		labels.detail.text = ""
+		labels.detail_stats.text = ""
+		labels.detail_type.text = ""
 	else:
 		var definition: Dictionary = sim.catalog.units[unit.kind]
 		labels.selection.text = "%s  %s" % ["★".repeat(int(definition.tier)), L.unit_name(str(unit.kind))]
@@ -687,8 +701,12 @@ func _refresh() -> void:
 			attack_note = L.text("unit.attack.out_of_range")
 		elif coverage == "tangent":
 			attack_note = L.text("unit.attack.limited_coverage")
-		labels.detail.text = L.text("unit.attack.selected_details") % [sim.attack_damage(unit), definition.range, " · " + attack_note if not attack_note.is_empty() else "", UnitDescription.attack_type(definition)]
-		labels.detail.add_theme_color_override("font_color", Color("ffe365") if coverage != "reachable" else MUTED)
+		var details: PackedStringArray = (L.text("unit.attack.selected_details") % [sim.attack_damage(unit), definition.range, " · " + attack_note if not attack_note.is_empty() else "", UnitDescription.attack_type(definition)]).split("\n", false, 1)
+		labels.detail_stats.text = details[0] if not details.is_empty() else ""
+		labels.detail_type.text = details[1] if details.size() > 1 else ""
+		var detail_color: Color = Color("ffe365") if coverage != "reachable" else MUTED
+		labels.detail_stats.add_theme_color_override("font_color", detail_color)
+		labels.detail_type.add_theme_color_override("font_color", detail_color)
 	board.selected_id = selected
 	for update in dynamic:
 		update.call()
