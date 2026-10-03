@@ -71,7 +71,7 @@ func _setup_web_input() -> void:
 	if not OS.has_feature("web"):
 		return
 	# 고정 Web 엔진은 touchcancel을 일반 touchend로 전달하므로 먼저 취소한다.
-	# 캡처 단계는 캔버스의 엔진 리스너보다 앞서며, 해당 손가락만 취소한다.
+	# 캡처 단계에서 정상 취소 이벤트를 보완하고 원래 DOM 전파는 유지한다.
 	var document := JavaScriptBridge.get_interface("document")
 	web_input_canvas = document.getElementById("canvas")
 	if web_input_canvas == null:
@@ -80,13 +80,34 @@ func _setup_web_input() -> void:
 	web_input_canvas.addEventListener("touchcancel", web_touch_cancel_callback, true)
 
 func _on_web_touch_cancel(arguments: Array) -> void:
-	if arguments.is_empty() or not is_instance_valid(board):
+	if arguments.is_empty() or web_input_canvas == null:
 		return
 	var event: JavaScriptObject = arguments[0]
 	var touches: JavaScriptObject = event.changedTouches
+	var rect: JavaScriptObject = web_input_canvas.getBoundingClientRect()
 	for index in range(int(touches.length)):
 		var touch: JavaScriptObject = touches.item(index)
-		board.cancel_touch(int(touch.identifier))
+		var position_value := Vector2.ZERO
+		if float(rect.width) > 0.0 and float(rect.height) > 0.0:
+			# 엔진과 동일하게 CSS 좌표를 캔버스의 실제 픽셀 좌표로 바꾼다.
+			position_value = Vector2(
+				(float(touch.clientX) - float(rect.x)) * float(web_input_canvas.width) / float(rect.width),
+				(float(touch.clientY) - float(rect.y)) * float(web_input_canvas.height) / float(rect.height))
+		_cancel_web_touch(int(touch.identifier), position_value)
+	Input.flush_buffered_events()
+
+func _cancel_web_touch(index: int, position_value: Vector2) -> void:
+	if is_instance_valid(board):
+		board.cancel_touch(index)
+	# Input이 같은 손가락의 합성 마우스와 GUI 포인터 캡처까지 취소한다.
+	# 뒤따르는 엔진의 일반 release는 이미 끝난 제스처를 다시 확정하지 않는다.
+	var canceled_touch := InputEventScreenTouch.new()
+	canceled_touch.index = index
+	canceled_touch.position = position_value
+	canceled_touch.pressed = false
+	canceled_touch.canceled = true
+	canceled_touch.window_id = get_window().get_window_id()
+	Input.parse_input_event(canceled_touch)
 
 func _style(fill: Color, border: Color = Color.TRANSPARENT, width: int = 1, radius: int = 9) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
