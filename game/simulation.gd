@@ -1,5 +1,7 @@
 extends RefCounted
 
+const L = preload("res://game/localization.gd")
+
 # 피해 확정 시 표시 계층에 값만 전달한다. 저장·판정·난수에는 관여하지 않는다.
 signal attack_presented(event: Dictionary)
 signal enemy_hit_presented(event: Dictionary)
@@ -124,7 +126,7 @@ func summon() -> Dictionary:
 	var unit := add_unit(pool[rng.randi_range(0, pool.size() - 1)], cell)
 	gold -= cost
 	revision += 1
-	return {"ok": true, "unit_id": unit.id, "reason": "%s 합류!" % catalog.units[unit.kind].name}
+	return {"ok": true, "unit_id": unit.id, "reason": L.text("%s 합류!") % L.text(catalog.units[unit.kind].name)}
 
 func move_unit(id: int, cell: int) -> Dictionary:
 	if not _allowed() or cell < 0 or cell >= 36:
@@ -133,7 +135,7 @@ func move_unit(id: int, cell: int) -> Dictionary:
 	if unit.is_empty():
 		return _fail("선택한 용병이 없습니다")
 	if int(unit.cell) == cell:
-		return {"ok": true, "reason": "이미 같은 칸에 있습니다"}
+		return {"ok": true, "reason": L.text("이미 같은 칸에 있습니다")}
 	var other := unit_at(cell)
 	if not other.is_empty():
 		other.cell = unit.cell
@@ -142,7 +144,7 @@ func move_unit(id: int, cell: int) -> Dictionary:
 	unit_presented.emit({"id": int(unit.id), "kind": str(unit.kind), "cell": cell, "time": time, "action": "move"})
 	if not other.is_empty():
 		unit_presented.emit({"id": int(other.id), "kind": str(other.kind), "cell": int(other.cell), "time": time, "action": "move"})
-	return {"ok": true, "reason": "배치를 변경했습니다"}
+	return {"ok": true, "reason": L.text("배치를 변경했습니다")}
 
 func recipe_materials(recipe: Dictionary, anchor_id: int = -1) -> Array:
 	var chosen: Array = []
@@ -184,7 +186,7 @@ func combine(recipe_id: String, anchor_id: int = -1) -> Dictionary:
 		units.erase(material)
 	var created := add_unit(recipe.result, target)
 	revision += 1
-	return {"ok": true, "unit_id": created.id, "reason": "%s 조합 완료!" % catalog.units[recipe.result].name}
+	return {"ok": true, "unit_id": created.id, "reason": L.text("%s 조합 완료!") % L.text(catalog.units[recipe.result].name)}
 
 func gamble(tier: int) -> Dictionary:
 	if not _allowed() or not catalog.rules.T.gamble.has(str(tier)):
@@ -202,7 +204,7 @@ func gamble(tier: int) -> Dictionary:
 		var pool: Array = catalog.pool(tier)
 		unit_id = add_unit(pool[rng.randi_range(0, pool.size() - 1)], cell).id
 	revision += 1
-	return {"ok": true, "won": won, "unit_id": unit_id, "reason": "%d성 영입 성공!" % tier if won else "도전 실패 · 보상 없음"}
+	return {"ok": true, "won": won, "unit_id": unit_id, "reason": L.text("%d성 영입 성공!") % tier if won else L.text("도전 실패 · 보상 없음")}
 
 func upgrade_cost(tier: int) -> int:
 	return int(catalog.rules.T.upgrade_cost) * tier * (int(upgrades.get(str(tier), 0)) + 1)
@@ -218,7 +220,7 @@ func upgrade(tier: int) -> Dictionary:
 	gold -= cost
 	upgrades[str(tier)] += 1
 	revision += 1
-	return {"ok": true, "reason": "%d성 공통 공격력 강화!" % tier}
+	return {"ok": true, "reason": L.text("%d성 공통 공격력 강화!") % tier}
 
 func summon_special(kind: String) -> Dictionary:
 	if not _allowed() or not catalog.enemies.has(kind):
@@ -231,7 +233,7 @@ func summon_special(kind: String) -> Dictionary:
 	add_enemy(kind, wave)
 	cooldowns[kind] = time + 300.0
 	revision += 1
-	return {"ok": true, "reason": "%s 출현 · 처치하고 보상을 받으세요" % definition.name}
+	return {"ok": true, "reason": L.text("%s 출현 · 처치하고 보상을 받으세요") % L.text(definition.name)}
 
 func add_enemy(kind: String, spawn_wave: int) -> Dictionary:
 	if not _allowed() or not catalog.enemies.has(kind):

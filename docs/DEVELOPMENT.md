@@ -81,12 +81,14 @@ ADB="$SDK_ROOT/platform-tools/adb"
 export ANDROID_SERIAL='DEVICE_SERIAL'
 "$ADB" devices -l
 "$ADB" install -r artifacts/android/project-rd-debug.apk
-"$ADB" shell monkey -p org.projectrd.debug 1
+"$ADB" shell monkey -p com.puzzlemind.frd 1
 ```
 
-전용 에뮬레이터/기기에서 해상도와 입력을 수동으로 살펴봅니다. `pm clear org.projectrd.debug`는 저장 데이터 전체를 삭제하므로 실행 전 필요한 진행 상태인지 확인하세요. 실기기에서는 노치·GPU·발열·백그라운드 정책도 확인해야 합니다. 에뮬레이터 실행 결과는 제조사 기기 호환성을 보증하지 않습니다.
+전용 에뮬레이터/기기에서 해상도와 입력을 수동으로 살펴봅니다. `pm clear com.puzzlemind.frd`는 저장 데이터 전체를 삭제하므로 실행 전 필요한 진행 상태인지 확인하세요. 실기기에서는 노치·GPU·발열·백그라운드 정책도 확인해야 합니다. 에뮬레이터 실행 결과는 제조사 기기 호환성을 보증하지 않습니다.
 
 ## 로컬 확인과 테스트 코드
+
+언어는 `data/localization.json`의 한국어 원문 키와 `en`·`zh_CN`·`ja` 번역으로 관리합니다. `game/localization.gd`가 Godot TranslationServer에 등록하며, 숫자·이름을 넣는 문장은 원문 템플릿을 먼저 번역한 뒤 포맷합니다. 저장된 정의 ID와 전투 종료 사유는 언어를 바꿔도 보존합니다. CJK 번역을 바꾸면 [폰트 제작 절차](RESOURCE_GUIDE.md#배경ui폰트)에 따라 부분집합을 다시 만들고 네 언어의 작은 화면 줄바꿈, 드롭다운, 저장 후 재시작을 확인합니다.
 
 게임을 바꾸면 편집기나 내보낸 실행본에서 해당 동작을 직접 살펴보고, 저장·입력·화면·오디오 중 영향을 받는 경로를 실제 실행으로 확인합니다. 내보내기 전 프로젝트 리소스 import가 끝났는지, 원하는 플랫폼 preset을 선택했는지, 출력 파일이 `artifacts/`에 생성됐는지 확인합니다. 결과 캡처와 로그도 같은 디렉터리에 둡니다.
 

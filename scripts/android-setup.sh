@@ -44,7 +44,8 @@ fi
 SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
 export ANDROID_HOME="$SDK_ROOT"
 export ANDROID_SDK_ROOT="$SDK_ROOT"
-mkdir -p "$SDK_ROOT/licenses"
+export ANDROID_USER_HOME="$TOOLS_ROOT/android-sdk/user"
+mkdir -p "$SDK_ROOT/licenses" "$ANDROID_USER_HOME"
 set +e
 yes | "$SDKMANAGER" --sdk_root="$SDK_ROOT" --licenses >/dev/null
 sdk_license_status=${PIPESTATUS[1]}

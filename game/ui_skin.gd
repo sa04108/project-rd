@@ -68,11 +68,16 @@ static func _texture(path: String) -> Texture2D:
 		_textures[path] = load(path) as Texture2D
 	return _textures[path] as Texture2D
 
+static func dropdown_arrow() -> Texture2D:
+	return _svg_texture("dropdown_arrow", '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><path d="m5 10 9 9 9-9" fill="none" stroke="#f2e5c7" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/></svg>')
+
 static func icon_texture(kind: String) -> Texture2D:
 	var shapes := {
 		"home": '<path d="M5 29 31 7l26 22-6 7-20-17-20 17z" fill="url(#metal)"/><path d="M13 31v24h13V39h10v16h13V31L31 16z" fill="url(#paper)"/><path d="M25 55V38h12v17" fill="#29251f"/><path d="M40 10h9v12l-9-8z" fill="url(#metal)"/>',
 		"recipes": '<path d="M9 13c8-3 15-2 23 3 8-5 15-6 23-3v37c-8-3-15-2-23 3-8-5-15-6-23-3z" fill="url(#paper)"/><path d="M32 16v37M15 23h10m-10 7h10m-10 7h10" fill="none"/><path d="M44 25v14m-7-7h14" fill="none" stroke-width="3"/>',
 		"codex": '<path d="M5 13c9-4 19-2 27 3 8-5 18-7 27-3v40c-9-3-19-1-27 4-8-5-18-7-27-4z" fill="url(#metal)"/><path d="M9 9c8-2 16 1 23 6v35c-7-5-15-7-23-5zM55 9c-8-2-16 1-23 6v35c7-5 15-7 23-5z" fill="url(#paper)"/><path d="M32 15v35M15 20c4 0 7 1 11 3m-11 7c4 0 7 1 11 3m23-13c-4 0-7 1-11 3m11 7c-4 0-7 1-11 3" fill="none" stroke="#886335" stroke-width="2"/>',
+		"sound": '<path d="M7 24h11L33 12v40L18 40H7z" fill="url(#paper)"/><path d="M41 22c7 5 7 15 0 20m8-28c12 10 12 26 0 36" fill="none" stroke="url(#paper)" stroke-width="4"/>',
+		"sound_muted": '<path d="M7 24h11L33 12v40L18 40H7z" fill="url(#paper)"/><path d="m42 24 14 16m0-16-14 16" fill="none" stroke="#f4b39b" stroke-width="5"/>',
 		"settings": '<path d="m27 4 9 0 2 8 5 2 7-4 6 7-5 6 2 5 8 2v9l-8 2-2 5 4 7-7 6-6-5-5 2-2 8h-9l-2-8-5-2-7 4-6-7 5-6-2-5-8-2v-9l8-2 2-5-4-7 7-6 6 5 5-2z" transform="translate(2 -2) scale(.94)" fill="url(#metal)"/><circle cx="31" cy="30" r="11" fill="#29251f" stroke="#f0d396" stroke-width="2"/>',
 		"coin": '<circle cx="31" cy="31" r="27" fill="#926023"/><circle cx="31" cy="29" r="24" fill="url(#metal)"/><circle cx="31" cy="29" r="18" fill="none" stroke="#a3762f"/><path d="m31 15 8 14-8 14-8-14z" fill="#fff1b2" stroke="#ad7b29"/><path d="M16 17c3-5 7-7 11-8" fill="none" stroke="#fff4cd" stroke-width="3"/>',
 		"summon": '<path d="M11 32c0-30 40-30 40 0v17l-12 8V36l-8-6-8 6v21l-12-8z" fill="url(#metal)"/><path d="M31 5v24M9 30l16 4m28-4-16 4" stroke="#fff1c2" stroke-width="2"/><path d="m15 35 8 3v9l-8-4zm32 0-8 3v9l8-4z" fill="#29251f"/><path d="M30 3h3v9h-3z" fill="#fff1c2"/>',
@@ -121,3 +126,21 @@ static func _texture_style(texture: Texture2D, edge: float, content_x: float, co
 	style.content_margin_bottom = content_y
 	style.draw_center = true
 	return style
+
+static func switch_texture(enabled: bool) -> Texture2D:
+	var fill := "#ae8135" if enabled else "#514d43"
+	var knob_x := 82 if enabled else 30
+	var svg := '<svg xmlns="http://www.w3.org/2000/svg" width="112" height="60" viewBox="0 0 112 60"><rect x="2" y="2" width="108" height="56" rx="28" fill="%s" stroke="#c7ab74" stroke-width="3"/><circle cx="%d" cy="30" r="22" fill="#fff0ca" stroke="#6c512d" stroke-width="2"/></svg>' % [fill, knob_x]
+	return _svg_texture("switch_on" if enabled else "switch_off", svg)
+
+static func style_slider(slider: Slider) -> void:
+	for state in ["slider", "grabber_area", "grabber_area_highlight"]:
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color("6b604e") if state == "slider" else Color("c99a45")
+		style.set_corner_radius_all(10)
+		style.content_margin_top = 10
+		style.content_margin_bottom = 10
+		slider.add_theme_stylebox_override(state, style)
+	var grabber := _svg_texture("volume_grabber", '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><circle cx="24" cy="24" r="21" fill="#fff0ca" stroke="#76552c" stroke-width="4"/><circle cx="24" cy="24" r="12" fill="#e3b45e"/></svg>')
+	for state in ["grabber", "grabber_highlight", "grabber_disabled"]:
+		slider.add_theme_icon_override(state, grabber)

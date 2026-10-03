@@ -1,0 +1,21 @@
+중국어 간체·일본어 UI 폰트
+
+원본: Noto Sans CJK Regular (SIL Open Font License 1.1)
+라이선스: CJK-LICENSE.txt
+원본 라이선스 URL: https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/LICENSE
+
+중국어 간체 원본:
+https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf
+SHA-256: 2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b
+
+일본어 원본:
+https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf
+SHA-256: 68a3fc98800b2a27b371f2fb79991daf3633bd89309d4ffaa6946fd587f375b5
+
+부분집합 제작: Python 3, fontTools 4.61.1
+python3 tools/fonts/build_locale_fonts.py --sc <중국어_원본.otf> --jp <일본어_원본.otf>
+
+data/localization.json의 각 언어 번역과 언어 선택 이름, ASCII, UI 기호를 포함한다.
+지역별 한자 자형을 유지하며 폰트명은 FRD Sans SC / FRD Sans JP로 바꾼다.
+원본 전체 폰트는 배포하지 않는다. 새 번역을 추가할 때 부분집합을 다시 만든다.
+결과 파일과 SHA-256은 제작 도구가 출력하며 현재 바이너리는 Git으로 관리한다.

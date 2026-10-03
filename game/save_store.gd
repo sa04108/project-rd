@@ -5,7 +5,7 @@ var last_error := ""
 var profile: Dictionary = {}
 var corrupt_files: Dictionary = {}
 const Simulation = preload("res://game/simulation.gd")
-const DEFAULT_SETTINGS := {"music": 0.35, "effects": 0.65, "reduced_motion": false, "haptics": false, "music_track": "mist_guard", "ui_sound": "tap"}
+const DEFAULT_SETTINGS := {"language": "en", "music": 0.35, "effects": 0.65, "music_muted": false, "effects_muted": false, "reduced_motion": false, "haptics": false, "music_track": "mist_guard", "ui_sound": "tap"}
 const LEGACY_MUSIC_TRACKS := ["hearth_watch", "mist_guard", "quiet_march"]
 const LEGACY_UI_SOUNDS := ["wood", "tap", "chime"]
 
@@ -40,6 +40,11 @@ func _valid_profile(value: Dictionary) -> bool:
 			return false
 	if not value.settings.reduced_motion is bool or not _valid_counts(value.kills):
 		return false
+	if value.settings.has("language") and not value.settings.language in ["en", "ko", "zh_CN", "ja"]:
+		return false
+	for key in ["music_muted", "effects_muted"]:
+		if value.settings.has(key) and not value.settings[key] is bool:
+			return false
 	if value.settings.has("haptics") and not value.settings.haptics is bool:
 		return false
 	if value.settings.has("music_track") and not value.settings.music_track in LEGACY_MUSIC_TRACKS:

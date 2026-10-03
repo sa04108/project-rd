@@ -28,7 +28,7 @@ const HAPTIC_VICTORY_MS := 320
 var music: AudioStreamPlayer
 var ui: AudioStreamPlayer
 var attacks: Array[AudioStreamPlayer] = []
-var settings := {"music": 0.35, "effects": 0.65, "haptics": false, "music_track": MUSIC_TRACK, "ui_sound": "tap"}
+var settings := {"music": 0.35, "effects": 0.65, "music_muted": false, "effects_muted": false, "haptics": false, "music_track": MUSIC_TRACK, "ui_sound": "tap"}
 var streams: Dictionary = {}
 var sound_rng := RandomNumberGenerator.new()
 var clock := 0.0
@@ -62,17 +62,20 @@ func _stream(path: String) -> AudioStream:
 		streams[path] = load(path)
 	return streams[path]
 
+func effective_volume(channel: String) -> float:
+	return 0.0 if bool(settings.get(channel + "_muted", false)) else float(settings[channel])
+
 func apply_settings(value: Dictionary) -> void:
 	settings = value.duplicate()
-	ui.volume_db = linear_to_db(maxf(0.0001, float(settings.effects))) - 3.0
+	ui.volume_db = linear_to_db(maxf(0.0001, effective_volume("effects"))) - 3.0
 	for player in attacks:
-		player.volume_db = linear_to_db(maxf(0.0001, float(settings.effects))) - 8.0
-	if float(settings.effects) <= 0.0:
+		player.volume_db = linear_to_db(maxf(0.0001, effective_volume("effects"))) - 8.0
+	if effective_volume("effects") <= 0.0:
 		ui.stop()
 		for player in attacks:
 			player.stop()
 	# 0은 작은 소리로 남기지 않고 실제로 재생을 중단한다.
-	if float(settings.music) <= 0.0:
+	if effective_volume("music") <= 0.0:
 		music.stop()
 	_sync_music()
 
@@ -88,7 +91,7 @@ func set_context(wants_music: bool, is_foreground: bool) -> void:
 func _sync_music() -> void:
 	if not is_instance_valid(music):
 		return
-	if not active or float(settings.music) <= 0.0:
+	if not active or effective_volume("music") <= 0.0:
 		music.stop()
 		return
 	# Web 샘플 백엔드는 같은 false 대입에도 소스를 다시 만들 수 있다.
@@ -108,11 +111,11 @@ func _sync_music() -> void:
 func _process(delta: float) -> void:
 	clock += delta
 	if music.playing:
-		var target := linear_to_db(maxf(0.0001, float(settings.music))) - 2.0
+		var target := linear_to_db(maxf(0.0001, effective_volume("music"))) - 2.0
 		music.volume_db = move_toward(music.volume_db, target, delta * 24.0)
 
 func play_ui(category: String = "tap") -> bool:
-	if not foreground or float(settings.effects) <= 0.0 or clock < next_ui:
+	if not foreground or effective_volume("effects") <= 0.0 or clock < next_ui:
 		return false
 	if not UI_CATEGORIES.has(category):
 		return false
@@ -128,7 +131,7 @@ static func attack_sound(kind: String) -> String:
 	return str(UNIT_SOUNDS.get(kind, ""))
 
 func play_attack(event: Dictionary) -> bool:
-	if not active or not foreground or float(settings.effects) <= 0.0 or clock < next_attack:
+	if not active or not foreground or effective_volume("effects") <= 0.0 or clock < next_attack:
 		return false
 	var sound_id := attack_sound(str(event.get("kind", "")))
 	if sound_id.is_empty() or clock < float(next_family.get(sound_id, 0.0)):

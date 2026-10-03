@@ -17,13 +17,14 @@ JAVA_BIN="$(readlink -f "$(command -v java)")"
 export JAVA_HOME="$(dirname "$(dirname "$JAVA_BIN")")"
 export ANDROID_HOME="$SDK_ROOT"
 export ANDROID_SDK_ROOT="$SDK_ROOT"
+export ANDROID_USER_HOME="$TOOLS_ROOT/android-sdk/user"
 export XDG_DATA_HOME="$TOOLS_ROOT/godot-templates/data"
 export XDG_CONFIG_HOME="$TOOLS_ROOT/android-sdk/config"
 export XDG_CACHE_HOME="$TOOLS_ROOT/android-sdk/cache"
 export PATH="$SDK_ROOT/platform-tools:$SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
 [[ -x "$GODOT" && -x "$SDK_ROOT/platform-tools/adb" ]]
-mkdir -p "$ROOT/artifacts/android" "$ROOT/artifacts/logs" "$XDG_CONFIG_HOME/godot"
+mkdir -p "$ROOT/artifacts/android" "$ROOT/artifacts/logs" "$XDG_CONFIG_HOME/godot" "$ANDROID_USER_HOME"
 python3 - "$XDG_CONFIG_HOME/godot/editor_settings-4.7.tres" "$SDK_ROOT" "$JAVA_HOME" <<'PYSETTINGS'
 from pathlib import Path
 import sys
@@ -54,8 +55,9 @@ PYSETTINGS
 "$GODOT" --headless --editor --path "$ROOT" --quit
 "$GODOT" --headless --path "$ROOT" --export-debug "Android Debug" "$ROOT/artifacts/android/project-rd-debug.apk"
 test -s "$ROOT/artifacts/android/project-rd-debug.apk"
-"$SDK_ROOT/build-tools/35.0.0/aapt" dump badging "$ROOT/artifacts/android/project-rd-debug.apk" | rg -F "package: name='org.projectrd.debug'"
-"$SDK_ROOT/build-tools/35.0.0/aapt" dump badging "$ROOT/artifacts/android/project-rd-debug.apk" | rg -F "launchable-activity:"
+"$SDK_ROOT/build-tools/35.0.0/aapt" dump badging "$ROOT/artifacts/android/project-rd-debug.apk" | rg -F "package: name='com.puzzlemind.frd'"
+# Godot 4.7은 activity-alias에 런처를 선언하므로 구형 aapt badging 출력 대신 매니페스트를 읽는다.
+"$SDK_ROOT/build-tools/35.0.0/aapt" dump xmltree "$ROOT/artifacts/android/project-rd-debug.apk" AndroidManifest.xml | rg -F 'android.intent.category.LAUNCHER'
 python3 - "$ROOT/artifacts/android/project-rd-debug.apk" "$ROOT/assets/art/manifest.json" <<'PYAPK'
 import json
 import sys
@@ -70,6 +72,7 @@ with zipfile.ZipFile(apk_path) as apk:
         "assets/data/units.json",
         "assets/data/enemies.json",
         "assets/data/recipes.json",
+        "assets/data/localization.json",
         "assets/assets/art/manifest.json",
     }
     missing = sorted(required - names)
@@ -93,6 +96,6 @@ with zipfile.ZipFile(apk_path) as apk:
         raise SystemExit("APK unexpectedly contains test source files")
     if any("/sprite_run/raw/" in name for name in names):
         raise SystemExit("APK unexpectedly contains raw sprite sources")
-print("APK content verified: four gameplay JSON files, art manifest, 87 portraits, no tests/raw sprites")
+print("APK content verified: gameplay/localization JSON files, art manifest, 87 portraits, no tests/raw sprites")
 PYAPK
 sha256sum "$ROOT/artifacts/android/project-rd-debug.apk"
