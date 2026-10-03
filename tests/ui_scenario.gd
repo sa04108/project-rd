@@ -62,12 +62,15 @@ func _run() -> void:
 	_check(game.toast_label.z_index > game.overlay.z_index, "battle toast stays above a later-opened panel")
 	await _capture("battle_toast")
 	await _touch(_action_center("close_panel"))
+	game.toast_label.hide()
+	game.toast_label.text = ""
 
 	await _tap(_action_center("pause"))
 	for _i in range(3):
 		await _tap(_action_center("summon"))
 	_check(game.sim.units.size() == 3, "three real summon button presses create three units")
 	_check(game.sim.gold == 0, "three summons spend the starting gold")
+	_check(not game.toast_label.visible, "summoning does not show an action notification")
 	var first_run_units: Array = game.sim.units.duplicate(true)
 	await _capture("battle")
 
@@ -107,6 +110,7 @@ func _run() -> void:
 	_check(int(game.sim.unit_by_id(first_id).cell) == first_cell and int(game.sim.unit_by_id(second_id).cell) == second_cell, "tapping another unit never swaps placement")
 	await _drag(_cell_screen(board, first_cell), _cell_screen(board, 35))
 	_check(int(game.sim.unit_by_id(first_id).cell) == 35, "drag moves the intended unit into an empty cell")
+	_check(not game.toast_label.visible, "placing and moving mercenaries does not show a notification")
 	await _tap(_cell_screen(board, second_cell))
 	_check(game.selected == second_id, "board tap selects second unit")
 	await _drag(_cell_screen(board, second_cell), _cell_screen(board, 35))
@@ -162,6 +166,8 @@ func _run() -> void:
 	game.sim.gold = 80
 	await _wait_until(func(): return upgrade_button != null and not upgrade_button.disabled)
 	_check(upgrade_button != null and not upgrade_button.disabled, "upgrade becomes affordable without reopening the panel")
+	await _tap(upgrade_button.get_global_rect().get_center())
+	_check(game.toast_label.visible and game.toast_label.text == "1성 공통 공격력 강화!", "real upgrade button retains its result notification")
 	await _tap(_action_center("close_panel"))
 
 	game.sim.gold = 99
@@ -172,6 +178,17 @@ func _run() -> void:
 	game.sim.gold = 100
 	await _wait_until(func(): return gamble_button != null and not gamble_button.disabled)
 	_check(gamble_button != null and not gamble_button.disabled, "gamble becomes affordable while its panel stays open")
+	var chance: float = game.sim.catalog.rules.T.gamble["2"].chance
+	game.sim.catalog.rules.T.gamble["2"].chance = 1.0
+	await _tap(gamble_button.get_global_rect().get_center())
+	_check(game.toast_label.visible and game.toast_label.text == "2성 영입 성공!", "winning a real gamble retains its result notification")
+	game.sim.gold = 100
+	game.sim.catalog.rules.T.gamble["2"].chance = 0.0
+	gamble_button = _find_button("계약   ◈ 100")
+	await _wait_until(func(): return gamble_button != null and not gamble_button.disabled)
+	await _tap(gamble_button.get_global_rect().get_center())
+	_check(game.toast_label.visible and game.toast_label.text == "도전 실패 · 보상 없음", "losing a real gamble retains its result notification")
+	game.sim.catalog.rules.T.gamble["2"].chance = chance
 	await _capture("gamble")
 	await _tap(_action_center("close_panel"))
 	await _tap(_action_center("pause"))

@@ -155,11 +155,11 @@ CHROMIUM_PATH="$(node -e 'process.stdout.write(require("./tools/web/node_modules
   --base-url 'http://127.0.0.1:4173/' --output artifacts/web-qa
 ```
 
-워크플로와 같이 Playwright가 설치한 Chromium을 명시적으로 선택합니다. `CHROMIUM_PATH`를 생략하면 `/usr/bin/chromium`이 있을 때 이를 우선 사용합니다.
+로컬 검사에서는 Playwright가 설치한 Chromium을 명시적으로 선택합니다. `CHROMIUM_PATH`를 생략하면 `/usr/bin/chromium`이 있을 때 이를 우선 사용합니다.
 
 검사는 QA 브리지를 `?qa=1` 주소에서만 사용하며 실제 캔버스 입력, 화면 크기 변화, 저장·이어하기, 새로고침 복원을 검사합니다. 저장 검증은 브라우저의 IndexedDB에 저장된 QA `run.json` 및 `profile.json`을 읽기 전용으로 확인하고, 기대한 전체 스냅샷이 기록될 때까지 최대 20초 기다린 뒤 새로고침 복원값과 비교합니다. 파일 존재만으로 저장 완료라 판단하거나 동기화를 강제하지 않습니다. 이 자동 절차는 저장 직후 탭을 닫아도 데이터가 보존된다는 보장을 하지 않습니다.
 
-`.github/workflows/web-preview.yml`은 `main` push 시 자동으로 실행하며, `workflow_dispatch`로 수동 실행할 수도 있습니다. 대상 ref의 빌드와 브라우저 검사가 성공하면 그 실행 산출물을 GitHub Pages에 배포합니다. 최초 배포 전 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 설정해야 합니다. 로컬 검사나 Actions 검사만으로 공개 URL이 정상임을 주장하지 말고 실제 URL을 확인합니다.
+`.github/workflows/web-preview.yml`은 `main` push 시 자동으로 실행하며, `workflow_dispatch`로 수동 실행할 수도 있습니다. 대상 ref의 Web 빌드가 성공하면 그 실행 산출물을 GitHub Pages에 배포합니다. 배포 워크플로에는 게임 회귀·브라우저 플레이·메모리 검사를 연결하지 않으며, 개발 검증으로 별도 실행합니다. 최초 배포 전 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 설정해야 합니다. 로컬 검사나 Actions 검사만으로 공개 URL이 정상임을 주장하지 말고 실제 URL을 확인합니다.
 
 ## Web 장시간 메모리 검사
 
@@ -176,7 +176,7 @@ CHROMIUM_PATH=/usr/bin/chromium node tools/web/memory-soak.cjs \
 
 새 게임·소환·배속·도감 필터·메인 복귀·이어하기를 반복하며, 연속 전투 도중 패배하면 남은 실시간 동안 새 전투를 시작합니다. `report.json`, `samples.jsonl`, `events.jsonl`과 캡처는 산출물 디렉터리에 남습니다. 실패·크래시까지의 샘플도 보존합니다. `--music-off`는 설정 UI에서 배경음만 끄는 대조 실험이며 효과음은 유지합니다. `--self-test`는 분석기 자체 검사이고 실제 게임 QA를 대신하지 않습니다.
 
-워크플로는 배포할 release 빌드에 `--allow-release --cycles 3 --warmup-cycles 0 --battle-seconds 20 --endurance-seconds 60` 검사를 추가로 실행합니다. release에서 제공하지 않는 static/orphan 카운터는 검증 근거로 삼지 않고, 자세한 엔진 메모리 비교는 위 debug 절차를 사용합니다.
+release 빌드의 메모리를 별도로 검사하려면 `--allow-release --cycles 3 --warmup-cycles 0 --battle-seconds 20 --endurance-seconds 60`을 지정할 수 있습니다. 배포 워크플로에서는 실행하지 않습니다. release에서 제공하지 않는 static/orphan 카운터는 검증 근거로 삼지 않고, 자세한 엔진 메모리 비교는 위 debug 절차를 사용합니다.
 
 정착한 동일 화면끼리 살아 있는 리소스·노드·텍스처를 비교합니다. Wasm 메모리의 확보 용량은 해제 뒤에도 최고치로 남을 수 있어 RSS나 JS heap과 구분합니다. 브라우저 오디오 객체 개수도 수거 시점에 영향을 받으므로 순간 개수만으로 누수를 단정하지 않습니다. 강제 GC로 누적을 숨기지 않으며, 소프트웨어 GPU의 FPS를 사용자 기기 성능으로 일반화하지 않습니다.
 

@@ -282,8 +282,6 @@ func _resume() -> void:
 	ended_saved = false
 	_show_battle()
 	_observe_result()
-	if sim.result == "active":
-		_toast("이전 배치로 복원했습니다 · 재개 버튼을 누르세요")
 
 func _show_battle() -> void:
 	audio.reset_battle(sim.run_id, sim.lives, sim.result)
@@ -368,8 +366,9 @@ func _summon() -> void:
 		selected = int(response.unit_id)
 	_transaction(response, true)
 
-func _transaction(response: Dictionary, confirmation: bool = false) -> void:
-	_toast(response.reason)
+func _transaction(response: Dictionary, confirmation: bool = false, notify: bool = false) -> void:
+	if notify:
+		_toast(response.reason)
 	if response.ok:
 		if confirmation: audio.play_ui("chime")
 		_mark_dirty()
@@ -504,7 +503,7 @@ func _upgrade_panel(panel: Control) -> void:
 		_portrait(card, ["u02", "u07", "u12", "u17"][tier - 1], Vector2(17, 44), Vector2(114, 99))
 		_label(card, "%d성 용병 +%d" % [tier, level], Vector2(16, 148), 126, 16, INK)
 		_label(card, "공격 +%d%%" % roundi(level * float(sim.catalog.rules.T.upgrade_factor) * 100), Vector2(16, 178), 126, 15, MUTED)
-		var button := _button(card, "최대 강화" if level >= 10 else "강화   ◈ %d" % sim.upgrade_cost(tier), Rect2(8, 220, 132, 40), func(): _transaction(sim.upgrade(tier), true), true)
+		var button := _button(card, "최대 강화" if level >= 10 else "강화   ◈ %d" % sim.upgrade_cost(tier), Rect2(8, 220, 132, 40), func(): _transaction(sim.upgrade(tier), true, true), true)
 		button.add_theme_font_size_override("font_size", 15)
 		var update := func(): button.disabled = sim.gold < sim.upgrade_cost(tier) or int(sim.upgrades[str(tier)]) >= 10 or sim.result != "active"
 		dynamic.append(update)
@@ -518,7 +517,7 @@ func _gamble_panel(panel: Control) -> void:
 		_label(panel, "★".repeat(tier) + " 도전", Vector2(x + 53, 86), 240, 27, GOLD)
 		_label(panel, "성공 확률  %d%%" % roundi(rule.chance * 100), Vector2(x + 38, 139), 260, 22, PALE)
 		_label(panel, "실패 시 보상 없음", Vector2(x + 52, 181), 250, 18, MUTED)
-		var button := _button(panel, "계약   ◈ %d" % int(rule.cost), Rect2(x + 14, 234, 269, 69), func(): _transaction(sim.gamble(tier), true), true)
+		var button := _button(panel, "계약   ◈ %d" % int(rule.cost), Rect2(x + 14, 234, 269, 69), func(): _transaction(sim.gamble(tier), true, true), true)
 		var update := func(): button.disabled = sim.gold < rule.cost or sim.first_empty() < 0 or sim.result != "active"
 		dynamic.append(update)
 		update.call()

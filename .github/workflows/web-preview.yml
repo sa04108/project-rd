@@ -14,13 +14,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v7
-      - name: Install native check dependency
+      - name: Install export dependency
         run: |
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends ripgrep
@@ -33,64 +33,15 @@ jobs:
           key: godot-web-4.7.2-stable-templates-v1
       - name: Install pinned Godot and Web export templates
         run: bash scripts/web-setup.sh
-      - name: Verify game rules and saves
-        run: bash scripts/mvp-check.sh
       - name: Export the Web build
         run: bash scripts/web-export.sh artifacts/web
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 'node'
-          cache: npm
-          cache-dependency-path: tools/web/package-lock.json
-      - name: Install browser test dependency
-        run: npm ci --prefix tools/web
-      - name: Install Chromium for browser QA
-        timeout-minutes: 10
-        env:
-          DEBUG: pw:install
-        run: tools/web/node_modules/.bin/playwright install --with-deps chromium
-      - name: Run the preview in a local HTTP server
-        run: |
-          python3 scripts/web-serve.py --directory artifacts/web > artifacts/web-server.log 2>&1 &
-          echo "$!" > artifacts/web-server.pid
-          for attempt in $(seq 1 40); do
-            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then break; fi
-            sleep 1
-          done
-          curl --fail --silent http://127.0.0.1:4173/ > /dev/null
-      - name: Exercise browser gameplay and persistence
-        run: |
-          CHROMIUM_PATH="$(node -e 'process.stdout.write(require("./tools/web/node_modules/playwright").chromium.executablePath())')" \
-            node tools/web/browser-qa.cjs --base-url http://127.0.0.1:4173/ --output artifacts/web-qa
-      - name: Check repeated gameplay and WebAudio lifetime
-        timeout-minutes: 6
-        run: |
-          node tools/web/memory-soak.cjs --self-test
-          CHROMIUM_PATH="$(node -e 'process.stdout.write(require("./tools/web/node_modules/playwright").chromium.executablePath())')" \
-            node tools/web/memory-soak.cjs --base-url http://127.0.0.1:4173/ --output artifacts/web-memory-soak \
-              --allow-release --cycles 3 --warmup-cycles 0 --battle-seconds 20 --endurance-seconds 60
-      - name: Stop the local preview server
-        if: always()
-        run: if [ -f artifacts/web-server.pid ]; then kill "$(cat artifacts/web-server.pid)" 2>/dev/null || true; fi
-      - name: Upload browser evidence
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: web-preview-qa
-          path: |
-            artifacts/web-qa/
-            artifacts/web-memory-soak/
-            artifacts/logs/*.log
-            artifacts/web-server.log
-          if-no-files-found: ignore
-          retention-days: 14
       - uses: actions/upload-pages-artifact@v5
         with:
           path: artifacts/web
 
   deploy:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
-    needs: build-and-test
+    needs: build
     runs-on: ubuntu-24.04
     concurrency:
       group: project-rd-pages
