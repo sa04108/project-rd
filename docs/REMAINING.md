@@ -25,6 +25,5 @@
 | Q02 | 최종 음악/효과음의 기기 청감·장시간 반복 피로도와 진동 | 음악/효과음 음소거, ×5 배속의 믹스, 끝 잡음·루프 이음새와 지원 기기의 진동 3조건을 확인한다. 음원 제작/연결은 완료됐으며 샘플 재선정 과제가 아니다. |
 | Q03 | 전체 100웨이브 수동 플레이와 초보 첫 클리어율 5%·주 실패 구간 30웨이브 목표의 사람 대상 검증 | 첫 플레이 표본과 조건을 정해 도달 웨이브·실패 원인·클리어율을 기록하고 튜닝을 평가한다. 기존 자동 봇 실행은 사람 관측치가 아니다. |
 | Q04 | 최신 대상 커밋의 원격 Web 워크플로·공개 Pages 결과 | `main` push 또는 수동 실행의 대상 SHA, Web export/배포 결과, 실제 공개 URL의 로드·입력·저장 복원을 확인한다. 로컬 성공과 과거 설정 기록만으로 현재 공개 상태를 단정하지 않는다. 실행에는 배포가 포함되므로 사용자 요청 범위에 맞춰 수행한다. |
-| Q06 | Web 장시간 실행에서 엔진 static allocation이 소폭 증가하는 경향이 관찰됐다. live allocation 증가인지 브라우저/Wasm 예약 용량인지 현재 설명이 충분하지 않다. | 최신 Web export를 실제 브라우저에서 오래 실행해 같은 장면이 정착한 뒤 메모리를 관찰한다. Wasm 예약 용량과 실제 사용 증가, 급격한 오디오 메모리 증가는 구분한다. |
 
 재현 절차는 [DEVELOPMENT](DEVELOPMENT.md), 리소스 규격은 [RESOURCE_GUIDE](RESOURCE_GUIDE.md)를 따른다. 제작 범위의 원본은 [identity-plan.json](../tools/art/identity-plan.json), 실제 등록 상태는 [identity_animations.json](../assets/art/identity_animations.json) 및 각 개체의 layout이다.

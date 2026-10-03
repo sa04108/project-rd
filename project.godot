@@ -30,6 +30,11 @@ window/size/window_height_override=960
 window/stretch/mode="canvas_items"
 window/handheld/orientation=1
 
+[physics]
+
+; Control 입력만 사용하므로 충돌체 선택용 물리 공간과 Web 작업 그룹 누적을 피한다.
+common/enable_object_picking=false
+
 [presentation]
 
 display_name="Fantasy Random Defense"

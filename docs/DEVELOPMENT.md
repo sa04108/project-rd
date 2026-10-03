@@ -63,6 +63,12 @@ python3 scripts/web-serve.py --directory artifacts/web-local --port 4180
 
 `.github/workflows/web-preview.yml`은 `main` push 또는 `workflow_dispatch` 수동 실행으로 Web 빌드와 GitHub Pages 배포를 수행합니다. 자동 테스트 단계는 없습니다. 최초 공개 전 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 설정하고, 배포 뒤 실제 Pages 주소를 브라우저에서 확인합니다. 로컬 export 성공만으로 공개 배포가 끝났다고 판단하지 않습니다.
 
+### 물리 선택과 Web 메모리
+
+현재 전투·배치 판정은 자체 시뮬레이션과 `Control` 입력을 사용하므로 `physics/common/enable_object_picking=false`를 유지합니다. 충돌체 선택으로 불필요한 `World2D` 물리 공간이 활성화되는 것을 막으며, Godot 4.7.2 단일 스레드 Web의 완료된 물리 작업 그룹 누적 경로도 피합니다. 일반 GUI 클릭·터치·드래그는 별도 입력 경로입니다.
+
+향후 `CollisionObject2D`의 입력·호버 기능을 도입한다면 이 설정의 의존성과 엔진의 작업 그룹 해제를 먼저 확인합니다. 메모리는 포인터 입력 뒤 전투/메뉴를 반복하고 같은 장면이 정착한 시점끼리 비교합니다. 엔진의 live static allocation, 노드·리소스·오디오 재생 수와 브라우저/Wasm 예약 용량은 구분해서 관찰합니다. 진단 코드와 결과는 로컬 `artifacts/`에만 둡니다.
+
 ## Android 내보내기와 수동 실행
 
 Android 작업은 Linux x86_64, Java, Python 3, `curl`, `unzip`, `sha1sum`, `sha512sum`, `grep`, `rg`, Android SDK command-line tools 및 Android export template이 필요합니다. `scripts/android-setup.sh`는 Android API 35 빌드 도구와 API 30 AOSP x86_64 에뮬레이터 이미지를 `/workspace/.tools/android-sdk/`에 준비하고 Godot 템플릿을 `/workspace/.tools/godot-templates/` 아래에 둡니다. 라이선스 동의가 필요하며, 가상화가 불가하면 에뮬레이터가 느리거나 시작되지 않을 수 있습니다.

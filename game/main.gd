@@ -41,6 +41,7 @@ const SAVE_RETRY_SECONDS := 2.0
 var save_retry_time := 0.0
 var save_time := 0.0
 var dirty_time := -1.0
+var settings_dirty := false
 var ended_saved := false
 var dev_mode := false
 var audio: Node
@@ -87,7 +88,7 @@ func _change_language(language: String) -> void:
 	if language == store.profile.settings.language:
 		return
 	store.profile.settings.language = language
-	var saved: bool = store.save_settings()
+	var saved := _save_settings()
 	_apply_language()
 	if mode == "battle":
 		_show_battle()
@@ -445,6 +446,15 @@ func _toggle_pause() -> void:
 func _mark_dirty() -> void:
 	dirty_time = wall_time + 0.3
 
+func _save_settings() -> bool:
+	settings_dirty = true
+	if not store.save_settings():
+		save_retry_time = wall_time + SAVE_RETRY_SECONDS
+		_toast(L.text(store.last_error))
+		return false
+	settings_dirty = false
+	return true
+
 func _save() -> bool:
 	if mode == "battle":
 		if not store.save_run(sim):
@@ -455,6 +465,11 @@ func _save() -> bool:
 		save_retry_time = 0.0
 		save_time = wall_time
 		dirty_time = -1.0
+		settings_dirty = false
+	elif settings_dirty:
+		if not _save_settings():
+			return false
+		save_retry_time = 0.0
 	return true
 
 func _refresh() -> void:
@@ -848,13 +863,13 @@ func _settings_panel(panel: Control) -> void:
 		audio.play_ui()
 		audio.set_haptics(value)
 		store.profile.settings.haptics = value
-		if not store.save_settings(): _toast(L.text(store.last_error)))
+		_save_settings())
 	var motion := _settings_toggle(panel, L.text("settings.reduced_motion"), 520, store.profile.settings.reduced_motion, "reduced_motion")
 	motion.toggled.connect(func(value):
 		audio.play_ui()
 		store.profile.settings.reduced_motion = value
 		if is_instance_valid(board): board.set("reduced_motion", value)
-		if not store.save_settings(): _toast(L.text(store.last_error)))
+		_save_settings())
 	_button(panel, L.text("battle.return") if mode == "battle" else L.text("ui.close"), Rect2(35, 632, 579, 100), _close_panel, true, "close_panel")
 	if mode == "battle":
 		_button(panel, L.text("menu.return_to_main"), Rect2(35, 744, 579, 100), func():
@@ -928,7 +943,7 @@ func _settings_audio_row(panel: Control, key: String, title: String, y: float) -
 		store.profile.settings[key + "_muted"] = false
 		_apply_audio()
 		_refresh_audio_mute(mute, key, title)
-		if not store.save_settings(): _toast(L.text(store.last_error)))
+		_save_settings())
 	_refresh_audio_mute(mute, key, title)
 
 func _toggle_audio_mute(key: String) -> void:
@@ -938,7 +953,7 @@ func _toggle_audio_mute(key: String) -> void:
 	if was_muted and float(store.profile.settings[key]) <= 0.0:
 		store.profile.settings[key] = SaveStore.DEFAULT_SETTINGS[key]
 	_apply_audio()
-	if not store.save_settings(): _toast(L.text(store.last_error))
+	_save_settings()
 
 func _refresh_audio_mute(button: Button, key: String, title: String) -> void:
 	var muted: bool = audio.effective_volume(key) <= 0.0
@@ -1002,8 +1017,11 @@ func _process(delta: float) -> void:
 			sim.advance(delta * sim.speed)
 		if sim.wave != old_wave:
 			_mark_dirty()
-		if sim.result == "active" and wall_time >= save_retry_time and (wall_time - save_time >= 10.0 or (dirty_time > 0 and wall_time >= dirty_time)):
+		if sim.result == "active" and wall_time >= save_retry_time and (settings_dirty or wall_time - save_time >= 10.0 or (dirty_time > 0 and wall_time >= dirty_time)):
 			_save()
+	elif mode == "menu" and settings_dirty and wall_time >= save_retry_time:
+		# 메뉴에는 진행 중 자동 저장이 없으므로 실패한 설정만 다시 저장한다.
+		_save()
 	_observe_result()
 	refresh_time += delta
 	if refresh_time > 0.15:
