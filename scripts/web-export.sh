@@ -39,6 +39,8 @@ esac
 
 run_logged web-import timeout --kill-after=5s 180s "$GODOT" --headless --path "$ROOT" --editor --import
 run_logged web-export timeout --kill-after=5s 180s "$GODOT" --headless --path "$ROOT" "$FLAG" "Web Preview" "$DEST/index.html"
+run_logged web-runtime python3 "$ROOT/scripts/web-patch-gl-tables.py" "$DEST/index.js" \
+	--mode "$MODE" --template "$XDG_DATA_HOME/godot/export_templates/${VERSION%-stable}.stable/web_nothreads_${MODE}.zip"
 test -s "$DEST/index.html"
 shopt -s nullglob
 WASM=("$DEST"/*.wasm)

@@ -69,6 +69,14 @@ python3 scripts/web-serve.py --directory artifacts/web-local --port 4180
 
 향후 `CollisionObject2D`의 입력·호버 기능을 도입한다면 이 설정의 의존성과 엔진의 작업 그룹 해제를 먼저 확인합니다. 메모리는 포인터 입력 뒤 전투/메뉴를 반복하고 같은 장면이 정착한 시점끼리 비교합니다. 엔진의 live static allocation, 노드·리소스·오디오 재생 수와 브라우저/Wasm 예약 용량은 구분해서 관찰합니다. 진단 코드와 결과는 로컬 `artifacts/`에만 둡니다.
 
+### WebGL 핸들 테이블 후처리
+
+`scripts/web-export.sh`는 export 뒤 `web-patch-gl-tables.py`로 생성된 `index.js`의 GL 핸들 테이블만 후처리합니다. 공식 4.7.2 단일 스레드·확장 미사용 **release와 debug** 템플릿의 ZIP·원본 JS·변환 결과 SHA-256을 고정하며, 전역 ID 순서와 `0=null`은 유지합니다. 해제된 핸들의 빈 배열 슬롯이 계속 쌓이지 않도록 숫자 키 사전을 사용하고 해제된 키를 삭제합니다. 이는 엔진 live static allocation과 별개인 [Emscripten의 GL 테이블 증가 문제](https://github.com/emscripten-core/emscripten/issues/21921)를 처리합니다.
+
+원본 JS의 저작권·라이선스 표기는 보존하며, Wasm·템플릿 ZIP·게임 리소스는 수정하지 않습니다. 완성된 결과를 같은 디렉터리의 임시 파일에서 원자적으로 교체하고, 이미 검증된 결과에 재실행하면 쓰기 없이 종료합니다. 버전·템플릿·JS 해시가 다르거나 수정 위치가 예상과 다르면 **내보내기를 실패 처리**합니다. 엔진 업그레이드, 스레드·확장 또는 custom template 변경 시에는 해당 런타임의 모든 테이블 사용처와 실제 렌더링·입력을 다시 확인한 뒤 지원 해시를 갱신해야 하며, 검사를 건너뛰지 않습니다.
+
+이 단계는 Python 표준 라이브러리만 쓰는 빌드 변환입니다. 브라우저·메모리·입력 검증과 그 의존성은 로컬 `artifacts/`에만 두며 배포 workflow에 테스트 단계를 추가하지 않습니다. debug export도 `WEB_EXPORT_MODE=debug bash scripts/web-export.sh artifacts/web-debug`로 같은 보호 절차를 거칩니다.
+
 ## Android 내보내기와 수동 실행
 
 Android 작업은 Linux x86_64, Java, Python 3, `curl`, `unzip`, `sha1sum`, `sha512sum`, `grep`, `rg`, Android SDK command-line tools 및 Android export template이 필요합니다. `scripts/android-setup.sh`는 Android API 35 빌드 도구와 API 30 AOSP x86_64 에뮬레이터 이미지를 `/workspace/.tools/android-sdk/`에 준비하고 Godot 템플릿을 `/workspace/.tools/godot-templates/` 아래에 둡니다. 라이선스 동의가 필요하며, 가상화가 불가하면 에뮬레이터가 느리거나 시작되지 않을 수 있습니다.
