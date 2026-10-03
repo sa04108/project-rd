@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "identities": {
+    "u01": {
+      "atlas": "assets/art/identities/u01/atlas.png",
+      "frame_layout": "assets/art/identities/u01/layout.json"
+    },
+    "u02": {
+      "atlas": "assets/art/identities/u02/atlas.png",
+      "frame_layout": "assets/art/identities/u02/layout.json"
+    },
+    "u03": {
+      "atlas": "assets/art/identities/u03/atlas.png",
+      "frame_layout": "assets/art/identities/u03/layout.json"
+    },
+    "n01": {
+      "atlas": "assets/art/identities/n01/atlas.png",
+      "frame_layout": "assets/art/identities/n01/layout.json"
+    },
+    "n02": {
+      "atlas": "assets/art/identities/n02/atlas.png",
+      "frame_layout": "assets/art/identities/n02/layout.json"
+    },
+    "n03": {
+      "atlas": "assets/art/identities/n03/atlas.png",
+      "frame_layout": "assets/art/identities/n03/layout.json"
+    },
+    "u04": {
+      "atlas": "assets/art/identities/u04/atlas.png",
+      "frame_layout": "assets/art/identities/u04/layout.json"
+    },
+    "u06": {
+      "atlas": "assets/art/identities/u06/atlas.png",
+      "frame_layout": "assets/art/identities/u06/layout.json"
+    },
+    "u05": {
+      "atlas": "assets/art/identities/u05/atlas.png",
+      "frame_layout": "assets/art/identities/u05/layout.json"
+    },
+    "u17": {
+      "atlas": "assets/art/identities/u17/atlas.png",
+      "frame_layout": "assets/art/identities/u17/layout.json"
+    },
+    "u18": {
+      "atlas": "assets/art/identities/u18/atlas.png",
+      "frame_layout": "assets/art/identities/u18/layout.json"
+    },
+    "u19": {
+      "atlas": "assets/art/identities/u19/atlas.png",
+      "frame_layout": "assets/art/identities/u19/layout.json"
+    },
+    "u20": {
+      "atlas": "assets/art/identities/u20/atlas.png",
+      "frame_layout": "assets/art/identities/u20/layout.json"
+    },
+    "u21": {
+      "atlas": "assets/art/identities/u21/atlas.png",
+      "frame_layout": "assets/art/identities/u21/layout.json"
+    },
+    "u22": {
+      "atlas": "assets/art/identities/u22/atlas.png",
+      "frame_layout": "assets/art/identities/u22/layout.json"
+    }
+  }
+}

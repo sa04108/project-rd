@@ -146,7 +146,7 @@ func _draw_enemies() -> void:
 		var p := ground_to_screen(enemy_position(float(enemy.get("progress", 0.0))))
 		var def: Dictionary = simulation.catalog.enemies.get(String(enemy.get("kind", "")), {})
 		var tint := Color(String(def.get("color", "#b95043")))
-		var anim_time := _animation_time()
+		var anim_time := _enemy_animation_clock(enemy)
 		_draw_shadow(p, 8.0)
 		_draw_character(p, String(enemy.kind), tint, false, "idle" if float(enemy.stun_until) > simulation.time else "walk", anim_time, 1.45 if def.kind in ["boss", "final"] else 1.0)
 		var hp := clampf(float(enemy.get("hp", 1.0)) / maxf(float(enemy.get("max_hp", 1.0)), 0.01), 0.0, 1.0)
@@ -171,18 +171,50 @@ func _draw_units() -> void:
 		if is_selected:
 			draw_arc(p, 21.0, 0, TAU, 48, Color("fff0a1"), 2.3, true)
 		var pose: Dictionary = combat_visuals.pose(unit, simulation, reduced_motion)
-		var stance: Dictionary = combat_visuals.transform_pose(pose)
-		# 개별 원화를 발 기준으로 기울이고 복원한다. 새 고유 프레임으로 가장하지 않는다.
-		draw_set_transform(p + stance.offset, stance.rotation, stance.scale)
-		_draw_character(Vector2.ZERO, String(unit.kind), tint, true, "idle", 0.0, 1.0 + tier * 0.035)
-		draw_set_transform(Vector2.ZERO)
+		var sprite := _unit_attack_frame(String(unit.kind), pose)
+		if not sprite.is_empty():
+			# 실제 자세 프레임에는 원화용 기울임·이동·확대 변형을 중복하지 않는다.
+			_draw_identity_frame(p, sprite, 1.0 + tier * 0.035)
+		else:
+			var stance: Dictionary = combat_visuals.transform_pose(pose)
+			draw_set_transform(p + stance.offset, stance.rotation, stance.scale)
+			_draw_character(Vector2.ZERO, String(unit.kind), tint, true, "idle", 0.0, 1.0 + tier * 0.035)
+			draw_set_transform(Vector2.ZERO)
 		combat_visuals.draw_preparation(self, p, pose, tint)
 		for star in range(tier):
 			var star_pos := p + Vector2((star - (tier - 1) * 0.5) * 6.0, -CELL_SIZE * 0.76)
 			_draw_star(star_pos, maxf(size.x / 180.0, 2.2), Color("ffe08a"))
 
+func _unit_attack_frame(identity: String, pose: Dictionary) -> Dictionary:
+	if reduced_motion or pose.phase == "idle":
+		return {}
+	return visuals.identity_frame(identity, "attack", float(pose.attack_clock))
+
+func _draw_identity_frame(p: Vector2, sprite: Dictionary, scale_factor: float) -> void:
+	var height := CELL_SIZE * 0.76 * scale_factor * float(sprite.get("render_scale", 1.0))
+	var width: float = height * sprite.region.size.x / sprite.region.size.y
+	# 256px 고유 프레임의 발 중심 (128, 232)을 전장 좌표에 고정한다.
+	var rect := Rect2(p - Vector2(width * 0.5, height * 232.0 / 256.0), Vector2(width, height))
+	draw_texture_rect_region(sprite.texture, rect, sprite.region, Color.WHITE)
+
+func _enemy_frame(identity: String, state: String, clock: float) -> Dictionary:
+	var sprite: Dictionary = visuals.identity_frame(identity, state, 0.0 if reduced_motion else clock)
+	if sprite.is_empty() and state == "idle":
+		# 기절 중 대기 프레임이 없으면 같은 적의 첫 이동 자세를 고정한다.
+		sprite = visuals.identity_frame(identity, "walk", 0.0)
+	return sprite
+
+func _enemy_animation_clock(enemy: Dictionary) -> float:
+	# 실제 이동 거리로 보행을 진행해 감속·기절·일시 정지를 그대로 따른다.
+	return 0.0 if reduced_motion else maxf(0.0, float(enemy.progress)) * 0.75
+
 func _draw_character(p: Vector2, identity: String, tint: Color, ally: bool, state: String, clock: float, scale_factor: float) -> void:
-	# 용병 정체성은 개별 원화로 보존한다. 공격 자세와 효과는 표시 계층에서 처리한다.
+	if not ally:
+		var identity_sprite := _enemy_frame(identity, state, clock)
+		if not identity_sprite.is_empty():
+			_draw_identity_frame(p, identity_sprite, scale_factor)
+			return
+	# 용병의 대기와 축소 동작은 기존 개별 원화를 유지한다.
 	var portrait: Texture2D = visuals.portrait(identity) if ally else null
 	if portrait != null:
 		var height := CELL_SIZE * 0.76 * scale_factor

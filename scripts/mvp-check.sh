@@ -30,6 +30,8 @@ run contracts timeout --kill-after=5s 60s "$GODOT" --headless --path . --script 
 rg -q '"failed":\[\]' artifacts/logs/contracts.log
 run lifecycle timeout --kill-after=5s 60s "$GODOT" --headless --path . --script res://tests/lifecycle_regression.gd -- --ui-test
 rg -Fq 'LIFECYCLE_REPORT {"failed":[]}' artifacts/logs/lifecycle.log
+run identity-animation timeout --kill-after=5s 60s "$GODOT" --headless --path . --script res://tests/identity_animation_test.gd
+rg -q '"failed":\[\]' artifacts/logs/identity-animation.log
 run mvp-smoke timeout --kill-after=5s 60s "$GODOT" --headless --path . --quit-after 300
 if [[ "${VERIFY_VISUAL:-0}" == 1 ]]; then
   run ui-scenario timeout --kill-after=5s 90s xvfb-run -a -s '-screen 0 900x1400x24' env LIBGL_ALWAYS_SOFTWARE=1 "$GODOT" --path . --audio-driver Dummy --rendering-method gl_compatibility --resolution 720x1280 --script res://tests/ui_scenario.gd -- --ui-test

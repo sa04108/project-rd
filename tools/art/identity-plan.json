@@ -1,0 +1,2755 @@
+{
+  "schema": 1,
+  "purpose": "Production plan, not generated/integrated/verified coverage. Coverage is maintained separately by the integration owner.",
+  "authorization": {
+    "scope": "All gameplay resource improvements, including new identity sprite frames when needed",
+    "builtin_image_generation": true,
+    "external_gpt_or_grok_api": false
+  },
+  "source_catalogs": [
+    "data/units.json",
+    "data/enemies.json"
+  ],
+  "identity_authority": "Current assets/art/portraits/<id>.png pixels override historical batch images, family labels and incompatible descriptive equipment. Reinspect the exact reference before each generation.",
+  "provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "counts": {
+    "identities": 87,
+    "units": 34,
+    "normal": 40,
+    "boss": 10,
+    "special": 3,
+    "attack_rows": 34,
+    "walk_rows": 53,
+    "idle_rows": 34,
+    "core_rows": 87,
+    "total_rows": 121,
+    "frames_per_row": 6,
+    "core_frames": 522,
+    "total_frames": 726
+  },
+  "paths": {
+    "runtime_index": "assets/art/identity_animations.json",
+    "runtime_index_schema": 1,
+    "source_layout_guide": "docs/art-generation/layout-guide-3x2.png",
+    "raw_source": "docs/art-generation/<id>/<state>.source.png",
+    "raw_prompt": "docs/art-generation/<id>/<state>.prompt.txt",
+    "runtime_atlas": "assets/art/identities/<id>/atlas.png",
+    "runtime_layout": "assets/art/identities/<id>/layout.json",
+    "runtime_receipt": "assets/art/identities/<id>/receipt.json"
+  },
+  "shared_generation_contract": {
+    "frames": 6,
+    "source_layout": "3 columns x 2 rows, reading left-to-right then top-to-bottom; exact six complete poses",
+    "source_background": "real transparent alpha",
+    "reference_lock": [
+      "same identity, camera, facing, handedness, palette, silhouette vocabulary and equipment",
+      "genuine articulated changes, not six transforms of one still",
+      "no new scenery, text, visible guides, motion trails, projectiles, detached decoration or shadows",
+      "retain legitimate reference anatomy/attached ornaments; inspect known floating ornaments explicitly rather than discarding by component size alone",
+      "keep every weapon, wing, antler, tail and tentacle complete with safe padding"
+    ],
+    "normalization": {
+      "cell": [
+        256,
+        256
+      ],
+      "source_scale": "one uniform scale per state row; retain cross-state apparent body size through stable anchor metadata",
+      "runtime_ground_baseline_y": 232,
+      "runtime_horizontal_anchor": "ground-support/foot anchor, not changing weapon-inclusive bounding-box center",
+      "render_scale": "calibrate once against the exact portrait; verify neutral size and baseline across states",
+      "no_repainted_pixels": true,
+      "no_blind_equal_slice": true
+    }
+  },
+  "state_contracts": {
+    "attack": {
+      "frames": 6,
+      "loop": false,
+      "durations_ms": [
+        90,
+        90,
+        60,
+        60,
+        180,
+        180
+      ],
+      "total_ms": 660,
+      "preparation_frames_zero_based": [
+        0,
+        1
+      ],
+      "contact_followthrough_frames_zero_based": [
+        2,
+        3
+      ],
+      "recovery_frames_zero_based": [
+        4,
+        5
+      ],
+      "impact_at_ms": 180,
+      "post_impact_ms": 480,
+      "clock": "During anticipation: clamp(0.18 - cooldown, 0, 0.18). At real attack event and after: 0.18 + (simulation.time - event.time). First immediate attack begins at frame 2, never delays damage.",
+      "fps_fallback": 8
+    },
+    "walk": {
+      "frames": 6,
+      "loop": true,
+      "durations_ms": [
+        125,
+        125,
+        125,
+        125,
+        125,
+        125
+      ],
+      "fps": 8,
+      "clock": "Distance/speed-derived visual phase using actual progress; stun freezes locomotion; no simulation movement changes.",
+      "facing": "Preserve the fixed reference camera; never rotate an upright sprite 90 degrees at path corners."
+    },
+    "idle": {
+      "frames": 6,
+      "loop": true,
+      "durations_ms": [
+        167,
+        167,
+        167,
+        167,
+        167,
+        167
+      ],
+      "fps": 6,
+      "clock": "simulation.time with deterministic display-only identity offset if needed; pause and reduced-motion freeze movement.",
+      "fallback": "Own portrait or own ready endpoint only, explicitly static and not counted as a generated idle row."
+    }
+  },
+  "integration_contracts": [
+    "A later idle import must merge with existing attack rows and preserve both; never overwrite the per-identity atlas/layout/receipt with only the new state.",
+    "Receipts retain provenance/checks/review per state, even when states share one atlas.",
+    "Runtime index schema 1 maps identities to atlas and frame_layout; validate each required state against actual layout rows and atlas pixels.",
+    "Missing or invalid identity state may use an explicitly tracked safe fallback but must not count as complete identity coverage.",
+    "Do not double-apply large procedural attack tilts to already articulated body frames.",
+    "Treat timing, damage, target selection, crowd control, RNG, save schema and cell movement as immutable gameplay contracts.",
+    "Generated, packed, integrated, image-reviewed and runtime-verified are separate coverage stages."
+  ],
+  "required_presentation_effects": {
+    "enemy_hit": "Actual affected identities, including splash targets; short bounded flash/recoil using own sprite.",
+    "enemy_death": "Presentation-only removal data before erasure; short own-sprite fade/collapse and optional family-appropriate particles; reward/death resolution unchanged.",
+    "enemy_escape": "Distinct exit feedback with no kill effect or reward.",
+    "enemy_cc": "Readable stun/slow feedback; movement phase matches the actual state.",
+    "ally_placement": "Ground-cell selection/drag/arrival feedback without inventing ally walking simulation.",
+    "summon_combine": "Bounded arrival/combination feedback; no HP or death state for consumed allies.",
+    "restrictions": [
+      "No enemy attacks on allies",
+      "No ally hit/death assets",
+      "No character-replacement procedural body parts",
+      "All transients are bounded, unsaved and reset on restore/new run",
+      "Paused, backgrounded, speed-changed and reduced-motion behavior must match the game clock"
+    ]
+  },
+  "memory_budget": {
+    "rgba8_mib_per_256px_six_frame_row": 1.5,
+    "all_121_rows_rgba8_mib_without_mipmaps": 181.5,
+    "all_87_core_rows_rgba8_mib_without_mipmaps": 130.5,
+    "proposed_identity_atlas_residency_soft_mib": 96,
+    "proposed_identity_atlas_residency_hard_mib": 128,
+    "budget_status": "Engineering target, not a measured pass; excludes existing portraits, family fallbacks, backgrounds, render targets and importer/driver overhead.",
+    "loading_policy": "Load identity atlases lazily. Release nonresident identities after no live unit, visible enemy, corpse/effect or preview references them. Clear caches on scene/run lifecycle boundaries as appropriate; lazy loading alone is not bounded across all waves.",
+    "future_resolution_policy": "Retain 256px master assets; consider validated 128px variants for small on-screen sprites and 256px for bosses/large subjects. 128px cells quarter decoded atlas memory; adapt layout/anchor metadata rather than cropping. Measure readability and total Web/mobile GPU/RSS before adoption."
+  },
+  "roadmap": [
+    {
+      "phase": 1,
+      "goal": "Core articulated combat and identity movement",
+      "rows": 87,
+      "scope": "attack for every ally and walk for every enemy; integrate validated batches cumulatively without marking remaining IDs complete"
+    },
+    {
+      "phase": 2,
+      "goal": "Living ally idle coverage",
+      "rows": 34,
+      "scope": "idle for every ally; preserve each existing attack row and cross-state continuity"
+    },
+    {
+      "phase": 3,
+      "goal": "Required presentation polish and final gates",
+      "rows": 0,
+      "scope": "hit/death/escape/CC/placement/summon/combine feedback, bounded resource residency, complete provenance and final native/Web verification"
+    }
+  ],
+  "acceptance": [
+    "Exact 87 identities and 121 required state rows, no duplicated/missing IDs or family-tint substitution counted as identity art",
+    "All six poses nonempty, in bounds, complete and visibly distinct where motion requires; no clipping, accidental duplicate frames or seam fragments",
+    "Stable identity, weapon/anatomy count, baseline and apparent body scale across each row and idle/attack transitions",
+    "Genuine six-phase movement/idle sequences; inspect complete loops, not one thumbnail",
+    "Attack impact starts on frame index 2 at real event, with 0.18s anticipation and 0.48s post-impact recovery",
+    "Representative runtime captures exercise all 34 attack identities and all 53 enemy identities with pause/speed/reduced-motion/restore cases",
+    "Splash hit/death, simultaneous kills, escape, victory cleanup and rapid repeated attacks preserve simulation and RNG",
+    "Art metadata paths point to the actual orthographic battlefield; static historical art is not counted as active coverage",
+    "Final VERIFY_VISUAL=1 bash scripts/verify.sh, export and browser QA results name the exact tested snapshot and remaining limits"
+  ],
+  "identities": [
+    {
+      "id": "u01",
+      "name": "길드 검사",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u01.png",
+      "reference_sha256": "b0441a0d66280e117f7fe5b0f3cb8e97bbd033af93d270d20f71c8203d17d3bc",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve brown hair, red-orange tabard/scarf, lion emblem, armor and one straight sword in the reference hand; no hood, shield or extra blade."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Pull the sword arm back and twist the torso; complete the raised-sword anticipation; deliver a decisive diagonal slash; follow through with bent knees; lower the blade; return to the original ready stance.",
+          "raw_source": "docs/art-generation/u01/attack.source.png",
+          "raw_prompt": "docs/art-generation/u01/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Subtle chest breathing, a small relaxed elbow shift and cloth settling; sword remains lowered; return smoothly to the same ready pose.",
+          "raw_source": "docs/art-generation/u01/idle.source.png",
+          "raw_prompt": "docs/art-generation/u01/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u01/atlas.png",
+        "layout": "assets/art/identities/u01/layout.json",
+        "receipt": "assets/art/identities/u01/receipt.json"
+      }
+    },
+    {
+      "id": "u02",
+      "name": "숲길 궁수",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u02.png",
+      "reference_sha256": "d671c6983b42e8b7ee10c8de8696b79318a8766472ab76c429195e704f271b9a",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the hood, curved bow, quiver and reference bow handedness; the released arrow becomes runtime VFX, never a disconnected projectile on the sheet."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Bring an arrow to the curved longbow and begin drawing; reach full draw; release the string and arrow; follow through with bow-arm tension; lower the drawing hand; recover to ready.",
+          "raw_source": "docs/art-generation/u02/attack.source.png",
+          "raw_prompt": "docs/art-generation/u02/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Small breathing motion and cloak/quiver settling while holding the curved longbow steadily; keep the feet planted.",
+          "raw_source": "docs/art-generation/u02/idle.source.png",
+          "raw_prompt": "docs/art-generation/u02/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u02/atlas.png",
+        "layout": "assets/art/identities/u02/layout.json",
+        "receipt": "assets/art/identities/u02/receipt.json"
+      }
+    },
+    {
+      "id": "u03",
+      "name": "견습 마도사",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u03.png",
+      "reference_sha256": "dc4dc18901ce329e7df91d0c561b4a9c688f4402a7b9ca23cfd31b391942e889",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Use the actual BLUE-gem staff, dark blue pointed hat and blue gold-trimmed robe in u03.png; preserve right-hand staff on screen-left; no purple-gem redesign, detached orb or added sword."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Raise the free left hand and tilt the staff; draw that arm back with a slight torso lean; extend the free hand in a clear casting release; let the robe follow through; lower the hand; return to the reference ready stance.",
+          "raw_source": "docs/art-generation/u03/attack.source.png",
+          "raw_prompt": "docs/art-generation/u03/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Gentle breathing, a small free-hand adjustment and robe settling with the staff steady; loop to the same planted stance.",
+          "raw_source": "docs/art-generation/u03/idle.source.png",
+          "raw_prompt": "docs/art-generation/u03/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u03/atlas.png",
+        "layout": "assets/art/identities/u03/layout.json",
+        "receipt": "assets/art/identities/u03/receipt.json"
+      }
+    },
+    {
+      "id": "u04",
+      "name": "수도사",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u04.png",
+      "reference_sha256": "c65f32554f8b404944c8d86a0328e47e1eb950b745c753ee936869f556c85200",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve bald head, prayer beads, cloth wraps, reference costume and two empty hands; no weapon or new limbs."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Shift weight into a guarded fist stance; chamber a short punch or palm; extend the striking arm; follow through with a small torso turn; retract the arm; recover to the same guard.",
+          "raw_source": "docs/art-generation/u04/attack.source.png",
+          "raw_prompt": "docs/art-generation/u04/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Calm breathing with slight shoulder and prayer-bead movement; hands remain in a martial guard.",
+          "raw_source": "docs/art-generation/u04/idle.source.png",
+          "raw_prompt": "docs/art-generation/u04/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u04/atlas.png",
+        "layout": "assets/art/identities/u04/layout.json",
+        "receipt": "assets/art/identities/u04/receipt.json"
+      }
+    },
+    {
+      "id": "u05",
+      "name": "길드 사제",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "floating",
+      "reference": "assets/art/portraits/u05.png",
+      "reference_sha256": "e7ea4425023f83d5c101ddbec49e9339ef8bad4e910fa4ab243e9e092db3a4bc",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the human priest, holy-staff head, clothing and reference hand; the floating catalog family does not make this character a ghost."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Bring the free hand toward the holy staff; raise staff and open the shoulders; extend the free hand in a directed holy cast; follow through with sleeve movement; lower the arm; return to ready.",
+          "raw_source": "docs/art-generation/u05/attack.source.png",
+          "raw_prompt": "docs/art-generation/u05/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Subtle breathing and ivory-robed sleeve settling, with the holy staff vertical and feet fixed.",
+          "raw_source": "docs/art-generation/u05/idle.source.png",
+          "raw_prompt": "docs/art-generation/u05/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u05/atlas.png",
+        "layout": "assets/art/identities/u05/layout.json",
+        "receipt": "assets/art/identities/u05/receipt.json"
+      }
+    },
+    {
+      "id": "u06",
+      "name": "늪지 약제사",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "blob",
+      "reference": "assets/art/portraits/u06.png",
+      "reference_sha256": "2fb9a43e4c4456e40033ecd7431399ae3bf9019359314cebc94651ccab191eca",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Keep the HUMANOID plague-mask alchemist, beak mask, satchel and attached vials; never substitute a slime because family is blob; launched potion is separate runtime VFX."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Bring the existing potion hand back; complete a small throwing anticipation; release a potion with the empty hand extended; follow through at the shoulder; draw the arm back toward the satchel; restore the held-potion ready pose.",
+          "raw_source": "docs/art-generation/u06/attack.source.png",
+          "raw_prompt": "docs/art-generation/u06/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "A restrained breath and small satchel/vial sway while the held potion stays secure; return to the original pose.",
+          "raw_source": "docs/art-generation/u06/idle.source.png",
+          "raw_prompt": "docs/art-generation/u06/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u06/atlas.png",
+        "layout": "assets/art/identities/u06/layout.json",
+        "receipt": "assets/art/identities/u06/receipt.json"
+      }
+    },
+    {
+      "id": "u07",
+      "name": "왕실 창기사",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u07.png",
+      "reference_sha256": "607eb37b44b096fd35fe6ccdc31dfb47c72764e6623c81bfdb44cb210a5f70f5",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve steel helmet, plume, royal tabard and one rigid long spear; keep both hands anatomically attached and the full spear tip inside the cell."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw the long spear toward the body; brace the rear leg and align the spear; extend a clean forward thrust; follow through without changing spear length; retract the spear; return to the same guard.",
+          "raw_source": "docs/art-generation/u07/attack.source.png",
+          "raw_prompt": "docs/art-generation/u07/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Small breathing and cape settling while both spear grip and planted armored stance remain stable.",
+          "raw_source": "docs/art-generation/u07/idle.source.png",
+          "raw_prompt": "docs/art-generation/u07/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u07/atlas.png",
+        "layout": "assets/art/identities/u07/layout.json",
+        "receipt": "assets/art/identities/u07/receipt.json"
+      }
+    },
+    {
+      "id": "u08",
+      "name": "룬 저격수",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u08.png",
+      "reference_sha256": "a4d2c051ba03df3f4d7d34a464042b9d8e552b4638ad2ff4a9dcc5e4caa2ad3f",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the rune archer identity, hood, silver bow, quiver and reference bow handedness; no gun or detached rune effects in the body sheet."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Set the arrow on the silver longbow; draw to full tension; release toward the reference facing; follow through with the bow arm; relax the draw hand; recover to ready.",
+          "raw_source": "docs/art-generation/u08/attack.source.png",
+          "raw_prompt": "docs/art-generation/u08/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Quiet breathing and cloak settling around the held silver longbow; loop with no step.",
+          "raw_source": "docs/art-generation/u08/idle.source.png",
+          "raw_prompt": "docs/art-generation/u08/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u08/atlas.png",
+        "layout": "assets/art/identities/u08/layout.json",
+        "receipt": "assets/art/identities/u08/receipt.json"
+      }
+    },
+    {
+      "id": "u09",
+      "name": "전쟁 북장이",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "heavy",
+      "reference": "assets/art/portraits/u09.png",
+      "reference_sha256": "7c890378ed89edb82bd4ce2b158ad53c88cb5f13bd61cecf2a1c22464b303ced",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the broad orc-like drummer, strapped drum and two beaters; strikes must visibly meet the drum rather than become hammer slams."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Lift the two existing drum beaters; complete an alternating-arm anticipation over the strapped drum; strike the drum head; show the second beat and recoil; lift both beaters off the head; settle to ready.",
+          "raw_source": "docs/art-generation/u09/attack.source.png",
+          "raw_prompt": "docs/art-generation/u09/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Heavy breathing and tiny shoulder/beater adjustments; keep the drum strapped to the torso throughout the loop.",
+          "raw_source": "docs/art-generation/u09/idle.source.png",
+          "raw_prompt": "docs/art-generation/u09/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u09/atlas.png",
+        "layout": "assets/art/identities/u09/layout.json",
+        "receipt": "assets/art/identities/u09/receipt.json"
+      }
+    },
+    {
+      "id": "u10",
+      "name": "설원 사냥꾼",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "quadruped",
+      "reference": "assets/art/portraits/u10.png",
+      "reference_sha256": "8bc9062e0626cfaf9d8dcd6c114633ff18ae56f4f4775161f5f288d91dac5a14",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve ONE white lynx and ONE seated ranger with existing bow/quiver equipment; keep saddle contact and four feline legs; do not turn the attack into a lynx bite or invent a trap machine."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "The mounted ranger shifts the free hand back while the lynx braces; complete the rider casting anticipation; extend the free hand in an ice-trap release; follow through with scarf and rider torso; lower the arm; restore the mounted ready pose.",
+          "raw_source": "docs/art-generation/u10/attack.source.png",
+          "raw_prompt": "docs/art-generation/u10/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "The lynx breathes and subtly shifts its head while the rider and scarf settle; neither leaves the same ground position.",
+          "raw_source": "docs/art-generation/u10/idle.source.png",
+          "raw_prompt": "docs/art-generation/u10/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u10/atlas.png",
+        "layout": "assets/art/identities/u10/layout.json",
+        "receipt": "assets/art/identities/u10/receipt.json"
+      }
+    },
+    {
+      "id": "u11",
+      "name": "철갑 수호자",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "heavy",
+      "reference": "assets/art/portraits/u11.png",
+      "reference_sha256": "4e8d11d2fc9aa72103e482cfc101435e0a4f151fb460f0f7b4bf55348e40b84d",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve broad gray armor, closed helmet and the exact mace head/handle; no sword swap or shrinking armor between frames."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Pull the iron mace back; raise it into a heavy windup; strike forward and down; show weighty follow-through; recover the mace toward the body; return to the armored guard.",
+          "raw_source": "docs/art-generation/u11/attack.source.png",
+          "raw_prompt": "docs/art-generation/u11/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Slow chest/shoulder breathing and small cape settling; the iron mace remains securely gripped.",
+          "raw_source": "docs/art-generation/u11/idle.source.png",
+          "raw_prompt": "docs/art-generation/u11/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u11/atlas.png",
+        "layout": "assets/art/identities/u11/layout.json",
+        "receipt": "assets/art/identities/u11/receipt.json"
+      }
+    },
+    {
+      "id": "u12",
+      "name": "폭풍 검무가",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u12.png",
+      "reference_sha256": "77e524939a10c80db26bad4a1d7fbd717cc8e5a4d927d6be681ce5f25365c192",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the dual-sword dancer, two separate blades, hair and costume; no extra arms, crossed-hand ambiguity or floating blade trails."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw both swords back in a dance stance; coil the torso for a paired cut; perform the first broad slash; complete the second-blade follow-through; re-center both arms; return to the ready stance.",
+          "raw_source": "docs/art-generation/u12/attack.source.png",
+          "raw_prompt": "docs/art-generation/u12/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Subtle dancer breathing, ponytail and sash settling with both swords held safely away from the body.",
+          "raw_source": "docs/art-generation/u12/idle.source.png",
+          "raw_prompt": "docs/art-generation/u12/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u12/atlas.png",
+        "layout": "assets/art/identities/u12/layout.json",
+        "receipt": "assets/art/identities/u12/receipt.json"
+      }
+    },
+    {
+      "id": "u13",
+      "name": "대현자",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "floating",
+      "reference": "assets/art/portraits/u13.png",
+      "reference_sha256": "40c0a9975741fb55696679edba93746888ca70aa6a249d4f81f72f896516b553",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the elderly sage, beard, book and existing robe details; the book never changes into a staff and detached spell particles are runtime effects."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Tilt the existing open spellbook and draw the free hand in; raise the casting hand at full anticipation; extend the hand in a directed cast; follow through with robe and book tilt; lower the hand; restore the floating ready pose.",
+          "raw_source": "docs/art-generation/u13/attack.source.png",
+          "raw_prompt": "docs/art-generation/u13/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Slow floating-body, beard and robe undulation while the book stays held and open; loop without camera or scale drift.",
+          "raw_source": "docs/art-generation/u13/idle.source.png",
+          "raw_prompt": "docs/art-generation/u13/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u13/atlas.png",
+        "layout": "assets/art/identities/u13/layout.json",
+        "receipt": "assets/art/identities/u13/receipt.json"
+      }
+    },
+    {
+      "id": "u14",
+      "name": "황금 고블린",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u14.png",
+      "reference_sha256": "861c9add8fe3c1e96a02e1d91bdd554059b6de321a050536ed7b1443fc43e97f",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the small goblin proportions, merchant-shaman costume and original totem shape; do not substitute special-enemy s30 despite similar Korean naming."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw the golden totem toward the chest; lift it for an invocation; thrust or present it outward in a clear release; follow through with the free hand; lower the totem; return to the goblin ready pose.",
+          "raw_source": "docs/art-generation/u14/attack.source.png",
+          "raw_prompt": "docs/art-generation/u14/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Small breathing, ear and garment settling while the golden totem remains held.",
+          "raw_source": "docs/art-generation/u14/idle.source.png",
+          "raw_prompt": "docs/art-generation/u14/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u14/atlas.png",
+        "layout": "assets/art/identities/u14/layout.json",
+        "receipt": "assets/art/identities/u14/receipt.json"
+      }
+    },
+    {
+      "id": "u15",
+      "name": "용암 거인",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "heavy",
+      "reference": "assets/art/portraits/u15.png",
+      "reference_sha256": "39be8f01555cc27fa095ed3a97a924e5799ea78e13e2fbf15265d55691a24b20",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "The actual portrait has NO HAMMER: preserve its unequal massive stone arms and lava cracks; use the visible fist, with no new weapon, extra rocks or detached lava."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw the existing massive stone fist backward; lift the arm for an overhead anticipation; drive the fist forward and down; show a braced heavy follow-through; lift the arm off the strike; return to the reference stance.",
+          "raw_source": "docs/art-generation/u15/attack.source.png",
+          "raw_prompt": "docs/art-generation/u15/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Slow stone-torso breathing and minimal shoulder settling with the same attached lava-cracked stone plates.",
+          "raw_source": "docs/art-generation/u15/idle.source.png",
+          "raw_prompt": "docs/art-generation/u15/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u15/atlas.png",
+        "layout": "assets/art/identities/u15/layout.json",
+        "receipt": "assets/art/identities/u15/receipt.json"
+      }
+    },
+    {
+      "id": "u16",
+      "name": "고대 비룡",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "dragon",
+      "reference": "assets/art/portraits/u16.png",
+      "reference_sha256": "23babad0fb9fd1b10d5f623b5e87ffb32fd9c93b55fdef967e08c93448027e95",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the purple dragon body, existing leg/wing count, horns and tail; actual breath projectile is runtime VFX, never a detached flame in this sheet."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Pull the dragon neck back and brace the wings; expand the chest with the jaw poised; open the jaw and extend the neck in a breath release; hold a short forward follow-through; close the jaw and lower the neck; return to ready.",
+          "raw_source": "docs/art-generation/u16/attack.source.png",
+          "raw_prompt": "docs/art-generation/u16/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Subtle chest breathing, small attached wing adjustments and a tail-tip settle; feet stay fixed.",
+          "raw_source": "docs/art-generation/u16/idle.source.png",
+          "raw_prompt": "docs/art-generation/u16/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u16/atlas.png",
+        "layout": "assets/art/identities/u16/layout.json",
+        "receipt": "assets/art/identities/u16/receipt.json"
+      }
+    },
+    {
+      "id": "u17",
+      "name": "해적 총잡이",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u17.png",
+      "reference_sha256": "5ea7d300a89ab7b321741c0ceee83cd2a1855ed794c48e395bcaf7191c9e3524",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the pirate, tricorn and ONE rigid flintlock rifle; maintain barrel length and grip anatomy; muzzle flash and projectile belong to runtime VFX."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Bring the existing flintlock rifle from rest to the shoulder; settle into full aim; discharge with a clear shoulder recoil; follow through while retaining both grips; lower the barrel; restore the ready pose.",
+          "raw_source": "docs/art-generation/u17/attack.source.png",
+          "raw_prompt": "docs/art-generation/u17/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Small breathing and coat settling with the rifle held securely and the tricorn hat unchanged.",
+          "raw_source": "docs/art-generation/u17/idle.source.png",
+          "raw_prompt": "docs/art-generation/u17/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u17/atlas.png",
+        "layout": "assets/art/identities/u17/layout.json",
+        "receipt": "assets/art/identities/u17/receipt.json"
+      }
+    },
+    {
+      "id": "u18",
+      "name": "황혼 주술사",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "floating",
+      "reference": "assets/art/portraits/u18.png",
+      "reference_sha256": "cfc67279f2f95d244ee236ad01678acd980b245a6f7c2222ce9faee0a823dcb8",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the actual shaman, staff, feather costume and perched ravens; do not delete the birds as stray components or create additional birds."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw the free hand and raven staff inward; raise the staff for a curse anticipation; extend the free hand in a curse release; follow through with feathered clothing; lower the arm; restore ready.",
+          "raw_source": "docs/art-generation/u18/attack.source.png",
+          "raw_prompt": "docs/art-generation/u18/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Gentle breathing and feather/robe settling; perched ravens make only tiny attached head adjustments.",
+          "raw_source": "docs/art-generation/u18/idle.source.png",
+          "raw_prompt": "docs/art-generation/u18/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u18/atlas.png",
+        "layout": "assets/art/identities/u18/layout.json",
+        "receipt": "assets/art/identities/u18/receipt.json"
+      }
+    },
+    {
+      "id": "u19",
+      "name": "수정 정령",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "blob",
+      "reference": "assets/art/portraits/u19.png",
+      "reference_sha256": "4fa4d5b807cc9be95f2d1be506245d430e85ef12a89e239862b3d21b29cc3a5c",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the cyan crystal creature, two eyes, arms and attached crown shards; no flesh hands, new humanoid body or detached crystal burst."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Compress the small crystal body and draw both crystalline arms inward; reach a braced pulse anticipation; extend both arms in a clear pulse release; follow through with a small torso expansion; retract the arms; restore the crystal ready shape.",
+          "raw_source": "docs/art-generation/u19/attack.source.png",
+          "raw_prompt": "docs/art-generation/u19/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Subtle organic pulse in the torso with small articulated crystal-arm movement; return to the same shape and scale.",
+          "raw_source": "docs/art-generation/u19/idle.source.png",
+          "raw_prompt": "docs/art-generation/u19/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u19/atlas.png",
+        "layout": "assets/art/identities/u19/layout.json",
+        "receipt": "assets/art/identities/u19/receipt.json"
+      }
+    },
+    {
+      "id": "u20",
+      "name": "사막 투창병",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u20.png",
+      "reference_sha256": "a4571a52f2ca02e4d6f38edfcb42389f4d718057e6d294ecef2d94a9bedac746",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the nomad, headwrap, sash and reference javelin hand; the released projectile is separate runtime VFX; never leave a floating spear on the sheet."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw the held javelin backward; rotate the shoulder into a full throwing windup; extend the arm in release; follow through with the now-empty hand; reach toward the existing spare-javelin equipment; restore the ready grip.",
+          "raw_source": "docs/art-generation/u20/attack.source.png",
+          "raw_prompt": "docs/art-generation/u20/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Quiet breathing and sash settling while the held javelin and spare equipment remain secure.",
+          "raw_source": "docs/art-generation/u20/idle.source.png",
+          "raw_prompt": "docs/art-generation/u20/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u20/atlas.png",
+        "layout": "assets/art/identities/u20/layout.json",
+        "receipt": "assets/art/identities/u20/receipt.json"
+      }
+    },
+    {
+      "id": "u21",
+      "name": "성채 연금술사",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u21.png",
+      "reference_sha256": "b2e73ba68813887c6fc368402ea5e634c49f6efa61a5775889d1ff3ee0bec366",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve goggles, backpack, coat and existing bottles; no invented launcher, exploding glass, free-floating grenade or splash cloud."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Bring the held glass grenade back; bend the elbow into a lob anticipation; extend the hand in an arcing throw release; follow through with torso and coat; draw the hand back to the existing belt supplies; restore ready.",
+          "raw_source": "docs/art-generation/u21/attack.source.png",
+          "raw_prompt": "docs/art-generation/u21/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Small breathing and strapped-bottle/backpack sway while the held glass grenade stays stable.",
+          "raw_source": "docs/art-generation/u21/idle.source.png",
+          "raw_prompt": "docs/art-generation/u21/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u21/atlas.png",
+        "layout": "assets/art/identities/u21/layout.json",
+        "receipt": "assets/art/identities/u21/receipt.json"
+      }
+    },
+    {
+      "id": "u22",
+      "name": "은빛 성기사",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "heavy",
+      "reference": "assets/art/portraits/u22.png",
+      "reference_sha256": "0073553a344baf733efdc47a3144cc6cc524f37027a5cfc5ee06d0e91cac05f5",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve helmet, cloak, one rigid warhammer and both hands; keep the complete head and handle in each frame."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw the warhammer back; raise the heavy head into full anticipation; drive it down in a clear strike; brace the shoulders through follow-through; recover the hammer; return to the same armored ready stance.",
+          "raw_source": "docs/art-generation/u22/attack.source.png",
+          "raw_prompt": "docs/art-generation/u22/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Calm armored breathing and cloak settling with the warhammer held at rest.",
+          "raw_source": "docs/art-generation/u22/idle.source.png",
+          "raw_prompt": "docs/art-generation/u22/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u22/atlas.png",
+        "layout": "assets/art/identities/u22/layout.json",
+        "receipt": "assets/art/identities/u22/receipt.json"
+      }
+    },
+    {
+      "id": "u23",
+      "name": "독안개 현자",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "floating",
+      "reference": "assets/art/portraits/u23.png",
+      "reference_sha256": "9c570ba40ec42979f892aa800215203e157e05eb0775aee7fa6662e75da28a78",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the hooded elder, staff, censer and continuous chain; censer remains attached; no detached smoke or new potion weapon."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Pull the censer staff close; prepare a short outward sweep; extend staff and free hand in a poison-cast release; show the censer chain following the sweep; slow the attached censer; restore ready.",
+          "raw_source": "docs/art-generation/u23/attack.source.png",
+          "raw_prompt": "docs/art-generation/u23/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Gentle robe movement and a small attached-censer pendulum, returning smoothly to center.",
+          "raw_source": "docs/art-generation/u23/idle.source.png",
+          "raw_prompt": "docs/art-generation/u23/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u23/atlas.png",
+        "layout": "assets/art/identities/u23/layout.json",
+        "receipt": "assets/art/identities/u23/receipt.json"
+      }
+    },
+    {
+      "id": "u24",
+      "name": "천둥 사수",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u24.png",
+      "reference_sha256": "06519840ab60baf4a60fc2c65196bff3612b8c7a63ef731fc4a525c1ef01ebfc",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "This is a BOW archer, not a gunner: retain actual blue lightning bow, feathered helmet and reference handedness; launched lightning arrow is runtime VFX."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Ease the existing lightning bow toward a draw stance; reach full bowstring tension; release the arrow; follow through with the bow arm still extended; relax the draw hand; return to the original bow-ready stance.",
+          "raw_source": "docs/art-generation/u24/attack.source.png",
+          "raw_prompt": "docs/art-generation/u24/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Small breathing, cape settling and tiny draw-arm adjustment while retaining the lightning bow and feathered helmet.",
+          "raw_source": "docs/art-generation/u24/idle.source.png",
+          "raw_prompt": "docs/art-generation/u24/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u24/atlas.png",
+        "layout": "assets/art/identities/u24/layout.json",
+        "receipt": "assets/art/identities/u24/receipt.json"
+      }
+    },
+    {
+      "id": "u25",
+      "name": "얼음 무희",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u25.png",
+      "reference_sha256": "316a93a7fc5161b9222e2b27ed2ccda34d9596b0d7193b6a7751f89bb44f518c",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the ice dancer, two blades, white hair and outfit; no extra sword, duplicated hand, detached ice trail or skating displacement."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw the two ice blades into a coiled dancer stance; complete a torso-twist anticipation; deliver the first ice-blade cut; complete the second-blade follow-through; re-center the arms and knees; return to ready.",
+          "raw_source": "docs/art-generation/u25/attack.source.png",
+          "raw_prompt": "docs/art-generation/u25/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Light breathing, white hair and cloth settling, with both ice blades stable and feet planted.",
+          "raw_source": "docs/art-generation/u25/idle.source.png",
+          "raw_prompt": "docs/art-generation/u25/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u25/atlas.png",
+        "layout": "assets/art/identities/u25/layout.json",
+        "receipt": "assets/art/identities/u25/receipt.json"
+      }
+    },
+    {
+      "id": "u26",
+      "name": "철혈 사령관",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "heavy",
+      "reference": "assets/art/portraits/u26.png",
+      "reference_sha256": "179858dcff8d3ad5e0e7f27b6ee46aa2bca6209ead9367160fb068286961086a",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the commander, fur cape and tall standard with its exact emblem; no substituted staff, copied text or clipped flag tip."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw the free arm back and steady the battle standard; raise the standard for a command anticipation; plant/present the banner and extend the free arm; show cloth following through; lower the free hand; restore the commanding ready stance.",
+          "raw_source": "docs/art-generation/u26/attack.source.png",
+          "raw_prompt": "docs/art-generation/u26/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Steady breathing and restrained banner/cape movement while the pole remains rigid and gripped.",
+          "raw_source": "docs/art-generation/u26/idle.source.png",
+          "raw_prompt": "docs/art-generation/u26/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u26/atlas.png",
+        "layout": "assets/art/identities/u26/layout.json",
+        "receipt": "assets/art/identities/u26/receipt.json"
+      }
+    },
+    {
+      "id": "u27",
+      "name": "그림자 검객",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/u27.png",
+      "reference_sha256": "eaf55b141781e0b9e8db7fe217ddb4be262cebf03702c2eb5945f02ced74304f",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the masked assassin, hood, scarf and two curved blades; maintain two hands and no detached shadow clones."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw both curved blades back; coil into a low rapid-strike anticipation; deliver the first close slash; complete the paired-blade follow-through; retract the arms; return to the masked ready stance.",
+          "raw_source": "docs/art-generation/u27/attack.source.png",
+          "raw_prompt": "docs/art-generation/u27/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Very restrained breathing and scarf settling with both curved blades held in the same guard.",
+          "raw_source": "docs/art-generation/u27/idle.source.png",
+          "raw_prompt": "docs/art-generation/u27/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u27/atlas.png",
+        "layout": "assets/art/identities/u27/layout.json",
+        "receipt": "assets/art/identities/u27/receipt.json"
+      }
+    },
+    {
+      "id": "u28",
+      "name": "태양 사제",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "floating",
+      "reference": "assets/art/portraits/u28.png",
+      "reference_sha256": "ab86b3812d3f5e59bff71544fdaa5d33b38acf963de6c10353a0ac353a7b611c",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the sun priestess, crown and rigid ornate scepter; crown is equipment, not a new floating glow ring; no detached rays in the body sheet."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Bring the free hand toward the sun scepter; raise the arm in an open radiant anticipation; extend the hand and present the scepter; follow through with sleeves and hair; lower the hand; return to the original stance.",
+          "raw_source": "docs/art-generation/u28/attack.source.png",
+          "raw_prompt": "docs/art-generation/u28/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Gentle breathing, long hair and robe settling, keeping the sun crown and scepter steady.",
+          "raw_source": "docs/art-generation/u28/idle.source.png",
+          "raw_prompt": "docs/art-generation/u28/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u28/atlas.png",
+        "layout": "assets/art/identities/u28/layout.json",
+        "receipt": "assets/art/identities/u28/receipt.json"
+      }
+    },
+    {
+      "id": "u29",
+      "name": "별빛 도사",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "floating",
+      "reference": "assets/art/portraits/u29.png",
+      "reference_sha256": "e4298c051622805be062f15ca95db1dcac2f85f4eed27044dd17b22a397de5b4",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the star mage, pointed hat, crescent staff and reference-held orb assembly; detached star seals are runtime VFX."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw the free hand toward the crescent staff; raise it to a poised seal-casting anticipation; extend the hand in a star-seal release; follow through with sleeve and robe movement; lower the arm; recover to ready.",
+          "raw_source": "docs/art-generation/u29/attack.source.png",
+          "raw_prompt": "docs/art-generation/u29/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Soft breathing and robe/hat-tip settling while the crescent staff and attached ornament stay stable.",
+          "raw_source": "docs/art-generation/u29/idle.source.png",
+          "raw_prompt": "docs/art-generation/u29/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u29/atlas.png",
+        "layout": "assets/art/identities/u29/layout.json",
+        "receipt": "assets/art/identities/u29/receipt.json"
+      }
+    },
+    {
+      "id": "u30",
+      "name": "숲의 파수꾼",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "quadruped",
+      "reference": "assets/art/portraits/u30.png",
+      "reference_sha256": "da14633962ec9cbe3d9ec46cc545903f99673aadecad188b9c7334d46a4f8cbb",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve ONE antlered quadruped, four legs and original branch anatomy; no humanoid caster, extra antlers or detached vines."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Lower the antlered head and brace the front legs; draw the neck back into a growth-casting anticipation; extend head and existing branch growth forward in a clear invocation; follow through with leaf/neck movement; lift the head back; restore the beast ready stance.",
+          "raw_source": "docs/art-generation/u30/attack.source.png",
+          "raw_prompt": "docs/art-generation/u30/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Four-legged breathing, subtle neck movement and leaf settling while the existing antlers and back branches remain attached.",
+          "raw_source": "docs/art-generation/u30/idle.source.png",
+          "raw_prompt": "docs/art-generation/u30/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u30/atlas.png",
+        "layout": "assets/art/identities/u30/layout.json",
+        "receipt": "assets/art/identities/u30/receipt.json"
+      }
+    },
+    {
+      "id": "u31",
+      "name": "폭풍 군주",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "heavy",
+      "reference": "assets/art/portraits/u31.png",
+      "reference_sha256": "cdf7b9dd9521c28e66bc82005ae86fe82366c63f5acffe154d144c88a3e87434",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the blue storm king, crown, beard and actual large hammer; the called lightning is runtime VFX, not detached lightning fragments on the sheet."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw the thunder hammer toward the shoulder; raise it for an overhead invocation; drive the hammer down to call the strike; hold a weighted armored follow-through; recover the hammer; return to the kingly ready stance.",
+          "raw_source": "docs/art-generation/u31/attack.source.png",
+          "raw_prompt": "docs/art-generation/u31/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Slow chest breathing, beard and fur-cape settling with the thunder hammer fixed in the reference grip.",
+          "raw_source": "docs/art-generation/u31/idle.source.png",
+          "raw_prompt": "docs/art-generation/u31/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u31/atlas.png",
+        "layout": "assets/art/identities/u31/layout.json",
+        "receipt": "assets/art/identities/u31/receipt.json"
+      }
+    },
+    {
+      "id": "u32",
+      "name": "월식 여왕",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "multi",
+      "reference": "assets/art/portraits/u32.png",
+      "reference_sha256": "d1174faeda5c093099cae3df6a92482a3eff91f56ccc65f0853b0ac8821101e1",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve ONE connected queen/spider body, crown and original spider-leg count; no separate humanoid standing in front, missing support limbs or detached web disc."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw the queen arms and front spider limbs inward; raise them into a coordinated web-casting anticipation; extend the arms and front limbs in a directed release; follow through while the remaining legs support the body; fold the limbs back; restore ready.",
+          "raw_source": "docs/art-generation/u32/attack.source.png",
+          "raw_prompt": "docs/art-generation/u32/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Subtle upper-body breathing and tiny alternating spider-leg adjustments without travel.",
+          "raw_source": "docs/art-generation/u32/idle.source.png",
+          "raw_prompt": "docs/art-generation/u32/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u32/atlas.png",
+        "layout": "assets/art/identities/u32/layout.json",
+        "receipt": "assets/art/identities/u32/receipt.json"
+      }
+    },
+    {
+      "id": "u33",
+      "name": "성역 수호룡",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "dragon",
+      "reference": "assets/art/portraits/u33.png",
+      "reference_sha256": "7f8ba53fa40f5a1b894724cf54949bd15e58723fae28e091407afd2a8706085f",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the white-gold sacred dragon, original wings, legs, crown-like horns and scales; breath and support aura are separate runtime effects."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Pull the sacred dragon neck inward and brace its wings; lift the chest into breath anticipation; open the jaw and extend the neck; show a brief breath follow-through; close the jaw and lower the neck; restore ready.",
+          "raw_source": "docs/art-generation/u33/attack.source.png",
+          "raw_prompt": "docs/art-generation/u33/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Gentle chest breathing with small white-gold wing and tail settling; remain in the same ground position.",
+          "raw_source": "docs/art-generation/u33/idle.source.png",
+          "raw_prompt": "docs/art-generation/u33/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u33/atlas.png",
+        "layout": "assets/art/identities/u33/layout.json",
+        "receipt": "assets/art/identities/u33/receipt.json"
+      }
+    },
+    {
+      "id": "u34",
+      "name": "시간의 관측자",
+      "category": "units",
+      "catalog_kind": "ally",
+      "family": "floating",
+      "reference": "assets/art/portraits/u34.png",
+      "reference_sha256": "38e262dd27a8314ce851a3cd057824d930f97236f6f247100a8777ab92c46e0f",
+      "required_states": [
+        "attack",
+        "idle"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the turquoise elder, actual staff, hourglass/clock structure and existing clock ornaments; no new rings, text or numbers; legitimate ornaments must not be stripped as noise."
+      ],
+      "states": {
+        "attack": {
+          "motion_prompt": "Draw the free hand toward the clock staff; bring the existing time-ring assembly into a poised anticipation; extend the free hand in a time-cast release; let robe and attached clock assembly follow through subtly; lower the hand; restore ready.",
+          "raw_source": "docs/art-generation/u34/attack.source.png",
+          "raw_prompt": "docs/art-generation/u34/attack.prompt.txt"
+        },
+        "idle": {
+          "motion_prompt": "Slow floating-body, beard and robe motion with a small coherent movement of the existing clock assembly; return smoothly without redesigning its circles.",
+          "raw_source": "docs/art-generation/u34/idle.source.png",
+          "raw_prompt": "docs/art-generation/u34/idle.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/u34/atlas.png",
+        "layout": "assets/art/identities/u34/layout.json",
+        "receipt": "assets/art/identities/u34/receipt.json"
+      }
+    },
+    {
+      "id": "n01",
+      "name": "고블린 정찰병",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/n01.png",
+      "reference_sha256": "eb15c6293c8c53177438987cd82a3411a0b0e73a6b6d57ff3658b53d7c184281",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the small goblin, hood, dagger and backpack; exactly two legs, no attack swings."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A cautious low goblin walk: alternate left and right foot contacts with short bent-knee passing poses, small arm counter-swing and backpack settling; close the loop in place.",
+          "raw_source": "docs/art-generation/n01/walk.source.png",
+          "raw_prompt": "docs/art-generation/n01/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n01/atlas.png",
+        "layout": "assets/art/identities/n01/layout.json",
+        "receipt": "assets/art/identities/n01/receipt.json"
+      }
+    },
+    {
+      "id": "n02",
+      "name": "늑대 약탈자",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "quadruped",
+      "reference": "assets/art/portraits/n02.png",
+      "reference_sha256": "e9fef2e577b5a38e485eb47ab53680ab7c9fd10ef57cb5683eeb4da6c70e7a53",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve one armored wolf and four legs; armor straps stay attached; no rider or humanoid gait."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "An armored wolf trot with alternating diagonal leg contacts, clear paw lifts, modest shoulder/hip motion and a attached tail counter-swing; loop in place.",
+          "raw_source": "docs/art-generation/n02/walk.source.png",
+          "raw_prompt": "docs/art-generation/n02/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n02/atlas.png",
+        "layout": "assets/art/identities/n02/layout.json",
+        "receipt": "assets/art/identities/n02/receipt.json"
+      }
+    },
+    {
+      "id": "n03",
+      "name": "슬라임",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "blob",
+      "reference": "assets/art/portraits/n03.png",
+      "reference_sha256": "da872c632aad6cac1d642d8eb92c579f535bc5ce47eb130109ba75c0605b6f02",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the crowned slime identity and face; no legs or detached bubbles invented; keep existing crown attached."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A gentle slime crawl: compress the base, lean and stretch, recover into the round form, then repeat the complementary pulse; stay centered and loop smoothly.",
+          "raw_source": "docs/art-generation/n03/walk.source.png",
+          "raw_prompt": "docs/art-generation/n03/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n03/atlas.png",
+        "layout": "assets/art/identities/n03/layout.json",
+        "receipt": "assets/art/identities/n03/receipt.json"
+      }
+    },
+    {
+      "id": "n04",
+      "name": "해골 전사",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/n04.png",
+      "reference_sha256": "fbdba14bea256cf9e27b09872d4e3e632676a84f0a6df80c905aeff49dd6e856",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the complete skeleton, sword, shield and reference limb count; do not swap bone hands or erase joints."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A skeletal march with alternating foot contacts, light knee bends, sword-arm counter-swing and shield movement; close the cycle without travel.",
+          "raw_source": "docs/art-generation/n04/walk.source.png",
+          "raw_prompt": "docs/art-generation/n04/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n04/atlas.png",
+        "layout": "assets/art/identities/n04/layout.json",
+        "receipt": "assets/art/identities/n04/receipt.json"
+      }
+    },
+    {
+      "id": "n05",
+      "name": "거미 추적자",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "multi",
+      "reference": "assets/art/portraits/n05.png",
+      "reference_sha256": "9d74eca6d683324bc6cf3aaa5611495ae67fca1399b40b9cad07df5460f70c66",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the spider body, reference leg count, red eyes and spines; no shared crab anatomy or detached legs."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A spider scuttle using coordinated alternating support and swing leg groups with a stable abdomen; show six genuinely different contact phases and loop in place.",
+          "raw_source": "docs/art-generation/n05/walk.source.png",
+          "raw_prompt": "docs/art-generation/n05/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n05/atlas.png",
+        "layout": "assets/art/identities/n05/layout.json",
+        "receipt": "assets/art/identities/n05/receipt.json"
+      }
+    },
+    {
+      "id": "n06",
+      "name": "숲의 망령",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "floating",
+      "reference": "assets/art/portraits/n06.png",
+      "reference_sha256": "f3bb389cbc3d27c28b18dab4b8617d2f6e5ea5b7758ebcd9f64621400184c412",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the woodland ghost, antler/leaf shapes and actual lower-body silhouette; no human walking feet or extra detached leaves."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A hovering forest-spirit glide with flowing robe/root lower-body undulation, gentle arm motion and a stable antlered head; cycle in place without footfalls.",
+          "raw_source": "docs/art-generation/n06/walk.source.png",
+          "raw_prompt": "docs/art-generation/n06/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n06/atlas.png",
+        "layout": "assets/art/identities/n06/layout.json",
+        "receipt": "assets/art/identities/n06/receipt.json"
+      }
+    },
+    {
+      "id": "n07",
+      "name": "오크 돌격병",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "heavy",
+      "reference": "assets/art/portraits/n07.png",
+      "reference_sha256": "a68fd670145c7a71ee27355482f541a13a37ffec8d53c1d768550040da097e48",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the orc, armor and one axe; walking is not an axe attack; keep weapon inside the cell."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A heavy orc stride with alternating planted feet, weighted knee bends, shoulder sway and a securely held axe; loop without translating.",
+          "raw_source": "docs/art-generation/n07/walk.source.png",
+          "raw_prompt": "docs/art-generation/n07/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n07/atlas.png",
+        "layout": "assets/art/identities/n07/layout.json",
+        "receipt": "assets/art/identities/n07/receipt.json"
+      }
+    },
+    {
+      "id": "n08",
+      "name": "어린 와이번",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "dragon",
+      "reference": "assets/art/portraits/n08.png",
+      "reference_sha256": "01e870054d249df856b5ef698d064b404f81183bc903d536ef382d4703a6f91e",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the young wyvern design and exact existing leg/wing count; no new forelimbs, fire or wing cropping."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A young dragon walking cycle with alternating reference-leg contacts, restrained wing flex and attached tail counterbalance; keep the body centered.",
+          "raw_source": "docs/art-generation/n08/walk.source.png",
+          "raw_prompt": "docs/art-generation/n08/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n08/atlas.png",
+        "layout": "assets/art/identities/n08/layout.json",
+        "receipt": "assets/art/identities/n08/receipt.json"
+      }
+    },
+    {
+      "id": "n09",
+      "name": "가시 멧돼지",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "quadruped",
+      "reference": "assets/art/portraits/n09.png",
+      "reference_sha256": "5ee514a92f86b0dfa2194b849ef5afc16639a27b9cd64a22afd5b7835f0fc89e",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the tusks, back spines, four boar legs and low body; no canine replacement."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A short-legged boar trot with alternating diagonal hoof contacts, compact body bob and attached head/tail movement; close the loop in place.",
+          "raw_source": "docs/art-generation/n09/walk.source.png",
+          "raw_prompt": "docs/art-generation/n09/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n09/atlas.png",
+        "layout": "assets/art/identities/n09/layout.json",
+        "receipt": "assets/art/identities/n09/receipt.json"
+      }
+    },
+    {
+      "id": "n10",
+      "name": "동굴 박쥐",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "floating",
+      "reference": "assets/art/portraits/n10.png",
+      "reference_sha256": "5464d7f2cc4ab771ddf85f2e4b407228372dfbef3c236b28860501f35cef1f24",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the bat anatomy and two membrane wings with attached finger bones; no human ghost, legs walking or detached wing tips."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A bat flight cycle with clearly raised, mid-stroke and lowered wings followed by recovery phases; body and ears stay readable and centered.",
+          "raw_source": "docs/art-generation/n10/walk.source.png",
+          "raw_prompt": "docs/art-generation/n10/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n10/atlas.png",
+        "layout": "assets/art/identities/n10/layout.json",
+        "receipt": "assets/art/identities/n10/receipt.json"
+      }
+    },
+    {
+      "id": "n11",
+      "name": "붉은 도적",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/n11.png",
+      "reference_sha256": "8b92df3c8730927f114df8d100c04b87b2f11ad6ec1448107ed1192c5fecddca",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the hooded dual-blade bandit and two arms; blades stay held and do not become attack arcs."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "An agile bandit stride with alternating foot plants and passing poses, controlled knee lift and natural cloak/blade-arm counter-swing; loop in place.",
+          "raw_source": "docs/art-generation/n11/walk.source.png",
+          "raw_prompt": "docs/art-generation/n11/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n11/atlas.png",
+        "layout": "assets/art/identities/n11/layout.json",
+        "receipt": "assets/art/identities/n11/receipt.json"
+      }
+    },
+    {
+      "id": "n12",
+      "name": "늪 거머리",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "blob",
+      "reference": "assets/art/portraits/n12.png",
+      "reference_sha256": "97cb2daa686a326b5a372db9ec7e8ea478e8051b050ced7c9581948ca284cb79",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the long soft leech body and round toothed mouth; no generic spherical slime, legs or detached drool."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A leech crawl built from body contraction, forward extension, base recovery and complementary contractions; keep the mouth attached and loop in place.",
+          "raw_source": "docs/art-generation/n12/walk.source.png",
+          "raw_prompt": "docs/art-generation/n12/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n12/atlas.png",
+        "layout": "assets/art/identities/n12/layout.json",
+        "receipt": "assets/art/identities/n12/receipt.json"
+      }
+    },
+    {
+      "id": "n13",
+      "name": "바위 게",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "multi",
+      "reference": "assets/art/portraits/n13.png",
+      "reference_sha256": "dabd842adaade720214efabc22c6596e7f336f541776540f7964a79274e2ef80",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the rock-shell crab, two claws and reference leg count; no spider abdomen or broken claw joints."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A low crab scuttle with coordinated alternating side-leg support, small body lift and restrained claw adjustment; return to the first contact phase.",
+          "raw_source": "docs/art-generation/n13/walk.source.png",
+          "raw_prompt": "docs/art-generation/n13/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n13/atlas.png",
+        "layout": "assets/art/identities/n13/layout.json",
+        "receipt": "assets/art/identities/n13/receipt.json"
+      }
+    },
+    {
+      "id": "n14",
+      "name": "불꽃 정령",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "floating",
+      "reference": "assets/art/portraits/n14.png",
+      "reference_sha256": "ab0eb0eef382938c8c8283edac5a02a6a9927039e026a730c5e8acbe1cff0984",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the fiery rocky elemental silhouette; keep intentional body pieces coherently arranged and add no loose embers or smoke."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A flame-elemental glide with attached flame-body compression and upward undulation, small shoulder/arm shifts and a coherent loop without walking feet.",
+          "raw_source": "docs/art-generation/n14/walk.source.png",
+          "raw_prompt": "docs/art-generation/n14/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n14/atlas.png",
+        "layout": "assets/art/identities/n14/layout.json",
+        "receipt": "assets/art/identities/n14/receipt.json"
+      }
+    },
+    {
+      "id": "n15",
+      "name": "회색 늑대",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "quadruped",
+      "reference": "assets/art/portraits/n15.png",
+      "reference_sha256": "61119f9616d298b5eafe2150b4d5c466b0ff47fbbda60752d801872b2dded73b",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the gray-wolf identity and four legs; no armor copied from n02 or human accessories."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A lean wolf trot with alternating diagonal paw contacts, visible limb passing and small head/tail counterbalance; loop in place.",
+          "raw_source": "docs/art-generation/n15/walk.source.png",
+          "raw_prompt": "docs/art-generation/n15/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n15/atlas.png",
+        "layout": "assets/art/identities/n15/layout.json",
+        "receipt": "assets/art/identities/n15/receipt.json"
+      }
+    },
+    {
+      "id": "n16",
+      "name": "장갑 고블린",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "heavy",
+      "reference": "assets/art/portraits/n16.png",
+      "reference_sha256": "9a221c71d8be642f218140d8432b401b9058d0b871eb65187ef4eb2015d36c12",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the compact goblin, helmet, mace and shield; no giant or human proportions."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A short heavy armored-goblin march with alternating planted feet, bent-knee passing and controlled weapon/shield weight shift; loop in place.",
+          "raw_source": "docs/art-generation/n16/walk.source.png",
+          "raw_prompt": "docs/art-generation/n16/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n16/atlas.png",
+        "layout": "assets/art/identities/n16/layout.json",
+        "receipt": "assets/art/identities/n16/receipt.json"
+      }
+    },
+    {
+      "id": "n17",
+      "name": "서리 슬라임",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "blob",
+      "reference": "assets/art/portraits/n17.png",
+      "reference_sha256": "596c6757da7ae66e02b03aa2832fbb5505e1d67755b2477c7e230de3d3ba0867",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the frost face and attached ice crown/spikes; no detached ice spray or newly grown legs."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "An ice-slime crawl with alternating low compression and rounded expansion while the icy upper silhouette moves coherently; loop in place.",
+          "raw_source": "docs/art-generation/n17/walk.source.png",
+          "raw_prompt": "docs/art-generation/n17/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n17/atlas.png",
+        "layout": "assets/art/identities/n17/layout.json",
+        "receipt": "assets/art/identities/n17/receipt.json"
+      }
+    },
+    {
+      "id": "n18",
+      "name": "밤의 추적자",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/n18.png",
+      "reference_sha256": "27b115b46fac15c84b5c01cb46f0823cd4e6472d0e9ce62d193dd13fb06e9e5a",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the hooded night stalker and paired curved blades; no slash action, extra arm or disappearing blade."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A low stealth walk with alternating toe-to-heel contact phases, bent knees, subtle torso sway and trailing cloak motion; loop in place.",
+          "raw_source": "docs/art-generation/n18/walk.source.png",
+          "raw_prompt": "docs/art-generation/n18/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n18/atlas.png",
+        "layout": "assets/art/identities/n18/layout.json",
+        "receipt": "assets/art/identities/n18/receipt.json"
+      }
+    },
+    {
+      "id": "n19",
+      "name": "독거미",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "multi",
+      "reference": "assets/art/portraits/n19.png",
+      "reference_sha256": "7703de0bcdf30f0580845730b823313b97a517255a8aa1bc49e0359cfd8a274a",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve this spider distinct from n05, including its abdomen, eyes and exact leg count; no palette-only substitution."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A venom-spider scuttle with alternating support leg groups, small abdomen motion and clear joint phases; loop in place.",
+          "raw_source": "docs/art-generation/n19/walk.source.png",
+          "raw_prompt": "docs/art-generation/n19/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n19/atlas.png",
+        "layout": "assets/art/identities/n19/layout.json",
+        "receipt": "assets/art/identities/n19/receipt.json"
+      }
+    },
+    {
+      "id": "n20",
+      "name": "고대 골렘",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "heavy",
+      "reference": "assets/art/portraits/n20.png",
+      "reference_sha256": "0c7505fede3d6fd5dd4ecb08542851cbe1f286fb6ee0a2f1dd991f156f69d5dc",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the golem blocks, chest core and attached vegetation; do not add detached rubble or human skin."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A stone golem lumber with alternating broad foot plants, delayed shoulder counter-swing and small coherent block-joint motion; return to the first contact phase.",
+          "raw_source": "docs/art-generation/n20/walk.source.png",
+          "raw_prompt": "docs/art-generation/n20/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n20/atlas.png",
+        "layout": "assets/art/identities/n20/layout.json",
+        "receipt": "assets/art/identities/n20/receipt.json"
+      }
+    },
+    {
+      "id": "n21",
+      "name": "사막 전갈",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "multi",
+      "reference": "assets/art/portraits/n21.png",
+      "reference_sha256": "1a305117530d5ef2ecc940b22a9b9f7c34aee33cbb55b15a04c65886411d8afc",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve two pincers, segmented curled tail, stinger and reference leg count; no spider-only silhouette or loose tail tip."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A scorpion gait with coordinated alternating ground-leg contacts, stable pincers and a small attached-tail counterbalance; loop in place.",
+          "raw_source": "docs/art-generation/n21/walk.source.png",
+          "raw_prompt": "docs/art-generation/n21/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n21/atlas.png",
+        "layout": "assets/art/identities/n21/layout.json",
+        "receipt": "assets/art/identities/n21/receipt.json"
+      }
+    },
+    {
+      "id": "n22",
+      "name": "유령 기사",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/n22.png",
+      "reference_sha256": "853852303e596ca52754004d78dc183332ae3a7ce2c434e156b79ba92b5c6740",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the ghost knight armor, sword, shield and existing spectral anatomy; no generic robed ghost replacement."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "An armored spectral march with alternating feet, small knee bends and controlled shield/sword counter-swing while the tattered lower garment follows; loop.",
+          "raw_source": "docs/art-generation/n22/walk.source.png",
+          "raw_prompt": "docs/art-generation/n22/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n22/atlas.png",
+        "layout": "assets/art/identities/n22/layout.json",
+        "receipt": "assets/art/identities/n22/receipt.json"
+      }
+    },
+    {
+      "id": "n23",
+      "name": "붉은 와이번",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "dragon",
+      "reference": "assets/art/portraits/n23.png",
+      "reference_sha256": "bc39622d86457684d4a1eccdacbf7160aaa5a7cc4fbb241ca7af926c53e9027b",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the red wyvern reference body, horn pattern and existing limb count; no copied n08 pixels or detached fire."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A red dragon stride with alternating original-leg contacts, restrained wing flex and tail counterbalance; six contact phases loop without translation.",
+          "raw_source": "docs/art-generation/n23/walk.source.png",
+          "raw_prompt": "docs/art-generation/n23/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n23/atlas.png",
+        "layout": "assets/art/identities/n23/layout.json",
+        "receipt": "assets/art/identities/n23/receipt.json"
+      }
+    },
+    {
+      "id": "n24",
+      "name": "얼음 거수",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "quadruped",
+      "reference": "assets/art/portraits/n24.png",
+      "reference_sha256": "cb66d26a46c8cd1b758bd1fc14c2ae05d0e839743c3df1438536de779fd6e28e",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the mammoth-like body, four legs, trunk, tusks and ice spikes; no canine movement or missing trunk."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A heavy ice-beast walk with deliberate alternating broad foot contacts, slow shoulder/hip sway and attached trunk/tusk counterbalance; loop in place.",
+          "raw_source": "docs/art-generation/n24/walk.source.png",
+          "raw_prompt": "docs/art-generation/n24/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n24/atlas.png",
+        "layout": "assets/art/identities/n24/layout.json",
+        "receipt": "assets/art/identities/n24/receipt.json"
+      }
+    },
+    {
+      "id": "n25",
+      "name": "맹독 슬라임",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "blob",
+      "reference": "assets/art/portraits/n25.png",
+      "reference_sha256": "629647c83e66a6e4d1eab74ee42528758af974098e1517ad90937ccad052e797",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the poison slime face and attached spikes; no newly detached bubbles, legs or generic recolored n03 body."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A poison-slime crawl with low base compression, body extension and complementary recovery pulses while the spiked upper shape remains coherent; loop.",
+          "raw_source": "docs/art-generation/n25/walk.source.png",
+          "raw_prompt": "docs/art-generation/n25/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n25/atlas.png",
+        "layout": "assets/art/identities/n25/layout.json",
+        "receipt": "assets/art/identities/n25/receipt.json"
+      }
+    },
+    {
+      "id": "n26",
+      "name": "화산 투사",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "heavy",
+      "reference": "assets/art/portraits/n26.png",
+      "reference_sha256": "008c7abad70ba39cfa9953e7e2d57b18238ddff09844a3838e44c649be5b7276",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the lava armor and exact reference-held equipment; do not give every volcanic identity the same weapon or add loose lava."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A volcanic warrior march with weighted alternating foot plants, modest torso bob and secure movement of the existing weapon/arm assembly; loop in place.",
+          "raw_source": "docs/art-generation/n26/walk.source.png",
+          "raw_prompt": "docs/art-generation/n26/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n26/atlas.png",
+        "layout": "assets/art/identities/n26/layout.json",
+        "receipt": "assets/art/identities/n26/receipt.json"
+      }
+    },
+    {
+      "id": "n27",
+      "name": "황혼 정령",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "floating",
+      "reference": "assets/art/portraits/n27.png",
+      "reference_sha256": "76b572b1d4d53f00ec324e571e75f13d924dc7c723144a2470ec62aeae434efd",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the spectral twilight identity and existing ornament arrangement; no human walking gait or new detached crystals."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A twilight-spirit glide with rhythmic robe and hair undulation, gentle upper-body motion and no ground footfalls; close the loop in place.",
+          "raw_source": "docs/art-generation/n27/walk.source.png",
+          "raw_prompt": "docs/art-generation/n27/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n27/atlas.png",
+        "layout": "assets/art/identities/n27/layout.json",
+        "receipt": "assets/art/identities/n27/receipt.json"
+      }
+    },
+    {
+      "id": "n28",
+      "name": "칼날 사마귀",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "multi",
+      "reference": "assets/art/portraits/n28.png",
+      "reference_sha256": "9bf30cebe27ae3c1f2e09ebac765e12a3590523b38f8c2236d0d7babb914505e",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the insect abdomen, antennae, original leg count and two blade-like forearms; foreblades are not extra walking legs."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A mantis walk with alternating support phases of the original walking legs, stable upright thorax and small foreblade adjustments; cycle in place.",
+          "raw_source": "docs/art-generation/n28/walk.source.png",
+          "raw_prompt": "docs/art-generation/n28/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n28/atlas.png",
+        "layout": "assets/art/identities/n28/layout.json",
+        "receipt": "assets/art/identities/n28/receipt.json"
+      }
+    },
+    {
+      "id": "n29",
+      "name": "검은 사냥개",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "quadruped",
+      "reference": "assets/art/portraits/n29.png",
+      "reference_sha256": "aba68aa586b84010b235e1898234e2f9b4c9816ea3a12ab02824f583197c593b",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the black hound, collar/chains and four canine legs; chains remain attached and no extra heads appear."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A dark hound trot with alternating diagonal paw contacts, low shoulder motion and attached chain/tail settling; loop in place.",
+          "raw_source": "docs/art-generation/n29/walk.source.png",
+          "raw_prompt": "docs/art-generation/n29/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n29/atlas.png",
+        "layout": "assets/art/identities/n29/layout.json",
+        "receipt": "assets/art/identities/n29/receipt.json"
+      }
+    },
+    {
+      "id": "n30",
+      "name": "폐허 주술사",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/n30.png",
+      "reference_sha256": "c78edcc3029b93dbd1ff1d8610deeaa84695496583b45ac8fe638a7b40b02f16",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the ruined shaman, skull staff and reference free hand; no attack casting motion or newly detached magic."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A staff-bearing shaman shuffle with alternating short steps, restrained torso sway and robe settling while the staff stays controlled; loop.",
+          "raw_source": "docs/art-generation/n30/walk.source.png",
+          "raw_prompt": "docs/art-generation/n30/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n30/atlas.png",
+        "layout": "assets/art/identities/n30/layout.json",
+        "receipt": "assets/art/identities/n30/receipt.json"
+      }
+    },
+    {
+      "id": "n31",
+      "name": "구름 해파리",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "floating",
+      "reference": "assets/art/portraits/n31.png",
+      "reference_sha256": "58b60cf27ed113c388ccc2637dfd61f32d73c56c92c9ea9166fd266748de0cbc",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the cloud-jellyfish bell, cloud cap, ornaments and actual tentacle arrangement; no human feet or generic ghost body."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A jellyfish glide with bell expansion, bell contraction and trailing-tentacle recovery across six coherent phases; remain centered and loop.",
+          "raw_source": "docs/art-generation/n31/walk.source.png",
+          "raw_prompt": "docs/art-generation/n31/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n31/atlas.png",
+        "layout": "assets/art/identities/n31/layout.json",
+        "receipt": "assets/art/identities/n31/receipt.json"
+      }
+    },
+    {
+      "id": "n32",
+      "name": "철갑 거북",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "quadruped",
+      "reference": "assets/art/portraits/n32.png",
+      "reference_sha256": "5275ae23ba3f1dd0e712e93d56310c7857888ae68eb0bea09c6baff5c7c6244e",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the low turtle body, four legs, shell and miniature trees; do not deform the shell into a canine torso."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A slow armored-turtle walk with alternating diagonal foot support, short deliberate steps and minimal heavy-shell rocking; loop in place.",
+          "raw_source": "docs/art-generation/n32/walk.source.png",
+          "raw_prompt": "docs/art-generation/n32/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n32/atlas.png",
+        "layout": "assets/art/identities/n32/layout.json",
+        "receipt": "assets/art/identities/n32/receipt.json"
+      }
+    },
+    {
+      "id": "n33",
+      "name": "불사조의 잔영",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "dragon",
+      "reference": "assets/art/portraits/n33.png",
+      "reference_sha256": "6ed109699f0a4f9d7dab05dc00834f55c9a2ece348b80ca5a9b9841b23ee1ed9",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "This is a BIRD: preserve two feathered wings, avian head and tail plumage; no four-legged dragon anatomy or detached flames."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A phoenix flight cycle with distinct upstroke, midstroke and downstroke wing poses, controlled body lift and flowing attached tail feathers; loop.",
+          "raw_source": "docs/art-generation/n33/walk.source.png",
+          "raw_prompt": "docs/art-generation/n33/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n33/atlas.png",
+        "layout": "assets/art/identities/n33/layout.json",
+        "receipt": "assets/art/identities/n33/receipt.json"
+      }
+    },
+    {
+      "id": "n34",
+      "name": "심연의 문어",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "multi",
+      "reference": "assets/art/portraits/n34.png",
+      "reference_sha256": "8682def1190a30d62c6efdc490cb0e2e8ed57e03679bc210caef28b682909323",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the octopus mantle, suckers and reference tentacle count; no spider-jointed replacement or detached tentacles."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "An octopus crawl/glide with alternating curled tentacle support and extension, small mantle pulsing and stable attached head armor; loop in place.",
+          "raw_source": "docs/art-generation/n34/walk.source.png",
+          "raw_prompt": "docs/art-generation/n34/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n34/atlas.png",
+        "layout": "assets/art/identities/n34/layout.json",
+        "receipt": "assets/art/identities/n34/receipt.json"
+      }
+    },
+    {
+      "id": "n35",
+      "name": "흑요석 거인",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "heavy",
+      "reference": "assets/art/portraits/n35.png",
+      "reference_sha256": "2530d49b81ad03d3c5b2c899d7a53959cf833f79a30053161b8f7ec11bad0448",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the obsidian plate shapes and glowing seams; no new hammer, detached rock shower or shrinking torso."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "An obsidian giant lumber with alternating wide foot plants, weight shifts and slow arm counter-swing; stone plates stay coherently joined through the loop.",
+          "raw_source": "docs/art-generation/n35/walk.source.png",
+          "raw_prompt": "docs/art-generation/n35/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n35/atlas.png",
+        "layout": "assets/art/identities/n35/layout.json",
+        "receipt": "assets/art/identities/n35/receipt.json"
+      }
+    },
+    {
+      "id": "n36",
+      "name": "달빛 망령",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "floating",
+      "reference": "assets/art/portraits/n36.png",
+      "reference_sha256": "c386e95e4a51ca87744fba6621030f2344a9a82b23d9632322e9899ec48fa226",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the moon motif, lantern ornaments and spectral lower body; no added ground feet or replacement generic ghost."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A moon-spirit hover with slow flowing hair/robe phases and restrained arm motion, returning to the original centered silhouette.",
+          "raw_source": "docs/art-generation/n36/walk.source.png",
+          "raw_prompt": "docs/art-generation/n36/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n36/atlas.png",
+        "layout": "assets/art/identities/n36/layout.json",
+        "receipt": "assets/art/identities/n36/receipt.json"
+      }
+    },
+    {
+      "id": "n37",
+      "name": "수정 용",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "dragon",
+      "reference": "assets/art/portraits/n37.png",
+      "reference_sha256": "00d6d025efb11e41e3409d2c3377432b0198f3942816fcb826a23c361f27d24c",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the angular crystal scales, horns and exact leg/wing count; no detached shards or melted soft-body anatomy."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A crystal dragon stride with alternating original-leg contacts, small wing flex and a coherent tail counterbalance; cycle in place.",
+          "raw_source": "docs/art-generation/n37/walk.source.png",
+          "raw_prompt": "docs/art-generation/n37/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n37/atlas.png",
+        "layout": "assets/art/identities/n37/layout.json",
+        "receipt": "assets/art/identities/n37/receipt.json"
+      }
+    },
+    {
+      "id": "n38",
+      "name": "균열 수호병",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "heavy",
+      "reference": "assets/art/portraits/n38.png",
+      "reference_sha256": "6723620b779da6cd4fbb6e0139decbd5e1b2f835bafbebf44c5deea7bde24cbe",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the actual rift armor, sword and established satellite pieces; do not delete characteristic pieces as noise or invent additional ones."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A rift guardian march with alternating armored foot plants and controlled sword-arm sway while the existing floating armor arrangement follows coherently; loop.",
+          "raw_source": "docs/art-generation/n38/walk.source.png",
+          "raw_prompt": "docs/art-generation/n38/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n38/atlas.png",
+        "layout": "assets/art/identities/n38/layout.json",
+        "receipt": "assets/art/identities/n38/receipt.json"
+      }
+    },
+    {
+      "id": "n39",
+      "name": "마왕의 전령",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/n39.png",
+      "reference_sha256": "53ef4c80cc56e732cd3971516f9875a9c7e6f50310ce22ff9eba0ce368147c67",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the humanoid herald, horns, staff and existing attached wings; do not convert it into a dragon because of the name."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A composed demonic-herald stride with alternating foot contacts, robe and wing settling and a steady staff; loop in place without attacking.",
+          "raw_source": "docs/art-generation/n39/walk.source.png",
+          "raw_prompt": "docs/art-generation/n39/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n39/atlas.png",
+        "layout": "assets/art/identities/n39/layout.json",
+        "receipt": "assets/art/identities/n39/receipt.json"
+      }
+    },
+    {
+      "id": "n40",
+      "name": "공허 비룡",
+      "category": "normal",
+      "catalog_kind": "normal",
+      "family": "dragon",
+      "reference": "assets/art/portraits/n40.png",
+      "reference_sha256": "1a67f85a867fd3133cb6ad5efa9bdc08aa252936dae4f31c018dfe169d13e3ec",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the void dragon silhouette, star-patterned wings and original anatomy; no new orbiting orbs, detached void effects or wing cropping."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A void dragon movement cycle using alternating original-leg contacts, restrained wing beats/flex and tail counterbalance while retaining a stable centered body.",
+          "raw_source": "docs/art-generation/n40/walk.source.png",
+          "raw_prompt": "docs/art-generation/n40/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/n40/atlas.png",
+        "layout": "assets/art/identities/n40/layout.json",
+        "receipt": "assets/art/identities/n40/receipt.json"
+      }
+    },
+    {
+      "id": "b10",
+      "name": "도보 도적왕",
+      "category": "boss",
+      "catalog_kind": "boss",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/b10.png",
+      "reference_sha256": "09ca56e3572513699a7fe5af37a1f64577b287aa12efb94a129d2dec2c3a33c5",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the crown, ragged royal cloak and original weapons; no mounted animal or generic knight replacement."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A deliberate crowned bandit-king march with alternating feet, weighted cloak sway and controlled held-blade movement; loop in place.",
+          "raw_source": "docs/art-generation/b10/walk.source.png",
+          "raw_prompt": "docs/art-generation/b10/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/b10/atlas.png",
+        "layout": "assets/art/identities/b10/layout.json",
+        "receipt": "assets/art/identities/b10/receipt.json"
+      }
+    },
+    {
+      "id": "b20",
+      "name": "숲의 거목",
+      "category": "boss",
+      "catalog_kind": "boss",
+      "family": "heavy",
+      "reference": "assets/art/portraits/b20.png",
+      "reference_sha256": "12ee9bcd7c22afef3f011dd9d4a3720743b3f05ba0fb537e172f10e35e4a5308",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the tree face, two reference root legs, trunk and branch canopy; no stone-golem replacement or detached leaves."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A walking tree gait with alternating root-foot plants, slow trunk weight shift and coherent canopy/branch sway; loop in place.",
+          "raw_source": "docs/art-generation/b20/walk.source.png",
+          "raw_prompt": "docs/art-generation/b20/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/b20/atlas.png",
+        "layout": "assets/art/identities/b20/layout.json",
+        "receipt": "assets/art/identities/b20/receipt.json"
+      }
+    },
+    {
+      "id": "b30",
+      "name": "거미 여왕",
+      "category": "boss",
+      "catalog_kind": "boss",
+      "family": "multi",
+      "reference": "assets/art/portraits/b30.png",
+      "reference_sha256": "2d9bf2e70076ec1e5ce1d562b00ea5ab13ec0aaeac1c92aec05351ebc4f8aed8",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the queen, crown, large abdomen and original leg count as ONE connected creature; do not substitute ally u32."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A large spider-queen scuttle with alternating support leg groups and a stable connected humanoid upper body; six contact phases loop in place.",
+          "raw_source": "docs/art-generation/b30/walk.source.png",
+          "raw_prompt": "docs/art-generation/b30/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/b30/atlas.png",
+        "layout": "assets/art/identities/b30/layout.json",
+        "receipt": "assets/art/identities/b30/receipt.json"
+      }
+    },
+    {
+      "id": "b40",
+      "name": "심연의 망령",
+      "category": "boss",
+      "catalog_kind": "boss",
+      "family": "floating",
+      "reference": "assets/art/portraits/b40.png",
+      "reference_sha256": "98294218e42cc10c7ad7c32508881ff377b8557f03352acf52ab2be8a50261bb",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the abyssal hood, chains, lantern and existing spectral silhouette; no added feet or new disconnected ghost flames."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "An abyssal specter glide with flowing robe-tail phases, gentle upper-body motion and a held lantern following coherently; loop without footfalls.",
+          "raw_source": "docs/art-generation/b40/walk.source.png",
+          "raw_prompt": "docs/art-generation/b40/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/b40/atlas.png",
+        "layout": "assets/art/identities/b40/layout.json",
+        "receipt": "assets/art/identities/b40/receipt.json"
+      }
+    },
+    {
+      "id": "b50",
+      "name": "고대 슬라임",
+      "category": "boss",
+      "catalog_kind": "boss",
+      "family": "blob",
+      "reference": "assets/art/portraits/b50.png",
+      "reference_sha256": "3a8e42a01ae01614da0369535055c4bf07ce00647ad9bf30ba1924cb619420a6",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the enormous slime and embedded architectural ruins; ruins remain part of the same silhouette, not dropped rubble."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A monumental slime crawl with heavy base compression, broad body recovery and stable embedded-ruin movement across six phases; loop in place.",
+          "raw_source": "docs/art-generation/b50/walk.source.png",
+          "raw_prompt": "docs/art-generation/b50/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/b50/atlas.png",
+        "layout": "assets/art/identities/b50/layout.json",
+        "receipt": "assets/art/identities/b50/receipt.json"
+      }
+    },
+    {
+      "id": "b60",
+      "name": "빙설 거수",
+      "category": "boss",
+      "catalog_kind": "boss",
+      "family": "quadruped",
+      "reference": "assets/art/portraits/b60.png",
+      "reference_sha256": "e855fd1b54da35dca06a71dbb1f653325a31ddca9579e5e735c13563105a9ca2",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the boss-specific mammoth-like beast, horn/tusk structure, four legs and ice mane; no enlarged copy of n24."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A large frost-beast walk with deliberate alternating four-foot support, low body rocking and attached tusk/head counterbalance; loop in place.",
+          "raw_source": "docs/art-generation/b60/walk.source.png",
+          "raw_prompt": "docs/art-generation/b60/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/b60/atlas.png",
+        "layout": "assets/art/identities/b60/layout.json",
+        "receipt": "assets/art/identities/b60/receipt.json"
+      }
+    },
+    {
+      "id": "b70",
+      "name": "화산 거인",
+      "category": "boss",
+      "catalog_kind": "boss",
+      "family": "heavy",
+      "reference": "assets/art/portraits/b70.png",
+      "reference_sha256": "e9b4cec85a396fed048dd05b14a3c406df77cdc8321cca8b8dae984643cde516",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the volcanic giant, jagged lava plates and actual fists; no new weapon, detached eruption or missing fingers."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A volcanic giant lumber with alternating massive foot plants, weighted torso sway and slow original-arm counter-swing; close the loop in place.",
+          "raw_source": "docs/art-generation/b70/walk.source.png",
+          "raw_prompt": "docs/art-generation/b70/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/b70/atlas.png",
+        "layout": "assets/art/identities/b70/layout.json",
+        "receipt": "assets/art/identities/b70/receipt.json"
+      }
+    },
+    {
+      "id": "b80",
+      "name": "폭풍 와이번",
+      "category": "boss",
+      "catalog_kind": "boss",
+      "family": "dragon",
+      "reference": "assets/art/portraits/b80.png",
+      "reference_sha256": "e8e6604b30a454a8ad2fe9276d67c7ea099b07046cf7aadf510205cb32c478bb",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the storm wing pattern, exact leg/wing count and head horns; no detached lightning or wing-tip cropping."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A storm wyvern stride with alternating original-leg contacts, restrained large-wing flex and attached tail counterbalance; loop in place.",
+          "raw_source": "docs/art-generation/b80/walk.source.png",
+          "raw_prompt": "docs/art-generation/b80/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/b80/atlas.png",
+        "layout": "assets/art/identities/b80/layout.json",
+        "receipt": "assets/art/identities/b80/receipt.json"
+      }
+    },
+    {
+      "id": "b90",
+      "name": "타락한 용기사",
+      "category": "boss",
+      "catalog_kind": "boss",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/b90.png",
+      "reference_sha256": "b727ad4a443e0f1d71fe1a8e6d1ce5a2fa00cceae11e9deaf0653ed03e4eec93",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the humanoid dragon-armored knight, ornate sword, horned helmet and original attached cape/wing structure; no dragon-body substitution."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A heavy fallen dragon-knight march with alternating armored foot contacts, controlled sword weight and slow cape/wing settling; loop in place.",
+          "raw_source": "docs/art-generation/b90/walk.source.png",
+          "raw_prompt": "docs/art-generation/b90/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/b90/atlas.png",
+        "layout": "assets/art/identities/b90/layout.json",
+        "receipt": "assets/art/identities/b90/receipt.json"
+      }
+    },
+    {
+      "id": "b100",
+      "name": "마왕",
+      "category": "boss",
+      "catalog_kind": "final",
+      "family": "dragon",
+      "reference": "assets/art/portraits/b100.png",
+      "reference_sha256": "148524ca982f9173ba39027d9d0acb64830dc1e7b0d50f0f814dc31f2be8d4a9",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the final boss dragon identity, red-black armor scales, horns and exact limbs; no enemy attack or breath sequence."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A massive demonic-dragon stride with alternating original-leg contacts, weighty chest movement, small wing flex and attached tail balance; loop in place.",
+          "raw_source": "docs/art-generation/b100/walk.source.png",
+          "raw_prompt": "docs/art-generation/b100/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/b100/atlas.png",
+        "layout": "assets/art/identities/b100/layout.json",
+        "receipt": "assets/art/identities/b100/receipt.json"
+      }
+    },
+    {
+      "id": "s10",
+      "name": "골드 고블린",
+      "category": "special",
+      "catalog_kind": "special",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/s10.png",
+      "reference_sha256": "d2c4a589d3202a40218e56785c0c04decdc6c48d2fb6847127089b76d23ef514",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve goggles, dagger and full attached treasure sack; coins do not spill as disconnected particles and no ally u14 substitution."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A hurried treasure-goblin walk with alternating bent-knee contacts, a forward-leaning torso and attached coin-sack settling; loop in place.",
+          "raw_source": "docs/art-generation/s10/walk.source.png",
+          "raw_prompt": "docs/art-generation/s10/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/s10/atlas.png",
+        "layout": "assets/art/identities/s10/layout.json",
+        "receipt": "assets/art/identities/s10/receipt.json"
+      }
+    },
+    {
+      "id": "s30",
+      "name": "황금 고블린",
+      "category": "special",
+      "catalog_kind": "special",
+      "family": "humanoid",
+      "reference": "assets/art/portraits/s30.png",
+      "reference_sha256": "577f32e06848a2ef43bf62ed23a8963b7e5a0df21b46df6836a3227b8542e9eb",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve crown, royal clothing, scepter and treasure load; distinct from s10 and ally u14 despite related names."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A crowned wealthy-goblin waddle with alternating short steps, gentle belly/robe movement and the scepter held steadily; loop in place.",
+          "raw_source": "docs/art-generation/s30/walk.source.png",
+          "raw_prompt": "docs/art-generation/s30/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/s30/atlas.png",
+        "layout": "assets/art/identities/s30/layout.json",
+        "receipt": "assets/art/identities/s30/receipt.json"
+      }
+    },
+    {
+      "id": "s60",
+      "name": "도적 두목",
+      "category": "special",
+      "catalog_kind": "special",
+      "family": "heavy",
+      "reference": "assets/art/portraits/s60.png",
+      "reference_sha256": "c0b505bb48ca509d0cd5874c007ac03bd495aa91f571bd1840f57e922667f3f7",
+      "required_states": [
+        "walk"
+      ],
+      "anatomy_weapon_safeguards": [
+        "Preserve the large HUMAN bandit, beard, fur shoulders and original blade; heavy family does not imply orc or golem anatomy."
+      ],
+      "states": {
+        "walk": {
+          "motion_prompt": "A broad bandit-chief stride with alternating heavy foot plants, modest shoulder sway and a securely held blade; loop in place.",
+          "raw_source": "docs/art-generation/s60/walk.source.png",
+          "raw_prompt": "docs/art-generation/s60/walk.prompt.txt"
+        }
+      },
+      "runtime": {
+        "atlas": "assets/art/identities/s60/atlas.png",
+        "layout": "assets/art/identities/s60/layout.json",
+        "receipt": "assets/art/identities/s60/receipt.json"
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+Create a single horizontal sprite strip for the game character `u01` in the state `attack`.
+
+If this is a pre-idle/simple run, the attached base image may be used as the canonical character design. In direction-anchor mode, do not use base images for final action rows; accepted idle/direction anchors own row identity. Use the attached accepted idle/direction anchor as the canonical character design for this row. If a state anchor is attached for a non-locomotion state, treat it as approved state vocabulary only. Use the attached layout guide image only for frame count, slot spacing, centering, and safe padding. If an additional generated row strip is attached, use it only as a motion reference, never as a replacement identity source. Do not simply copy the still reference pose. Generate distinct animation poses that create a readable cycle or action.
+
+Character: Young swordsman, tousled brown hair, red-orange scarf and lion-emblem tabard, dark steel plate with gold trim, boots and right-handed straight steel sword. No hood, no green cloak, no shield. Preserve the exact attached u01 reference character.
+Style contract: Exact reference identity, detailed pixel-art rendering, face, palette, material, proportions, outline density, camera and facing. No redesign, mirror, new equipment or camera rotation.
+
+Use this prompt as an authoritative sprite-production spec.
+
+Animation action: Six genuinely different full-body attack poses, in reading order. 1: sword draws back with bent elbow, slight torso twist. 2: full overhead windup. 3: decisive downward diagonal cutting contact, sword arm extended. 4: different low follow-through. 5: sword returns to low guard. 6: original ready stance. Preserve right-hand sword grip, sword stays visible in ALL six poses. Feet remain in the same ground cell. Change articulated arms, knees, torso and cloth, not six transformed copies of one still. No damage or hit on this character.
+
+Anchor lock:
+- Accepted idle/direction anchors own character identity, outfit details, colors, face design, asymmetric markings, and side-specific accessories for final action rows.
+- Base character images and original character sheets are pre-idle sources only. Do not reinterpret or reintroduce base-character details inside a direction-anchor action row.
+- This row owns motion only. Spend the variation budget on limb contacts, arm counter-swing, body height, torso lean, head bob, hair bounce, and loop continuity.
+- Do not redesign or reinterpret identity details while animating. Keep face, hair shape, markings, palette, outline weight, body proportions, outfit, props, and silhouette copied from the approved anchors.
+- Preserve side-specific features exactly as the approved anchors show them. Do not solve hairpin side, earring side, logos, handed props, scars, one-sided markings, asymmetric clothing, or lighting cues from scratch inside the row.
+- When generating a paired left/right row, use the paired row reference only for timing, scale, and animation intensity. Rotate the body, feet, shoulders, face angle, and gaze to the target facing, but keep identity details attached according to the accepted target-direction anchor.
+- For cyclic locomotion, do not let a single running/walking pose anchor determine every frame's leg phase. When a multi-pose motion reference is attached, use it for foot contacts.
+- Prefer a subtler animation over any change that mutates the character identity.
+
+
+Transparency and artifact rules:
+- Prefer pose, expression, and silhouette changes over decorative effects.
+- Effects are allowed only when state-relevant, opaque, hard-edged, sprite-like, fully inside the same frame slot, and physically touching or overlapping the character silhouette.
+- Do not draw detached effects: floating stars, loose sparkles, floating punctuation, floating icons, separated smoke clouds, loose dust, disconnected outline bits, or stray pixels.
+- Do not draw wave marks, motion arcs, speed lines, action streaks, afterimages, blur, smears, halos, glows, auras, floor patches, cast shadows, contact shadows, drop shadows, oval floor shadows, landing marks, or impact bursts.
+- Do not include text, labels, frame numbers, visible grids, guide marks, speech bubbles, thought bubbles, UI panels, code snippets, scenery, checkerboard transparency, white backgrounds, or black backgrounds.
+- Reject any pose that is cropped, overlaps another pose, crosses into a neighboring frame slot, or creates a separate disconnected component that is not attached to the character.
+
+Layout requirements (adapted from sprite-gen row layout for built-in image aspect ratio):
+- Exactly SIX full-body poses in THREE columns and TWO rows, reading left to right on the top row, then left to right on the bottom row.
+- Output a landscape 3:2 sheet, ideally 1536x1024. Six equal square invisible slots, one pose per slot. The second reference is a layout guide only.
+- Keep each COMPLETE pose, including every weapon tip and garment, inside its own slot with at least 12 percent transparent padding on all sides. No cropping or crossing between cells.
+- All feet touch the SAME baseline at 86 percent of each cell height. Keep head/body scale the same in all poses, even when a weapon is raised. Allow generous top space for raised weapons.
+- Center each character's hips on the horizontal center of its cell. Preserve the same body scale and anchor in all six cells.
+- Do NOT include grid lines, frame numbers, letters, background colors, floor, ground, shadows, labels or UI.
+- Real transparent alpha background. This replaces the upstream magenta chroma-key option. No fake checkerboard.
+- Hard clean sprite edges, no detached decoration, no chromatic fringe, no blur. Preserve the source image's detailed pixel-art style.
+Output only the six-pose sprite sheet image.
