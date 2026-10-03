@@ -14,6 +14,7 @@ var _access_serial := 0
 var entries: Dictionary = {}
 var families: Dictionary = {}
 var portraits: Dictionary = {}
+var _portrait_regions: Dictionary = {}
 var identity_resources: Dictionary = {}
 
 func _init(identity_manifest_path: String = "res://assets/art/identity_animations.json") -> void:
@@ -145,6 +146,19 @@ func portrait(identity: String) -> Texture2D:
 		portraits[identity] = load(_portrait_paths[identity])
 		_trim_portraits(identity)
 	return portraits[identity] as Texture2D
+
+func framed_portrait(identity: String) -> Texture2D:
+	var texture := portrait(identity)
+	if texture == null:
+		return null
+	# 원본의 투명 여백만 제외한다. 사각 영역만 캐시해 텍스처 LRU 수명은 그대로 둔다.
+	if not _portrait_regions.has(identity):
+		var used := texture.get_image().get_used_rect()
+		_portrait_regions[identity] = Rect2(used).grow(8).intersection(Rect2(Vector2.ZERO, texture.get_size()))
+	var framed := AtlasTexture.new()
+	framed.atlas = texture
+	framed.region = _portrait_regions[identity]
+	return framed
 
 func retain_identities(identities: Array) -> void:
 	# 살아 있는 개체는 해상도/동작을 보존한다. 웨이브 사이에는 작은 LRU 여유만 남긴다.

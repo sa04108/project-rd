@@ -1462,5 +1462,53 @@
     "ko": "강화할 수 없습니다",
     "zh_CN": "无法强化",
     "ja": "強化できません"
+  },
+  "catalog.filter.distance": {
+    "en": "Range: All",
+    "ko": "거리: 전체",
+    "zh_CN": "距离：全部",
+    "ja": "距離：すべて"
+  },
+  "catalog.filter.targets": {
+    "en": "Targets: All",
+    "ko": "대상: 전체",
+    "zh_CN": "目标：全部",
+    "ja": "対象：すべて"
+  },
+  "catalog.filter.action": {
+    "en": "Role: All",
+    "ko": "행동: 전체",
+    "zh_CN": "行动：全部",
+    "ja": "行動：すべて"
+  },
+  "catalog.filter.empty": {
+    "en": "No matching mercenaries.",
+    "ko": "조건에 맞는 용병이 없습니다.",
+    "zh_CN": "没有符合条件的佣兵。",
+    "ja": "条件に合う傭兵はいません。"
+  },
+  "recipes.tracking.start": {
+    "en": "Track",
+    "ko": "추적",
+    "zh_CN": "追踪",
+    "ja": "追跡"
+  },
+  "recipes.tracking.stop": {
+    "en": "Untrack",
+    "ko": "추적 해제",
+    "zh_CN": "取消追踪",
+    "ja": "追跡解除"
+  },
+  "recipes.tracking.combine": {
+    "en": "Combine %s",
+    "ko": "%s 조합",
+    "zh_CN": "合成%s",
+    "ja": "%sを合成"
+  },
+  "error.save.unsupported_version": {
+    "en": "This save needs a newer app version. Please update the app.",
+    "ko": "새 버전에서 저장한 기록입니다. 앱을 업데이트해 주세요.",
+    "zh_CN": "此存档需要更新版本的应用。请更新应用。",
+    "ja": "このセーブには新しいバージョンが必要です。アプリを更新してください。"
   }
 }

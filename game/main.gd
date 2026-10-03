@@ -12,6 +12,8 @@ const SaveStore = preload("res://game/save_store.gd")
 const AudioDirector = preload("res://game/audio_director.gd")
 const BattleBoard = preload("res://game/battle_board.gd")
 const UnitDescription = preload("res://game/unit_description.gd")
+const CatalogFilters = preload("res://game/catalog_filters.gd")
+const RecipeTracking = preload("res://game/recipe_tracking.gd")
 const PlacementFeedback = preload("res://game/placement_feedback.gd")
 const MENU_BACKGROUND = preload("res://assets/art/backgrounds/guild.png")
 const FONT = preload("res://assets/fonts/GuildSans.otf")
@@ -47,7 +49,12 @@ var dev_mode := false
 var audio: Node
 var codex_tab := "units"
 var enemy_filter := "all"
-var unit_tier_filter := 0
+var catalog_filters = CatalogFilters.new()
+var recipe_filters = CatalogFilters.new()
+var tracking_bar: Control
+var tracked_button_ids: Array[String] = []
+var selection_pointer: Dictionary = {}
+var selection_click_serial := 0
 var modal_focus_controls: Array[Dictionary] = []
 var modal_previous_focus: Control
 var web_input_canvas: JavaScriptObject
@@ -254,6 +261,8 @@ func _battle_action(text_value: String, rect: Rect2, callback: Callable, action:
 
 func _retire_ui(control: Control) -> void:
 	# 숨김 처리의 내부 마우스 release가 누르고 있던 버튼을 실행하지 않게 한다.
+	if control is BaseButton:
+		control.disabled = true
 	for button in control.find_children("*", "BaseButton", true, false):
 		button.disabled = true
 	# 입력 이벤트 전파가 끝날 때까지 노드는 트리에 남겨 둔다.
@@ -269,6 +278,9 @@ func _clear_screen() -> void:
 	add_child(screen)
 	labels.clear()
 	board = null
+	tracking_bar = null
+	tracked_button_ids.clear()
+	selection_pointer.clear()
 	if is_instance_valid(toast_label):
 		toast_label.queue_free()
 	toast_label = null
@@ -508,6 +520,7 @@ func _refresh() -> void:
 	board.selected_id = selected
 	for update in dynamic:
 		update.call()
+	_sync_tracking_buttons()
 
 func _close_panel() -> void:
 	if is_instance_valid(board):
@@ -521,6 +534,7 @@ func _close_panel() -> void:
 	panel_name = ""
 	dynamic.clear()
 	sim.set_pause("settings", false)
+	_sync_tracking_buttons()
 
 func _capture_modal_focus() -> void:
 	# 마우스 차단막뿐 아니라 Tab·Enter도 현재 모달 안에서만 동작한다.
@@ -550,9 +564,9 @@ func _restore_modal_focus() -> void:
 		modal_previous_focus.grab_focus()
 	modal_previous_focus = null
 
-func _open_panel(kind: String, force: bool = false) -> void:
+func _open_panel(kind: String, force: bool = false, preserve_scroll: bool = true) -> void:
 	var recipe_scroll := -1
-	if force and kind == "recipes" and panel_name == kind and is_instance_valid(overlay):
+	if preserve_scroll and force and kind == "recipes" and panel_name == kind and is_instance_valid(overlay):
 		for scroller in overlay.find_children("*", "ScrollContainer", true, false):
 			recipe_scroll = scroller.scroll_vertical
 			break
@@ -573,13 +587,17 @@ func _open_panel(kind: String, force: bool = false) -> void:
 	var large := kind in ["recipes", "codex", "settings", "result", "confirm_new"]
 	var top := 171.0 if kind == "settings" else (303.0 if large else 637.0)
 	var body_height := 884.0 if kind == "settings" else (694.0 if large else 360.0)
+	if kind in ["recipes", "codex"]:
+		# 128px씩 대칭 여백을 두고 최상단 도구 바로 아래부터 표시한다.
+		top = 172.0
+		body_height = 980.0
 	if kind in ["upgrade", "special"]:
 		body_height = 526.0 if kind == "upgrade" else 449.0
 		top = 997.0 - body_height
 	# 본문과 하단 HUD 위치를 보존하면서 닫기 버튼을 위한 머리말만 위로 확장한다.
 	var panel := _panel(overlay, Rect2(35, top - 44.0, 650, body_height + 44.0), Color("172b39"), GOLD)
-	if is_instance_valid(board):
-		board.blocked_screen_rects.assign([Rect2(0, 0, 720, 1280) if kind in ["settings", "result", "confirm_new"] else panel.get_global_rect()])
+	panel.name = "PopupPanel"
+	overlay.set_meta("blocked_rect", Rect2(0, 0, 720, 1280) if kind in ["settings", "result", "confirm_new"] else panel.get_global_rect())
 	var titles := {"upgrade": L.text("upgrade.title"), "gamble": L.text("gamble.title"), "special": L.text("special.title"), "recipes": L.text("recipes.codex.title"), "codex": L.text("catalog.codex.title"), "settings": L.text("settings.title"), "result": L.text("result.title.victory") if sim.result == "victory" else L.text("result.title.defeat"), "confirm_new": L.text("expedition.new.title")}
 	var heading := _panel(panel, Rect2(9, 5, 632, 100), INK, GOLD, "blue")
 	_label(heading, titles[kind], Vector2(20, 31), 500, 26, PALE)
@@ -612,6 +630,7 @@ func _open_panel(kind: String, force: bool = false) -> void:
 			scroller.set_deferred("scroll_vertical", recipe_scroll)
 	for candidate in overlay.find_children("PanelScroll", "ScrollContainer", true, false):
 		_set_scroll_input_pass(candidate)
+	_sync_tracking_buttons()
 
 func _set_scroll_input_pass(node: Node) -> void:
 	if node is ScrollBar:
@@ -675,8 +694,9 @@ func _scroll(panel: Control, top: float = 72.0) -> VBoxContainer:
 	var scroller := DragScrollContainer.new()
 	scroller.name = "PanelScroll"
 	scroller.position = Vector2(18, top)
-	scroller.size = Vector2(614, 670 - top)
+	scroller.size = Vector2(614, panel.size.y - top - 68.0)
 	scroller.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroller.scroll_started.connect(_selection_drag_started)
 	panel.add_child(scroller)
 	var list := VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -711,23 +731,18 @@ func _catalog_header(body: VBoxContainer, identity: String, title: String, statu
 	header.add_theme_constant_override("separation", 12)
 	body.add_child(header)
 	var portrait_slot := Control.new()
-	portrait_slot.custom_minimum_size = Vector2(84, 96)
+	portrait_slot.custom_minimum_size = Vector2(160, 180)
 	portrait_slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	header.add_child(portrait_slot)
-	_portrait(portrait_slot, identity, Vector2.ZERO, Vector2(84, 96))
+	_portrait(portrait_slot, identity, Vector2.ZERO, Vector2(160, 180), true)
 	var details := VBoxContainer.new()
 	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	details.add_theme_constant_override("separation", 6)
 	header.add_child(details)
-	var heading := HBoxContainer.new()
-	heading.add_theme_constant_override("separation", 8)
-	details.add_child(heading)
-	_catalog_text(heading, title, 28, GOLD)
+	_catalog_text(details, title, 28, GOLD)
 	if not status.is_empty():
-		var badge := _catalog_text(heading, status, 24, MUTED)
+		var badge := _catalog_text(details, status, 22, MUTED)
 		badge.name = "DiscoveryBadge"
-		badge.custom_minimum_size.x = clampf(badge.get_theme_font("font").get_string_size(status, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x, 72, 190)
-		badge.size_flags_horizontal = Control.SIZE_SHRINK_END
 	return details
 
 func _unit_summary(parent: Container, definition: Dictionary) -> void:
@@ -743,11 +758,89 @@ func _recipe_anchor(recipe: Dictionary) -> int:
 	var unit: Dictionary = sim.unit_by_id(selected)
 	return selected if not unit.is_empty() and recipe.ingredients.has(unit.kind) else -1
 
+func _catalog_filter_controls(panel: Control, filters, kind: String, y: float) -> void:
+	for tier in range(5):
+		var caption := L.text("catalog.filter.all") if tier == 0 else "★".repeat(tier)
+		var button := _button(panel, caption, Rect2(20 + tier * 124, y, 112, 88), func():
+			filters.tier = tier
+			_open_panel(kind, true, false), filters.tier == tier, kind + "_tier_%d" % tier)
+		button.add_theme_font_size_override("font_size", 22)
+	for index in range(CatalogFilters.GROUPS.size()):
+		var group: String = CatalogFilters.GROUPS[index]
+		var button := _button(panel, L.text(filters.label_key(group)), Rect2(20 + index * 206, y + 96, 194, 88), func():
+			filters.cycle(group)
+			_open_panel(kind, true, false), filters.get(group) != "all", kind + "_filter_" + group)
+		button.add_theme_font_size_override("font_size", 22)
+
+func _toggle_recipe_tracking(identity: String) -> void:
+	if not store.set_recipe_tracked(identity, not store.is_recipe_tracked(identity)):
+		_toast(L.text(store.last_error))
+		return
+	if is_instance_valid(overlay):
+		var button := overlay.find_child("track_" + identity, true, false) as Button
+		if button != null:
+			button.text = L.text("recipes.tracking.stop") if store.is_recipe_tracked(identity) else L.text("recipes.tracking.start")
+	_sync_tracking_buttons()
+
+func _sync_tracking_buttons() -> void:
+	if mode != "battle" or not is_instance_valid(board) or not is_instance_valid(screen):
+		return
+	var ready: Array = RecipeTracking.ready_recipes(sim, store.tracked_recipe_units())
+	var identities: Array[String] = []
+	for recipe in ready:
+		identities.append(str(recipe.result))
+	if identities != tracked_button_ids or not is_instance_valid(tracking_bar):
+		if is_instance_valid(tracking_bar):
+			_retire_ui(tracking_bar)
+		tracked_button_ids = identities
+		tracking_bar = Control.new()
+		tracking_bar.name = "RecipeTracking"
+		tracking_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		screen.add_child(tracking_bar)
+		for index in range(identities.size()):
+			var identity: String = identities[index]
+			var button := _button(tracking_bar, "", Rect2(618, 304 + index * 110, 100, 100), func(): _combine_tracked(identity), true, "tracked_" + identity)
+			button.tooltip_text = L.text("recipes.tracking.combine") % L.unit_name(identity)
+			button.accessibility_name = button.tooltip_text
+			_portrait(button, identity, Vector2(9, 5), Vector2(82, 71), true)
+			var stars := _label(button, "★".repeat(int(sim.catalog.units[identity].tier)), Vector2(4, 76), 92, 17, INK, false)
+			stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tracking_bar.visible = panel_name.is_empty() and sim.result == "active"
+	_sync_board_blockers()
+
+func _combine_tracked(identity: String) -> void:
+	# 눌린 뒤 재료가 바뀌거나 추적이 해제됐어도 다른 레시피를 대신 실행하지 않는다.
+	if not store.is_recipe_tracked(identity):
+		_sync_tracking_buttons()
+		return
+	var recipe: Dictionary = RecipeTracking.available_recipe(sim, identity)
+	if recipe.is_empty():
+		_sync_tracking_buttons()
+		return
+	var response: Dictionary = sim.combine(recipe.id)
+	if response.ok:
+		selected = int(response.unit_id)
+	_transaction(response, true)
+
+func _sync_board_blockers() -> void:
+	if not is_instance_valid(board):
+		return
+	board.blocked_screen_rects.clear()
+	if is_instance_valid(overlay) and overlay.has_meta("blocked_rect"):
+		board.blocked_screen_rects.append(overlay.get_meta("blocked_rect"))
+	if is_instance_valid(tracking_bar) and tracking_bar.is_visible_in_tree():
+		for button in tracking_bar.get_children():
+			if button is BaseButton:
+				board.blocked_screen_rects.append(button.get_global_rect())
+
 func _recipes_panel(panel: Control) -> void:
-	var list := _scroll(panel)
+	_catalog_filter_controls(panel, recipe_filters, "recipes", 72)
+	var list := _scroll(panel, 268)
 	var available: Array = []
 	var unavailable: Array = []
 	for recipe in sim.catalog.recipes:
+		if not recipe_filters.matches(sim.catalog.units[recipe.result]):
+			continue
 		if not sim.recipe_materials(recipe, _recipe_anchor(recipe)).is_empty():
 			available.append(recipe)
 		else:
@@ -758,7 +851,7 @@ func _recipes_panel(panel: Control) -> void:
 		var body := _catalog_row(list, recipe.result)
 		var details := _catalog_header(body, recipe.result, "%s  %s" % ["★".repeat(int(result_def.tier)), L.unit_name(str(recipe.result))])
 		_unit_summary(details, result_def)
-		_unit_base_stats(body, result_def)
+		_unit_base_stats(details, result_def)
 		var footer := HBoxContainer.new()
 		footer.add_theme_constant_override("separation", 16)
 		body.add_child(footer)
@@ -769,34 +862,40 @@ func _recipes_panel(panel: Control) -> void:
 				if unit.kind == id:
 					owned += 1
 			material_names.append("%s %d/%d" % [L.unit_name(str(id)), owned, recipe.ingredients[id]])
-		var materials := _catalog_text(footer, " + ".join(material_names), 24, PALE)
+		var materials := _catalog_text(body, " + ".join(material_names), 24, PALE)
 		materials.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		body.move_child(footer, body.get_child_count() - 1)
+		var track := _button(footer, L.text("recipes.tracking.stop") if store.is_recipe_tracked(recipe.result) else L.text("recipes.tracking.start"), Rect2(0, 0, 250, 100), func(): _toggle_recipe_tracking(str(recipe.result)), false, "track_" + recipe.result)
+		track.custom_minimum_size = Vector2(250, 100)
+		track.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var button := _button(footer, L.text("recipes.merge.button"), Rect2(0, 0, 120, 100), func():
 			var response: Dictionary = sim.combine(recipe.id, _recipe_anchor(recipe))
 			if response.ok:
 				selected = int(response.unit_id)
 			_transaction(response, true), true, "combine_" + recipe.id)
 		button.custom_minimum_size = Vector2(120, 100)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		button.disabled = not recipe in available or mode != "battle" or sim.result != "active"
+	if list.get_child_count() == 0:
+		_catalog_text(list, L.text("catalog.filter.empty"))
 
 func _codex_panel(panel: Control) -> void:
 	var units_tab := codex_tab == "units"
 	_button(panel, L.text("catalog.units.tab") % sim.catalog.units.size(), Rect2(20, 70, 285, 100), func(): codex_tab = "units"; _open_panel("codex", true), codex_tab == "units", "codex_units")
 	_button(panel, L.text("catalog.enemies.tab") % sim.catalog.enemies.size(), Rect2(322, 70, 306, 100), func(): codex_tab = "enemies"; _open_panel("codex", true), codex_tab == "enemies", "codex_enemies")
 	if codex_tab == "units":
-		for tier in range(5):
-			_button(panel, L.text("catalog.filter.all") if tier == 0 else L.text("catalog.filter.tier") % tier, Rect2(20 + tier * 124, 182, 112, 100), func(): unit_tier_filter = tier; _open_panel("codex", true), unit_tier_filter == tier, "codex_tier_%d" % tier)
+		_catalog_filter_controls(panel, catalog_filters, "codex", 182)
 	else:
 		var filters := ["all", "normal", "boss", "special"]
 		var names := [L.text("catalog.filter.all"), L.text("catalog.filter.normal"), L.text("catalog.filter.boss"), L.text("catalog.filter.special")]
 		for index in range(4):
-			_button(panel, names[index], Rect2(20 + index * 154, 182, 145, 100), func(): enemy_filter = filters[index]; _open_panel("codex", true), enemy_filter == filters[index], "codex_filter_" + filters[index])
-	var list := _scroll(panel, 296)
+			_button(panel, names[index], Rect2(20 + index * 154, 182, 140, 88), func(): enemy_filter = filters[index]; _open_panel("codex", true), enemy_filter == filters[index], "codex_filter_" + filters[index])
+	var list := _scroll(panel, 378 if units_tab else 284)
 	var definitions: Dictionary = sim.catalog.units if codex_tab == "units" else sim.catalog.enemies
 	for id in definitions:
 		var definition: Dictionary = definitions[id]
-		if codex_tab == "units" and unit_tier_filter != 0 and int(definition.tier) != unit_tier_filter:
+		if units_tab and not catalog_filters.matches(definition):
 			continue
 		if codex_tab == "enemies" and enemy_filter != "all" and definition.kind != enemy_filter and not (enemy_filter == "boss" and definition.kind == "final"):
 			continue
@@ -809,7 +908,7 @@ func _codex_panel(panel: Control) -> void:
 		var shown := {"found": found, "kills": _codex_kills(id) if not units_tab else 0}
 		if codex_tab == "units":
 			_unit_summary(details, definition)
-			_unit_base_stats(body, definition)
+			_unit_base_stats(details, definition)
 			_catalog_text(body, L.unit_description(str(id)), 24, MUTED)
 		else:
 			_catalog_text(details, L.text("catalog.enemy.stats") % [definition.hp, definition.reward], 24, PALE)
@@ -828,6 +927,8 @@ func _codex_panel(panel: Control) -> void:
 					shown.kills = count
 					kill_label.text = L.text("catalog.enemy.progress") % [definition.travel, count]
 		dynamic.append(update)
+	if list.get_child_count() == 0:
+		_catalog_text(list, L.text("catalog.filter.empty"))
 
 func _codex_kills(identity: String) -> int:
 	# 프로필에 반영된 이번 판의 상한을 빼서 자동 저장 전후에도 중복 합산하지 않는다.
@@ -839,8 +940,8 @@ func _codex_kills(identity: String) -> int:
 		pending -= int(store.profile.run_counts[sim.run_id].get(identity, 0))
 	return total + maxi(0, pending)
 
-func _portrait(parent: Control, identity: String, position_value: Vector2, dimensions: Vector2) -> void:
-	var texture: Texture2D = visuals.portrait(identity)
+func _portrait(parent: Control, identity: String, position_value: Vector2, dimensions: Vector2, framed: bool = false) -> void:
+	var texture: Texture2D = visuals.framed_portrait(identity) if framed else visuals.portrait(identity)
 	if texture == null:
 		return
 	var portrait := TextureRect.new()
@@ -1049,6 +1150,7 @@ func _notification(what: int) -> void:
 	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		_handle_back()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
+		selection_pointer.clear()
 		if is_instance_valid(board):
 			board.cancel_pointer()
 		sim.set_pause("background" if what == NOTIFICATION_APPLICATION_FOCUS_OUT else "suspended", true)
@@ -1057,6 +1159,74 @@ func _notification(what: int) -> void:
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_APPLICATION_RESUMED:
 		sim.set_pause("background" if what == NOTIFICATION_APPLICATION_FOCUS_IN else "suspended", false)
 		_sync_audio()
+
+# GUI에 소비되는 클릭도 관측하되, 실제 버튼 처리가 끝난 뒤 선택만 해제한다.
+func _input(event: InputEvent) -> void:
+	if mode != "battle" or not is_instance_valid(board):
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.device == InputEvent.DEVICE_ID_EMULATION:
+			return
+		if event.pressed:
+			_selection_press("mouse", 0, event.position)
+		else:
+			_selection_release("mouse", 0, event.position, event.canceled)
+	elif event is InputEventMouseMotion and event.device != InputEvent.DEVICE_ID_EMULATION:
+		_selection_motion("mouse", 0, event.position)
+	elif event is InputEventScreenTouch:
+		if event.pressed:
+			_selection_press("touch", event.index, event.position)
+		else:
+			_selection_release("touch", event.index, event.position, event.canceled)
+	elif event is InputEventScreenDrag:
+		_selection_motion("touch", event.index, event.position)
+
+func _selection_press(kind: String, index: int, position_value: Vector2) -> void:
+	if not selection_pointer.is_empty():
+		selection_pointer.dragged = true
+		return
+	selection_click_serial += 1
+	selection_pointer = {"kind": kind, "index": index, "origin": get_global_transform_with_canvas().affine_inverse() * position_value, "dragged": false, "unit": _pointer_board_unit(position_value)}
+
+func _selection_motion(kind: String, index: int, position_value: Vector2) -> void:
+	if selection_pointer.is_empty() or selection_pointer.kind != kind or selection_pointer.index != index:
+		return
+	var local := get_global_transform_with_canvas().affine_inverse() * position_value
+	if local.distance_to(selection_pointer.origin) >= 10.0:
+		selection_pointer.dragged = true
+
+func _selection_drag_started() -> void:
+	if not selection_pointer.is_empty():
+		selection_pointer.dragged = true
+
+func _selection_release(kind: String, index: int, position_value: Vector2, canceled: bool) -> void:
+	if selection_pointer.is_empty() or selection_pointer.kind != kind or selection_pointer.index != index:
+		return
+	_selection_motion(kind, index, position_value)
+	var pointer := selection_pointer.duplicate()
+	selection_pointer.clear()
+	if canceled or pointer.dragged:
+		return
+	var unit_id := _pointer_board_unit(position_value)
+	if unit_id >= 0 and int(pointer.unit) == unit_id:
+		return
+	_clear_selection_after_click.call_deferred(screen, selection_click_serial)
+
+func _pointer_board_unit(position_value: Vector2) -> int:
+	var local := get_global_transform_with_canvas().affine_inverse() * position_value
+	for rect in board.blocked_screen_rects:
+		if rect.has_point(local):
+			return -1
+	var board_position: Vector2 = board.get_global_transform_with_canvas().affine_inverse() * position_value
+	if not Rect2(Vector2.ZERO, board.size).has_point(board_position):
+		return -1
+	var unit: Dictionary = sim.unit_at(board.screen_to_cell(board_position))
+	return int(unit.id) if not unit.is_empty() else -1
+
+func _clear_selection_after_click(source_screen: Control, click_serial: int) -> void:
+	if click_serial == selection_click_serial and is_instance_valid(source_screen) and source_screen == screen and mode == "battle":
+		selected = -1
+		_refresh()
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
