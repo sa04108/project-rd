@@ -14,7 +14,9 @@
       2,
       3,
       5
-    ]
+    ],
+    "deployment_seconds": 5.0,
+    "maximum_speed": 20
   },
   "I": {
     "normal_travel": 18.0,
@@ -50,7 +52,7 @@
     ],
     "final_boss_count": 1,
     "occupied_move": "swap",
-    "pause_allows_economy_and_reposition": true,
+    "pause_allows_economy_and_reposition": false,
     "combination_cost": 0,
     "recipe_matching": "exact_unit_ids_and_counts",
     "catalogue_unlocked_for_browsing": true,
@@ -63,9 +65,12 @@
     "upgrade_levels": "1_to_4_star_shared",
     "special_cooldown_scope": "per_type_game_time",
     "same_type_specials_may_coexist": true,
-    "save_resume_starts_paused": true,
+    "save_resume_starts_paused": false,
     "enemy_limit_scope": "all_active_enemies_including_boss_and_special",
-    "enemy_limit_trigger": "immediate_on_spawn_at_or_above_limit"
+    "enemy_limit_trigger": "immediate_on_spawn_at_or_above_limit",
+    "pause_only_by_button": true,
+    "background_progress": true,
+    "synthesis_tier": 1
   },
   "T": {
     "summon_cost": 50,
@@ -109,6 +114,11 @@
         "wave": 100,
         "multiplier": 4.0
       }
-    ]
+    ],
+    "sale_summon_multipliers": {
+      "1": 0.5,
+      "2": 1.0,
+      "3": 2.0
+    }
   }
 }

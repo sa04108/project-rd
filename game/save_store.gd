@@ -6,7 +6,10 @@ var profile: Dictionary = {}
 var corrupt_files: Dictionary = {}
 var read_only := false
 var _recipe_results: Dictionary = {}
-const PROFILE_SCHEMA := 2
+const PROFILE_SCHEMA := 3
+const Progression = preload("res://game/permanent_progression.gd")
+var economy: Dictionary:
+	get: return profile.economy
 const Catalog = preload("res://game/catalog.gd")
 const Simulation = preload("res://game/simulation.gd")
 const DEFAULT_SETTINGS := {"language": "en", "music": 0.35, "effects": 0.65, "music_muted": false, "effects_muted": false, "reduced_motion": false, "haptics": false, "music_track": "mist_guard", "ui_sound": "tap"}
@@ -18,7 +21,7 @@ func _init(path: String = "user://") -> void:
 	DirAccess.make_dir_recursive_absolute(directory)
 	for recipe in Catalog.new().recipes:
 		_recipe_results[str(recipe.result)] = true
-	profile = {"schema": PROFILE_SCHEMA, "preferences": {"recipe_tracking": {"unit_ids": []}}, "best_wave": 0, "cleared": false, "settings": DEFAULT_SETTINGS.duplicate(true), "units": {}, "enemies": {}, "kills": {}, "run_counts": {}, "ended_runs": {}}
+	profile = {"schema": PROFILE_SCHEMA, "preferences": {"recipe_tracking": {"unit_ids": []}}, "economy": _new_economy(), "best_wave": 0, "cleared": false, "settings": DEFAULT_SETTINGS.duplicate(true), "units": {}, "enemies": {}, "kills": {}, "run_counts": {}, "ended_runs": {}}
 	var loaded := _read("profile.json")
 	if not loaded.is_empty():
 		if _future_profile(loaded):
@@ -28,8 +31,10 @@ func _init(path: String = "user://") -> void:
 		elif _valid_profile(loaded, true):
 			profile = loaded
 			if profile.schema == 1:
-				profile.schema = PROFILE_SCHEMA
 				profile.preferences = {"recipe_tracking": {"unit_ids": []}}
+			if int(profile.schema) < PROFILE_SCHEMA:
+				profile.economy = _new_economy()
+				profile.schema = PROFILE_SCHEMA
 			# 콘텐츠에서 삭제된 추적 대상만 제외하며 기록·설정은 보존한다.
 			var retained: Array[String] = []
 			for identity in profile.preferences.recipe_tracking.unit_ids:
@@ -50,9 +55,9 @@ func _future_profile(value: Dictionary) -> bool:
 func _valid_profile(value: Dictionary, allow_removed_tracking: bool = false) -> bool:
 	if not value.has_all(["schema", "best_wave", "cleared", "settings", "units", "enemies", "kills", "run_counts", "ended_runs"]) or not (value.schema is int or value.schema is float):
 		return false
-	if not is_finite(float(value.schema)) or float(value.schema) != floor(float(value.schema)) or not int(value.schema) in [1, PROFILE_SCHEMA]:
+	if not is_finite(float(value.schema)) or float(value.schema) != floor(float(value.schema)) or not int(value.schema) in [1, 2, PROFILE_SCHEMA]:
 		return false
-	if int(value.schema) == PROFILE_SCHEMA:
+	if int(value.schema) >= 2:
 		if not value.get("preferences") is Dictionary or not value.preferences.get("recipe_tracking") is Dictionary:
 			return false
 		var tracking: Dictionary = value.preferences.recipe_tracking
@@ -65,7 +70,9 @@ func _valid_profile(value: Dictionary, allow_removed_tracking: bool = false) -> 
 			if not allow_removed_tracking and not _recipe_results.has(identity):
 				return false
 			seen[identity] = true
-	if not (value.best_wave is int or value.best_wave is float) or value.best_wave < 0 or value.best_wave > 100 or not value.cleared is bool:
+	if int(value.schema) == PROFILE_SCHEMA and not _valid_economy(value.get("economy")):
+		return false
+	if not Progression.integer(value.best_wave, 0, 100) or not value.cleared is bool:
 		return false
 	for key in ["settings", "units", "enemies", "kills", "run_counts", "ended_runs"]:
 		if not value[key] is Dictionary:
@@ -208,8 +215,122 @@ func set_recipe_tracked(identity: String, enabled: bool) -> bool:
 	profile = updated
 	return true
 
+func _new_economy() -> Dictionary:
+	var state := {"schema": 1, "authority": "local", "revision": 0, "wallet": {"diamonds": 0, "total_earned": 0, "total_spent": 0}, "upgrades": Progression.defaults(), "ledger": []}
+	_grant(state, "welcome:v1", "welcome", int(Progression.rules().starter_diamonds))
+	return state
+
+func _valid_economy(value: Variant) -> bool:
+	if not value is Dictionary or not value.has_all(["schema", "authority", "revision", "wallet", "upgrades", "ledger"]):
+		return false
+	if not Progression.integer(value.schema, 1, 1) or value.authority != "local" or not Progression.integer(value.revision):
+		return false
+	if not Progression.valid_levels(value.upgrades) or not value.ledger is Array or value.ledger.size() != int(value.revision):
+		return false
+	if not value.wallet is Dictionary or not value.wallet.has_all(["diamonds", "total_earned", "total_spent"]):
+		return false
+	for key in ["diamonds", "total_earned", "total_spent"]:
+		if not Progression.integer(value.wallet[key]): return false
+	var balance := 0
+	var earned := 0
+	var spent := 0
+	var levels := Progression.defaults()
+	var seen: Dictionary = {}
+	for index in range(value.ledger.size()):
+		var entry: Variant = value.ledger[index]
+		if not entry is Dictionary or not entry.has_all(["id", "kind", "delta", "balance_after"]): return false
+		if not entry.id is String or entry.id.is_empty() or seen.has(entry.id): return false
+		if not Progression.integer(entry.delta, -Progression.MAX_DIAMONDS, Progression.MAX_DIAMONDS) or not Progression.integer(entry.balance_after): return false
+		seen[entry.id] = true
+		if entry.kind == "purchase":
+			if entry.id != "purchase:%d" % (index + 1) or int(entry.delta) >= 0: return false
+			var identity: Variant = entry.get("upgrade_id")
+			if not identity is String or not levels.has(identity) or not Progression.integer(entry.get("level_after"), 1, Progression.max_level(identity)): return false
+			if int(entry.level_after) != int(levels[identity]) + 1: return false
+			levels[identity] = int(entry.level_after)
+			spent -= int(entry.delta)
+		else:
+			if int(entry.delta) < 0: return false
+			match entry.kind:
+				"welcome":
+					if entry.id != "welcome:v1": return false
+				"milestone":
+					if not Progression.integer(entry.get("wave"), 10, 100) or int(entry.wave) % 10 != 0 or entry.id != "milestone:%d" % int(entry.wave): return false
+				"run":
+					if not entry.get("run_id") is String or entry.run_id.is_empty() or entry.id != "run:" + entry.run_id: return false
+				_: return false
+			earned += int(entry.delta)
+		balance += int(entry.delta)
+		if balance < 0 or balance > Progression.MAX_DIAMONDS or balance != int(entry.balance_after): return false
+	for identity in levels:
+		if int(levels[identity]) != int(value.upgrades[identity]): return false
+	return balance == int(value.wallet.diamonds) and earned == int(value.wallet.total_earned) and spent == int(value.wallet.total_spent)
+
+func _grant(state: Dictionary, identity: String, kind: String, amount: int, details: Dictionary = {}) -> void:
+	for entry in state.ledger:
+		if entry.id == identity: return
+	# 로컬 플레이 보상 전용. 유료 영수증이나 서버 잔액을 이 경로로 승인하지 않는다.
+	var accepted := mini(amount, Progression.MAX_DIAMONDS - int(state.wallet.total_earned))
+	state.wallet.diamonds += accepted
+	state.wallet.total_earned += accepted
+	state.revision += 1
+	var entry := {"id": identity, "kind": kind, "delta": accepted, "balance_after": int(state.wallet.diamonds)}
+	entry.merge(details)
+	state.ledger.append(entry)
+
+func diamond_balance() -> int:
+	return int(profile.economy.wallet.diamonds)
+
+func permanent_levels() -> Dictionary:
+	return profile.economy.upgrades.duplicate()
+
+func purchase_permanent(identity: String, expected_level: int, expected_revision: int) -> Dictionary:
+	if read_only:
+		return {"ok": false, "error": "error.save.unsupported_version"}
+	if not profile.economy.upgrades.has(identity):
+		return {"ok": false, "error": "progression.error.unavailable"}
+	var level := int(profile.economy.upgrades[identity])
+	if expected_level != level or expected_revision != int(profile.economy.revision):
+		return {"ok": false, "error": "progression.error.stale"}
+	var price := Progression.cost(identity, level)
+	if price < 0:
+		return {"ok": false, "error": "progression.maxed"}
+	if int(profile.best_wave) < Progression.unlock_wave(identity, level):
+		return {"ok": false, "error": "progression.error.locked"}
+	if diamond_balance() < price:
+		return {"ok": false, "error": "progression.error.funds"}
+	var updated := profile.duplicate(true)
+	var state: Dictionary = updated.economy
+	state.wallet.diamonds -= price
+	state.wallet.total_spent += price
+	state.upgrades[identity] = level + 1
+	state.revision += 1
+	state.ledger.append({"id": "purchase:%d" % int(state.revision), "kind": "purchase", "delta": -price, "balance_after": int(state.wallet.diamonds), "upgrade_id": identity, "level_after": level + 1})
+	# 차감·권한·원장을 같은 파일로 확정한 다음에만 메모리에 반영한다.
+	if not _write("profile.json", updated):
+		return {"ok": false, "error": last_error}
+	profile = updated
+	return {"ok": true, "error": ""}
+
+func run_diamond_reward(sim) -> int:
+	if sim.developer_run or sim.result == "active": return 0
+	var defeated := 0
+	for milestone in range(10, 100, 10):
+		if int(sim.kills.get("b%d" % milestone, 0)) > 0: defeated += 1
+	return defeated * int(Progression.rules().boss_reward) + (int(Progression.rules().victory_reward) if sim.result == "victory" else 0)
+
+func _record_permanent_progress(updated: Dictionary, sim) -> void:
+	if sim.developer_run: return
+	updated.best_wave = maxi(int(updated.best_wave), sim.wave)
+	for milestone in range(10, 101, 10):
+		if int(updated.best_wave) >= milestone:
+			_grant(updated.economy, "milestone:%d" % milestone, "milestone", int(Progression.rules().first_milestone_reward), {"wave": milestone})
+	if sim.result != "active":
+		_grant(updated.economy, "run:" + sim.run_id, "run", run_diamond_reward(sim), {"run_id": sim.run_id})
+
 func save_run(sim) -> bool:
 	var updated := profile.duplicate(true)
+	_record_permanent_progress(updated, sim)
 	for key in sim.discovered_units:
 		updated.units[key] = true
 	for key in sim.discovered_enemies:

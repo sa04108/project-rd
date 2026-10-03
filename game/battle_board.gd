@@ -138,6 +138,7 @@ func _draw() -> void:
 	_draw_selected_range()
 	_draw_enemies()
 	_draw_units()
+	_draw_unit_stars()
 	_draw_effects()
 	_draw_markers()
 	_draw_drag_guide()
@@ -269,6 +270,14 @@ func _draw_units() -> void:
 			_draw_character(Vector2.ZERO, String(unit.kind), tint, true, "idle", 0.0, ALLY_RENDER_SCALE * (1.0 + tier * 0.035))
 			draw_set_transform(Vector2.ZERO)
 		combat_visuals.draw_preparation(self, p, pose, tint)
+
+func _draw_unit_stars() -> void:
+	if simulation == null:
+		return
+	# 별표를 모든 용병 그림자·자세를 그린 뒤 한 번에 올려 겹침을 막는다.
+	for unit in simulation.units:
+		var tier := int(simulation.catalog.units.get(String(unit.get("kind", "")), {}).get("tier", 1))
+		var p := unit_foot_position(int(unit.get("cell", 0)))
 		for star in range(tier):
 			var star_pos := p + Vector2((star - (tier - 1) * 0.5) * 8.0, -CELL_SIZE * 0.98)
 			_draw_star(star_pos, maxf(size.x / 144.0, 2.75), Color("ffe08a"))

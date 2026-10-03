@@ -14,6 +14,8 @@ const BattleBoard = preload("res://game/battle_board.gd")
 const UnitDescription = preload("res://game/unit_description.gd")
 const CatalogFilters = preload("res://game/catalog_filters.gd")
 const RecipeTracking = preload("res://game/recipe_tracking.gd")
+const PauseOverlay = preload("res://game/pause_overlay.gd")
+const ProgressionPanel = preload("res://game/progression_panel.gd")
 const PlacementFeedback = preload("res://game/placement_feedback.gd")
 const MENU_BACKGROUND = preload("res://assets/art/backgrounds/guild.png")
 const FONT = preload("res://assets/fonts/GuildSans.otf")
@@ -55,11 +57,17 @@ var tracking_bar: Control
 var tracked_button_ids: Array[String] = []
 var selection_pointer: Dictionary = {}
 var selection_click_serial := 0
+var button_release: Dictionary = {}
 var modal_focus_controls: Array[Dictionary] = []
 var modal_previous_focus: Control
 var web_input_canvas: JavaScriptObject
 var web_touch_cancel_callback: JavaScriptObject
 var locale_themes: Dictionary = {}
+var pause_overlay: Control
+var pause_focus_controls: Array[Dictionary] = []
+var clock_usec := 0
+var backgrounded := false
+var suspended := false
 
 func _ready() -> void:
 	get_tree().auto_accept_quit = false
@@ -70,6 +78,7 @@ func _ready() -> void:
 	_apply_language()
 	_setup_sound()
 	_setup_web_input()
+	clock_usec = Time.get_ticks_usec()
 	_show_menu()
 
 func _apply_language() -> void:
@@ -166,8 +175,7 @@ func _panel(parent: Node, rect: Rect2, _color: Color = INK, _border: Color = GOL
 	parent.add_child(panel)
 	return panel
 
-func _label(parent: Node, text_value: String, pos: Vector2, width: float, font_size: int = 22, color: Color = PALE, wrap: bool = true) -> Label:
-	var label := Label.new()
+func _content_color(parent: Node, color: Color) -> Color:
 	var ancestor := parent
 	while ancestor != null:
 		if ancestor.has_meta("parchment"):
@@ -177,6 +185,11 @@ func _label(parent: Node, text_value: String, pos: Vector2, width: float, font_s
 				elif color == GOLD: color = Color("725019")
 			break
 		ancestor = ancestor.get_parent()
+	return color
+
+func _label(parent: Node, text_value: String, pos: Vector2, width: float, font_size: int = 22, color: Color = PALE, wrap: bool = true) -> Label:
+	var label := Label.new()
+	color = _content_color(parent, color)
 	# 긴 문장은 트리에 들어가기 전에 줄바꿈을 설정해 최소 폭이 커지는 것을 막는다.
 	if wrap:
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -203,6 +216,7 @@ func _paragraph(parent: Node, text_value: String, rect: Rect2, font_size: int = 
 func _button(parent: Node, text_value: String, rect: Rect2, callback: Callable, accent: bool = false, action: String = "", sound_role: String = "tap") -> Button:
 	var button := Button.new()
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	button.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	button.action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
 	button.text = text_value
 	button.position = rect.position
@@ -218,12 +232,22 @@ func _button(parent: Node, text_value: String, rect: Rect2, callback: Callable, 
 	button.add_theme_color_override("font_disabled_color", Color("b5ac8d"))
 	button.add_theme_font_size_override("font_size", 26)
 	button.pressed.connect(func():
+		if not _released_inside(button): return
+		if mode == "battle": _advance_battle_to_now()
+		if mode == "battle" and sim.pause_reasons.has("user"): return
 		var sound_serial: int = audio.ui_play_serial
 		callback.call()
 		if sound_role != "none" and audio.ui_play_serial == sound_serial:
 			audio.play_ui(sound_role))
 	parent.add_child(button)
 	return button
+
+func _released_inside(button: BaseButton) -> bool:
+	# BaseButton의 hover 캐시 대신 이번 release의 좌표를 확인한다. 키보드 실행은 허용한다.
+	if button_release.is_empty() or int(button_release.frame) != Engine.get_process_frames(): return true
+	if button_release.canceled: return false
+	var local := button.get_global_transform_with_canvas().affine_inverse() * Vector2(button_release.position)
+	return Rect2(Vector2.ZERO, button.size).has_point(local)
 
 func _hud_icon(parent: Control, kind: String, rect: Rect2) -> TextureRect:
 	var icon := TextureRect.new()
@@ -235,6 +259,56 @@ func _hud_icon(parent: Control, kind: String, rect: Rect2) -> TextureRect:
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(icon)
 	return icon
+
+func _gold_line(parent: Control, title: String, amount: int, rect: Rect2, font_size: int = 26, color: Color = PALE, centered: bool = false) -> RichTextLabel:
+	var line := RichTextLabel.new()
+	line.name = "GoldAmount"
+	line.position = rect.position
+	line.size = rect.size
+	line.fit_content = true
+	line.scroll_active = false
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.add_theme_font_size_override("normal_font_size", font_size)
+	line.add_theme_color_override("default_color", _content_color(parent, color))
+	line.set_meta("centered", centered)
+	line.set_meta("coin_size", maxi(24, font_size))
+	parent.add_child(line)
+	_set_gold_line(line, title, amount)
+	return line
+
+func _set_gold_line(line: RichTextLabel, title: String, amount: int) -> void:
+	var content := [title, amount]
+	if line.get_meta("content", []) == content: return
+	line.set_meta("content", content)
+	line.clear()
+	line.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER if line.get_meta("centered") else HORIZONTAL_ALIGNMENT_LEFT)
+	line.add_text(title)
+	if amount >= 0:
+		line.add_text("  ")
+		var icon_size := int(line.get_meta("coin_size"))
+		line.add_image(UiSkin.icon_texture("coin"), icon_size, icon_size, Color.WHITE, INLINE_ALIGNMENT_CENTER)
+		line.add_text(" %d" % amount)
+	line.pop()
+	line.accessibility_name = title + " " + L.text("currency.gold.amount") % amount if amount >= 0 else title
+
+func _gold_button(parent: Control, title: String, amount: int, rect: Rect2, callback: Callable, action: String = "") -> Button:
+	var button := _button(parent, "", rect, callback, true, action)
+	# 실제 글줄 높이로 중앙 정렬해 언어별 글꼴 높이가 달라도 위치를 유지한다.
+	var content := VBoxContainer.new()
+	content.alignment = BoxContainer.ALIGNMENT_CENTER
+	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	button.add_child(content)
+	content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	content.offset_left = 10
+	content.offset_right = -10
+	content.offset_top = 10
+	content.offset_bottom = -10
+	var line := _gold_line(content, title, amount, Rect2(), 26, INK, true)
+	line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.accessibility_name = line.accessibility_name
+	button.set_meta("gold_caption", line)
+	return button
 
 func _hud_button(parent: Node, text_value: String, rect: Rect2, callback: Callable, action: String, icon_kind: String = "", accent: bool = false) -> Button:
 	var button := _button(parent, text_value, rect, callback, false, action)
@@ -253,10 +327,15 @@ func _battle_action(text_value: String, rect: Rect2, callback: Callable, action:
 	button.tooltip_text = L.text("unit.summon.title") if action == "summon" else text_value
 	button.accessibility_name = button.tooltip_text
 	_hud_icon(button, icon_kind, Rect2((rect.size.x - 44) * 0.5, 9, 44, 44))
-	var caption := _label(button, text_value, Vector2(9, 57), rect.size.x - 18, 22, PALE)
-	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	caption.size.y = 33
-	button.set_meta("caption", caption)
+	if action == "summon":
+		var caption := _gold_line(button, L.text("unit.summon.button"), int(sim.catalog.rules.T.summon_cost), Rect2(9, 57, rect.size.x - 18, 33), 22, PALE, true)
+		button.set_meta("caption", caption)
+	else:
+		var caption := _label(button, text_value, Vector2(9, 57), rect.size.x - 18, 22, PALE)
+		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		caption.size.y = 33
+		button.set_meta("caption", caption)
 	return button
 
 func _retire_ui(control: Control) -> void:
@@ -270,6 +349,7 @@ func _retire_ui(control: Control) -> void:
 	control.queue_free()
 
 func _clear_screen() -> void:
+	_remove_pause_overlay()
 	_close_panel()
 	if is_instance_valid(screen):
 		_retire_ui(screen)
@@ -288,9 +368,9 @@ func _clear_screen() -> void:
 
 func _show_menu() -> void:
 	if mode == "battle":
+		_advance_battle_to_now()
 		if not _save():
 			return
-		sim.set_pause("menu", true)
 	mode = "menu"
 	_sync_audio()
 	_clear_screen()
@@ -321,6 +401,9 @@ func _show_menu() -> void:
 	resume.disabled = resume_data.is_empty()
 	_hud_button(screen, L.text("menu.codex.open"), Rect2(126, 920, 228, 100), func(): _open_panel("codex"), "codex")
 	_hud_button(screen, L.text("settings.title"), Rect2(366, 920, 228, 100), func(): _open_panel("settings"), "settings")
+	_hud_button(screen, L.text("progression.menu.open"), Rect2(126, 1032, 468, 100), func(): _open_panel("progression"), "progression", "", true)
+	labels.menu_diamonds = _label(screen, L.text("progression.wallet.balance") % store.diamond_balance(), Vector2(126, 1146), 468, 25, PALE)
+	labels.menu_diamonds.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	labels.menu_footer = _label(screen, "© 2026 %s  ·  v0.4" % display_name, Vector2(48, 1222), 624, 18, MUTED)
 	labels.menu_footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	if not store.last_error.is_empty():
@@ -333,7 +416,8 @@ func _request_new() -> void:
 		_open_panel("confirm_new")
 
 func _start_new() -> void:
-	sim.new_run()
+	sim.new_run(0, store.permanent_levels())
+	clock_usec = Time.get_ticks_usec()
 	selected = -1
 	ended_saved = false
 	mode = "battle"
@@ -345,6 +429,7 @@ func _resume() -> void:
 		_toast(L.text("error.continue.load_failed"))
 		return
 	mode = "battle"
+	clock_usec = Time.get_ticks_usec()
 	selected = -1
 	ended_saved = false
 	_show_battle()
@@ -369,9 +454,12 @@ func _show_battle() -> void:
 			rect = Rect2(292, 20, 202, 100)
 		var button := _hud_button(screen, "", rect, func(): _open_panel(action), action, "" if action == "recipes" else action, action == "recipes")
 		if action == "recipes":
-			_hud_icon(button, "recipes", Rect2(17, 23, 54, 54))
-			var caption := _label(button, L.text("recipes.open"), Vector2(79, 33), 110, 28, Color("fff5d7"))
-			caption.size.y = 42
+			button.text = L.text("recipes.open")
+			button.icon = UiSkin.icon_texture("recipes")
+			button.expand_icon = true
+			button.add_theme_constant_override("icon_max_width", 54)
+			button.add_theme_constant_override("h_separation", 8)
+			button.add_theme_font_size_override("font_size", 28)
 		button.tooltip_text = tools[index][1]
 		button.accessibility_name = tools[index][1]
 	_panel(screen, Rect2(510, 132, 188, 54), INK, GOLD, "brass")
@@ -404,11 +492,22 @@ func _show_battle() -> void:
 	board.cell_dragged.connect(_cell_dragged)
 	screen.add_child(board)
 	screen.move_child(board, 0)
-	labels.selection_panel = _panel(screen, Rect2(28, 902, 664, 120), INK, GOLD, "brass")
+	# 격자 하단(850) 아래 흙길 안에만 선택 동작을 놓는다.
+	labels.unit_actions = Control.new()
+	labels.unit_actions.name = "UnitActions"
+	labels.unit_actions.position = Vector2(144, 850)
+	labels.unit_actions.size = Vector2(432, 76)
+	labels.unit_actions.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	screen.add_child(labels.unit_actions)
+	labels.synthesize = _button(labels.unit_actions, L.text("unit.synthesis.button"), Rect2(0, 0, 208, 76), _synthesize_selected, true, "synthesize")
+	labels.synthesize.tooltip_text = L.text("unit.synthesis.hint")
+	labels.sell = _gold_button(labels.unit_actions, L.text("unit.sale.button"), sim.sale_price(), Rect2(224, 0, 208, 76), _sell_selected, "sell_unit")
+	labels.sell.tooltip_text = L.text("unit.sale.hint")
+	labels.selection_panel = _panel(screen, Rect2(28, 926, 664, 96), INK, GOLD, "brass")
 	labels.selection = _label(labels.selection_panel, "", Vector2(15, 4), 634, 28, PALE)
 	labels.selection.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	labels.detail = _label(labels.selection_panel, "", Vector2(15, 44), 634, 20, MUTED)
-	labels.detail.size.y = 70
+	labels.detail = _label(labels.selection_panel, "", Vector2(15, 40), 634, 18, MUTED)
+	labels.detail.size.y = 52
 	labels.detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# 하단의 소환 중심 배치와 강화·도박·특수몬스터 순서는 그대로 유지한다.
 	labels.summon = _battle_action("", Rect2(229, 1030, 262, 100), _summon, "summon", "summon")
@@ -419,6 +518,7 @@ func _show_battle() -> void:
 	_battle_action(L.text("gamble.open"), Rect2(252, 1172, 216, 100), func(): _open_panel("gamble"), "gamble", "gamble")
 	_battle_action(L.text("special.open"), Rect2(477, 1172, 216, 100), func(): _open_panel("special"), "special", "special")
 	_refresh()
+	_sync_pause_overlay()
 
 func _cell_pressed(cell: int) -> void:
 	if not panel_name.is_empty() and panel_name in ["settings", "result", "confirm_new"]:
@@ -438,6 +538,16 @@ func _summon() -> void:
 		selected = int(response.unit_id)
 	_transaction(response, true)
 
+func _synthesize_selected() -> void:
+	var response: Dictionary = sim.synthesize(selected)
+	if response.ok: selected = int(response.unit_id)
+	_transaction(response, true)
+
+func _sell_selected() -> void:
+	var response: Dictionary = sim.sell_unit(selected)
+	if response.ok: selected = -1
+	_transaction(response)
+
 func _transaction(response: Dictionary, confirmation: bool = false, notify: bool = false) -> void:
 	if notify:
 		_toast(response.reason)
@@ -452,8 +562,61 @@ func _transaction(response: Dictionary, confirmation: bool = false, notify: bool
 		_open_panel(current_panel, true)
 
 func _toggle_pause() -> void:
-	sim.set_pause("user", not sim.pause_reasons.has("user"))
+	_advance_battle_to_now()
+	if sim.result != "active" or sim.pause_reasons.has("user"): return
+	_close_panel()
+	sim.set_pause("user", true)
+	selected = -1
+	selection_pointer.clear()
+	if is_instance_valid(board): board.cancel_pointer()
+	_sync_pause_overlay()
+	_mark_dirty()
 	_refresh()
+
+func _sync_pause_overlay() -> void:
+	if mode != "battle" or not sim.pause_reasons.has("user"):
+		_remove_pause_overlay()
+		return
+	if is_instance_valid(pause_overlay): return
+	for node in find_children("*", "Control", true, false):
+		var control := node as Control
+		if control.focus_mode != Control.FOCUS_NONE:
+			pause_focus_controls.append({"control": control, "mode": control.focus_mode})
+			control.focus_mode = Control.FOCUS_NONE
+	pause_overlay = PauseOverlay.new()
+	pause_overlay.name = "BattlePause"
+	pause_overlay.z_index = 200
+	pause_overlay.resume_requested.connect(func(): _resume_paused_battle.call_deferred())
+	add_child(pause_overlay)
+	_sync_board_blockers()
+
+func _remove_pause_overlay() -> void:
+	if is_instance_valid(pause_overlay): _retire_ui(pause_overlay)
+	pause_overlay = null
+	for entry in pause_focus_controls:
+		if is_instance_valid(entry.control): entry.control.focus_mode = entry.mode
+	pause_focus_controls.clear()
+
+func _resume_paused_battle() -> void:
+	if mode != "battle" or not sim.pause_reasons.has("user"): return
+	# 정지 중의 실제 시간과 재개 클릭은 전투에 전달하지 않는다.
+	clock_usec = Time.get_ticks_usec()
+	sim.set_pause("user", false)
+	_remove_pause_overlay()
+	selection_pointer.clear()
+	_sync_board_blockers()
+	_mark_dirty()
+	_refresh()
+
+func _purchase_permanent(identity: String, level: int, revision: int) -> void:
+	if mode != "menu": return
+	var response: Dictionary = store.purchase_permanent(identity, level, revision)
+	if not response.ok:
+		_toast(L.text(response.error))
+	else:
+		audio.play_ui("chime")
+		labels.menu_diamonds.text = L.text("progression.wallet.balance") % store.diamond_balance()
+	_open_panel("progression", true)
 
 func _mark_dirty() -> void:
 	dirty_time = wall_time + 0.3
@@ -492,15 +655,24 @@ func _refresh() -> void:
 	labels.gold.text = "%d" % sim.gold
 	labels.count.text = L.text("battle.enemy.count") % [sim.enemies.size(), sim.enemy_limit()]
 	labels.count.add_theme_color_override("font_color", Color("ff8871") if sim.enemies.size() >= sim.enemy_limit() - 10 else MUTED)
-	labels.clock.text = L.text("battle.objective.demon_king") if sim.wave == 100 else L.text("battle.next_wave.timer") % maxf(0, sim.wave * 30.0 - sim.time)
+	labels.clock.text = L.text("battle.deployment.timer") % ceili(sim.deployment_remaining) if sim.deployment_remaining > 0.0 else (L.text("battle.objective.demon_king") if sim.wave == 100 else L.text("battle.next_wave.timer") % maxf(0, sim.wave * 30.0 - sim.time))
+	labels.clock.add_theme_font_size_override("font_size", 24 if sim.deployment_remaining > 0.0 else 15)
 	if sim.developer_run:
 		labels.clock.text += L.text("debug.run.marker")
 	labels.speed.text = "×%d" % sim.speed
 	labels.pause.text = "▶" if sim.pause_reasons.has("user") else "Ⅱ"
-	labels.summon.get_meta("caption").text = L.text("unit.summon.button") % int(sim.catalog.rules.T.summon_cost)
+	_set_gold_line(labels.summon.get_meta("caption"), L.text("unit.summon.button"), int(sim.catalog.rules.T.summon_cost))
 	labels.summon.disabled = sim.gold < int(sim.catalog.rules.T.summon_cost) or sim.units.size() >= 36 or sim.result != "active"
 	var unit: Dictionary = sim.unit_by_id(selected)
 	labels.selection_panel.visible = not unit.is_empty()
+	labels.unit_actions.visible = not unit.is_empty() and panel_name.is_empty() and not sim.pause_reasons.has("user") and sim.result == "active"
+	labels.synthesize.disabled = sim.synthesis_materials(selected).is_empty() or (not unit.is_empty() and sim.synthesis_pool(str(unit.kind)).is_empty())
+	var refund: int = sim.sale_price(int(sim.catalog.units[unit.kind].tier)) if not unit.is_empty() else -1
+	labels.sell.disabled = refund < 0
+	var sale_caption: RichTextLabel = labels.sell.get_meta("gold_caption")
+	_set_gold_line(sale_caption, L.text("unit.sale.button") if refund >= 0 else L.text("unit.sale.blocked"), refund)
+	labels.sell.accessibility_name = sale_caption.accessibility_name
+	sale_caption.modulate.a = 0.55 if labels.sell.disabled else 1.0
 	labels.summon.get_meta("caption").modulate.a = 0.72 if labels.summon.disabled else 1.0
 	if unit.is_empty():
 		selected = -1
@@ -533,7 +705,6 @@ func _close_panel() -> void:
 	_restore_modal_focus()
 	panel_name = ""
 	dynamic.clear()
-	sim.set_pause("settings", false)
 	_sync_tracking_buttons()
 
 func _capture_modal_focus() -> void:
@@ -565,8 +736,9 @@ func _restore_modal_focus() -> void:
 	modal_previous_focus = null
 
 func _open_panel(kind: String, force: bool = false, preserve_scroll: bool = true) -> void:
+	if mode == "battle" and sim.pause_reasons.has("user"): return
 	var recipe_scroll := -1
-	if preserve_scroll and force and kind == "recipes" and panel_name == kind and is_instance_valid(overlay):
+	if preserve_scroll and force and kind in ["recipes", "progression"] and panel_name == kind and is_instance_valid(overlay):
 		for scroller in overlay.find_children("*", "ScrollContainer", true, false):
 			recipe_scroll = scroller.scroll_vertical
 			break
@@ -587,7 +759,7 @@ func _open_panel(kind: String, force: bool = false, preserve_scroll: bool = true
 	var large := kind in ["recipes", "codex", "settings", "result", "confirm_new"]
 	var top := 171.0 if kind == "settings" else (303.0 if large else 637.0)
 	var body_height := 884.0 if kind == "settings" else (694.0 if large else 360.0)
-	if kind in ["recipes", "codex"]:
+	if kind in ["recipes", "codex", "progression"]:
 		# 128px씩 대칭 여백을 두고 최상단 도구 바로 아래부터 표시한다.
 		top = 172.0
 		body_height = 980.0
@@ -598,7 +770,7 @@ func _open_panel(kind: String, force: bool = false, preserve_scroll: bool = true
 	var panel := _panel(overlay, Rect2(35, top - 44.0, 650, body_height + 44.0), Color("172b39"), GOLD)
 	panel.name = "PopupPanel"
 	overlay.set_meta("blocked_rect", Rect2(0, 0, 720, 1280) if kind in ["settings", "result", "confirm_new"] else panel.get_global_rect())
-	var titles := {"upgrade": L.text("upgrade.title"), "gamble": L.text("gamble.title"), "special": L.text("special.title"), "recipes": L.text("recipes.codex.title"), "codex": L.text("catalog.codex.title"), "settings": L.text("settings.title"), "result": L.text("result.title.victory") if sim.result == "victory" else L.text("result.title.defeat"), "confirm_new": L.text("expedition.new.title")}
+	var titles := {"upgrade": L.text("upgrade.title"), "gamble": L.text("gamble.title"), "special": L.text("special.title"), "recipes": L.text("recipes.codex.title"), "codex": L.text("catalog.codex.title"), "settings": L.text("settings.title"), "result": L.text("result.title.victory") if sim.result == "victory" else L.text("result.title.defeat"), "confirm_new": L.text("expedition.new.title"), "progression": L.text("progression.shop.title")}
 	var heading := _panel(panel, Rect2(9, 5, 632, 100), INK, GOLD, "blue")
 	_label(heading, titles[kind], Vector2(20, 31), 500, 26, PALE)
 	var close_button: Button
@@ -610,9 +782,8 @@ func _open_panel(kind: String, force: bool = false, preserve_scroll: bool = true
 		"special": _special_panel(panel)
 		"recipes": _recipes_panel(panel)
 		"codex": _codex_panel(panel)
-		"settings":
-			sim.set_pause("settings", true)
-			_settings_panel(panel)
+		"settings": _settings_panel(panel)
+		"progression": ProgressionPanel.build(self, panel)
 		"result": _result_panel(panel)
 		"confirm_new":
 			_paragraph(panel, L.text("menu.new_game.confirm.warning"), Rect2(38, 140, 560, 150), 25, PALE)
@@ -651,8 +822,11 @@ func _upgrade_panel(panel: Control) -> void:
 		_label(card, "%s +%d" % ["★".repeat(tier), level], Vector2(90, 14), 194, 26, GOLD)
 		_portrait(card, ["u02", "u07", "u12", "u15"][tier - 1], Vector2(10, 8), Vector2(72, 84))
 		_label(card, L.text("upgrade.amount") % roundi(level * float(sim.catalog.rules.T.upgrade_factor) * 100), Vector2(90, 62), 194, 22, MUTED)
-		var button := _button(card, L.text("upgrade.maxed_label") if level >= 10 else L.text("upgrade.button") % sim.upgrade_cost(tier), Rect2(8, 106, 282, 100), func(): _transaction(sim.upgrade(tier), true, true), true)
-		button.add_theme_font_size_override("font_size", 26)
+		var button: Button
+		if level >= 10:
+			button = _button(card, L.text("upgrade.maxed_label"), Rect2(8, 106, 282, 100), func(): pass, true)
+		else:
+			button = _gold_button(card, L.text("upgrade.button"), sim.upgrade_cost(tier), Rect2(8, 106, 282, 100), func(): _transaction(sim.upgrade(tier), true, true))
 		var update := func(): button.disabled = sim.gold < sim.upgrade_cost(tier) or int(sim.upgrades[str(tier)]) >= 10 or sim.result != "active"
 		dynamic.append(update)
 		update.call()
@@ -663,9 +837,9 @@ func _gamble_panel(panel: Control) -> void:
 		var rule: Dictionary = sim.catalog.rules.T.gamble[str(tier)]
 		_panel(panel, Rect2(x, 73, 297, 253), Color("112332"), Color("726754"))
 		_label(panel, "★".repeat(tier) + L.text("gamble.challenge.suffix"), Vector2(x + 53, 86), 240, 27, GOLD)
-		_label(panel, L.text("gamble.success_chance") % roundi(rule.chance * 100), Vector2(x + 38, 139), 260, 22, PALE)
+		_label(panel, L.text("gamble.success_chance") % roundi(sim.gamble_chance(tier) * 100), Vector2(x + 38, 139), 260, 22, PALE)
 		_label(panel, L.text("gamble.failure.no_reward"), Vector2(x + 52, 181), 250, 18, MUTED)
-		var button := _button(panel, L.text("gamble.contract.button") % int(rule.cost), Rect2(x + 14, 224, 269, 100), func(): _transaction(sim.gamble(tier), true, true), true)
+		var button := _gold_button(panel, L.text("gamble.contract.button"), int(rule.cost), Rect2(x + 14, 224, 269, 100), func(): _transaction(sim.gamble(tier), true, true))
 		var update := func(): button.disabled = sim.gold < rule.cost or sim.first_empty() < 0 or sim.result != "active"
 		dynamic.append(update)
 		update.call()
@@ -678,7 +852,7 @@ func _special_panel(panel: Control) -> void:
 		var card := _panel(panel, Rect2(x, 74, 201, 359))
 		_label(card, L.enemy_name(str(id)), Vector2(12, 8), 181, 24, GOLD)
 		_portrait(card, id, Vector2(38, 48), Vector2(126, 84))
-		_label(card, L.text("special.defeat.reward") % definition.reward, Vector2(16, 139), 181, 22, INK)
+		_gold_line(card, L.text("special.defeat.reward"), int(definition.reward), Rect2(16, 139, 173, 36), 22, INK)
 		var status := _label(card, "", Vector2(12, 177), 183, 20, MUTED)
 		var button := _button(card, L.text("unit.summon.free"), Rect2(10, 250, 181, 100), func(): _transaction(sim.summon_special(id), true))
 		button.add_theme_font_size_override("font_size", 24)
@@ -805,7 +979,7 @@ func _sync_tracking_buttons() -> void:
 			_portrait(button, identity, Vector2(9, 5), Vector2(82, 71), true)
 			var stars := _label(button, "★".repeat(int(sim.catalog.units[identity].tier)), Vector2(4, 76), 92, 17, INK, false)
 			stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	tracking_bar.visible = panel_name.is_empty() and sim.result == "active"
+	tracking_bar.visible = panel_name.is_empty() and sim.result == "active" and not sim.pause_reasons.has("user")
 	_sync_board_blockers()
 
 func _combine_tracked(identity: String) -> void:
@@ -826,6 +1000,12 @@ func _sync_board_blockers() -> void:
 	if not is_instance_valid(board):
 		return
 	board.blocked_screen_rects.clear()
+	if labels.has("unit_actions"):
+		labels.unit_actions.visible = selected >= 0 and not sim.unit_by_id(selected).is_empty() and panel_name.is_empty() and sim.result == "active" and not sim.pause_reasons.has("user")
+		if labels.unit_actions.is_visible_in_tree():
+			board.blocked_screen_rects.append(labels.unit_actions.get_global_rect())
+	if is_instance_valid(pause_overlay):
+		board.blocked_screen_rects.append(Rect2(0, 0, 720, 1280))
 	if is_instance_valid(overlay) and overlay.has_meta("blocked_rect"):
 		board.blocked_screen_rects.append(overlay.get_meta("blocked_rect"))
 	if is_instance_valid(tracking_bar) and tracking_bar.is_visible_in_tree():
@@ -911,7 +1091,8 @@ func _codex_panel(panel: Control) -> void:
 			_unit_base_stats(details, definition)
 			_catalog_text(body, L.unit_description(str(id)), 24, MUTED)
 		else:
-			_catalog_text(details, L.text("catalog.enemy.stats") % [definition.hp, definition.reward], 24, PALE)
+			var stats := _gold_line(details, L.text("catalog.enemy.stats") % definition.hp, int(definition.reward), Rect2(), 24, PALE)
+			stats.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			kill_label = _catalog_text(body, L.text("catalog.enemy.progress") % [definition.travel, shown.kills], 24, MUTED)
 			if definition.kind == "special":
 				_catalog_text(body, L.text("catalog.enemy.unlock_wave") % definition.unlock, 24, MUTED)
@@ -1084,7 +1265,7 @@ func _result_panel(panel: Control) -> void:
 	var tip := L.text("result.guidance.next_expedition")
 	if sim.result == "defeat":
 		tip = L.text("battle.menu.tip.wait_then_upgrade") if sim.enemies.size() >= sim.enemy_limit() else L.text("battle.menu.tip.pause_reposition")
-	_paragraph(panel, tip, Rect2(64, 403, 535, 95), 20, MUTED)
+	_paragraph(panel, L.text("progression.result.reward") % store.run_diamond_reward(sim) + "\n" + tip, Rect2(64, 403, 535, 95), 20, MUTED)
 	_button(panel, L.text("menu.main.open"), Rect2(62, 523, 526, 100), func():
 		if _save(): _show_menu(), true, "result_menu")
 
@@ -1108,23 +1289,31 @@ func _toast(message: String) -> void:
 	toast_until = wall_time + 3.0
 	move_child(toast_label, get_child_count() - 1)
 
-func _process(delta: float) -> void:
-	_sync_audio()
-	wall_time += delta
+func _advance_battle_to_now() -> float:
+	var now := Time.get_ticks_usec()
+	var elapsed := maxf(0.0, float(now - clock_usec) / 1000000.0) if clock_usec > 0 else 0.0
+	clock_usec = now
+	wall_time += elapsed
 	if mode == "battle" and sim.result == "active":
 		var old_wave: int = sim.wave
-		# 포커스 복귀 때 누적된 실제 시간은 전투에 한꺼번에 주입하지 않는다.
-		if delta < 0.5:
-			sim.advance(delta * sim.speed)
-		if sim.wave != old_wave:
-			_mark_dirty()
+		# OS/브라우저가 프레임을 멈춘 구간도 한 번만 계산한다. 과거 효과음은 재생하지 않는다.
+		sim.presentation_suppressed = elapsed > 0.5 or backgrounded or suspended
+		sim.advance_wall_time(elapsed)
+		sim.presentation_suppressed = false
+		if sim.wave != old_wave: _mark_dirty()
+	return elapsed
+
+func _process(_delta: float) -> void:
+	_sync_audio()
+	var elapsed := _advance_battle_to_now()
+	if mode == "battle" and sim.result == "active":
 		if sim.result == "active" and wall_time >= save_retry_time and (settings_dirty or wall_time - save_time >= 10.0 or (dirty_time > 0 and wall_time >= dirty_time)):
 			_save()
 	elif mode == "menu" and settings_dirty and wall_time >= save_retry_time:
 		# 메뉴에는 진행 중 자동 저장이 없으므로 실패한 설정만 다시 저장한다.
 		_save()
 	_observe_result()
-	refresh_time += delta
+	refresh_time += elapsed
 	if refresh_time > 0.15:
 		refresh_time = 0
 		_refresh()
@@ -1153,16 +1342,23 @@ func _notification(what: int) -> void:
 		selection_pointer.clear()
 		if is_instance_valid(board):
 			board.cancel_pointer()
-		sim.set_pause("background" if what == NOTIFICATION_APPLICATION_FOCUS_OUT else "suspended", true)
+		_advance_battle_to_now()
+		if what == NOTIFICATION_APPLICATION_FOCUS_OUT: backgrounded = true
+		else: suspended = true
 		_sync_audio()
 		_save()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_APPLICATION_RESUMED:
-		sim.set_pause("background" if what == NOTIFICATION_APPLICATION_FOCUS_IN else "suspended", false)
+		_advance_battle_to_now()
+		if what == NOTIFICATION_APPLICATION_FOCUS_IN: backgrounded = false
+		else: suspended = false
 		_sync_audio()
 
 # GUI에 소비되는 클릭도 관측하되, 실제 버튼 처리가 끝난 뒤 선택만 해제한다.
 func _input(event: InputEvent) -> void:
-	if mode != "battle" or not is_instance_valid(board):
+	button_release.clear()
+	if (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed) or (event is InputEventScreenTouch and not event.pressed):
+		button_release = {"position": event.position, "canceled": event.canceled, "frame": Engine.get_process_frames()}
+	if mode != "battle" or not is_instance_valid(board) or is_instance_valid(pause_overlay):
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.device == InputEvent.DEVICE_ID_EMULATION:
@@ -1229,6 +1425,7 @@ func _clear_selection_after_click(source_screen: Control, click_serial: int) -> 
 		_refresh()
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if is_instance_valid(pause_overlay): return
 	if event.is_action_pressed("ui_cancel"):
 		_handle_back()
 	if dev_mode and event is InputEventKey and event.pressed and not event.echo:
@@ -1238,6 +1435,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			_toast(L.text("debug.wave.skip"))
 
 func _handle_back() -> void:
+	if is_instance_valid(pause_overlay): return
 	_save()
 	if panel_name.is_empty():
 		_open_panel("settings")
@@ -1264,7 +1462,7 @@ func _apply_audio() -> void:
 
 func _sync_audio() -> void:
 	if is_instance_valid(audio):
-		audio.set_context(mode == "battle" and sim.result == "active", not sim.pause_reasons.has("background") and not sim.pause_reasons.has("suspended"))
+		audio.set_context(mode == "battle" and sim.result == "active", not backgrounded and not suspended)
 
 func _exit_tree() -> void:
 	if web_input_canvas != null and web_touch_cancel_callback != null:

@@ -9,6 +9,7 @@ signal enemy_removed_presented(event: Dictionary)
 signal unit_presented(event: Dictionary)
 
 const Catalog = preload("res://game/catalog.gd")
+const Progression = preload("res://game/permanent_progression.gd")
 # 아군 한 칸을 1로 두고 폭 1인 외곽 길의 중심선을 따른다.
 const PATH_SIDE := 7.0
 const PATH_LENGTH := PATH_SIDE * 4.0
@@ -38,13 +39,22 @@ var next_id := 1
 var run_id := ""
 var revision := 0
 var developer_run := false
+var permanent_levels: Dictionary = Progression.defaults()
+var deployment_remaining := 0.0
+var presentation_suppressed := false
 
-func new_run(seed_value: int = 0) -> void:
+func new_run(seed_value: int = 0, permanent: Dictionary = {}) -> void:
+	if not permanent.is_empty() and not Progression.valid_levels(permanent):
+		push_error("영구 강화 단계가 올바르지 않습니다.")
+		return
+	permanent_levels = Progression.defaults() if permanent.is_empty() else permanent.duplicate()
+	deployment_remaining = float(catalog.rules.F.deployment_seconds)
+	spawn_index = 0
 	units.clear()
 	enemies.clear()
 	effects.clear()
-	gold = int(catalog.rules.T.summon_cost) * 3
-	lives = 20
+	gold = int(catalog.rules.T.summon_cost) * 3 + int(Progression.value("starting_gold", int(permanent_levels.starting_gold)))
+	lives = 20 + int(Progression.value("extra_lives", int(permanent_levels.extra_lives)))
 	time = 0.0
 	wave = 1
 	speed = 1
@@ -64,7 +74,6 @@ func new_run(seed_value: int = 0) -> void:
 		rng.seed = seed_value
 	run_id = "%s-%s" % [Time.get_unix_time_from_system(), rng.randi()]
 	revision = 1
-	_start_wave()
 
 func cell_position(cell: int) -> Vector2:
 	return Vector2(floori(float(cell) / 6.0) + 0.5, cell % 6 + 0.5)
@@ -101,7 +110,7 @@ func _fail(message_key: String) -> Dictionary:
 	return {"ok": false, "reason": L.text(message_key)}
 
 func _allowed() -> bool:
-	return result == "active"
+	return result == "active" and not pause_reasons.has("user")
 
 func add_unit(kind: String, cell: int) -> Dictionary:
 	if not _allowed() or not catalog.units.has(kind) or cell < 0 or cell >= 36 or not unit_at(cell).is_empty():
@@ -110,7 +119,8 @@ func add_unit(kind: String, cell: int) -> Dictionary:
 	next_id += 1
 	units.append(unit)
 	discovered_units[kind] = true
-	unit_presented.emit({"id": int(unit.id), "kind": kind, "cell": cell, "time": time, "action": "appear"})
+	if not presentation_suppressed:
+		unit_presented.emit({"id": int(unit.id), "kind": kind, "cell": cell, "time": time, "action": "appear"})
 	return unit
 
 func summon() -> Dictionary:
@@ -125,8 +135,14 @@ func summon() -> Dictionary:
 	var pool: Array = catalog.pool(1)
 	var unit := add_unit(pool[rng.randi_range(0, pool.size() - 1)], cell)
 	gold -= cost
+	var extra_id := -1
+	var chance := Progression.value("double_summon", int(permanent_levels.double_summon))
+	# 기본 소환 한 번당 최대 한 명이다. 남은 칸이 없으면 추가 굴림도 하지 않는다.
+	var extra_cell := first_empty()
+	if chance > 0.0 and extra_cell >= 0 and rng.randf() < chance:
+		extra_id = int(add_unit(pool[rng.randi_range(0, pool.size() - 1)], extra_cell).id)
 	revision += 1
-	return {"ok": true, "unit_id": unit.id, "reason": L.text("transaction.unit.joined") % L.unit_name(str(unit.kind))}
+	return {"ok": true, "extra_unit_id": extra_id, "unit_id": unit.id, "reason": L.text("transaction.unit.joined") % L.unit_name(str(unit.kind))}
 
 func move_unit(id: int, cell: int) -> Dictionary:
 	if not _allowed() or cell < 0 or cell >= 36:
@@ -141,9 +157,11 @@ func move_unit(id: int, cell: int) -> Dictionary:
 		other.cell = unit.cell
 	unit.cell = cell
 	revision += 1
-	unit_presented.emit({"id": int(unit.id), "kind": str(unit.kind), "cell": cell, "time": time, "action": "move"})
+	if not presentation_suppressed:
+		unit_presented.emit({"id": int(unit.id), "kind": str(unit.kind), "cell": cell, "time": time, "action": "move"})
 	if not other.is_empty():
-		unit_presented.emit({"id": int(other.id), "kind": str(other.kind), "cell": int(other.cell), "time": time, "action": "move"})
+		if not presentation_suppressed:
+			unit_presented.emit({"id": int(other.id), "kind": str(other.kind), "cell": int(other.cell), "time": time, "action": "move"})
 	return {"ok": true, "reason": L.text("transaction.formation.updated")}
 
 func recipe_materials(recipe: Dictionary, anchor_id: int = -1) -> Array:
@@ -188,6 +206,57 @@ func combine(recipe_id: String, anchor_id: int = -1) -> Dictionary:
 	revision += 1
 	return {"ok": true, "unit_id": created.id, "reason": L.text("recipes.merge.success") % L.unit_name(str(recipe.result))}
 
+func synthesis_materials(anchor_id: int) -> Array:
+	var anchor := unit_by_id(anchor_id)
+	if anchor.is_empty() or int(catalog.units[anchor.kind].tier) != int(catalog.rules.D.synthesis_tier): return []
+	var chosen: Array = [anchor]
+	var candidates := units.duplicate()
+	candidates.sort_custom(func(a, b): return a.cell < b.cell if a.cell != b.cell else a.id < b.id)
+	for unit in candidates:
+		if unit.kind == anchor.kind and int(unit.id) != anchor_id:
+			chosen.append(unit)
+			if chosen.size() == 3: return chosen
+	return []
+
+func synthesis_pool(kind: String) -> Array:
+	if not catalog.units.has(kind) or int(catalog.units[kind].tier) != int(catalog.rules.D.synthesis_tier): return []
+	var pool: Array = catalog.pool(int(catalog.units[kind].tier))
+	pool.erase(kind)
+	return pool
+
+func synthesize(anchor_id: int) -> Dictionary:
+	if not _allowed(): return _fail("error.game.already_ended")
+	var anchor := unit_by_id(anchor_id)
+	if anchor.is_empty(): return _fail("error.unit.none_selected")
+	if int(catalog.units[anchor.kind].tier) != int(catalog.rules.D.synthesis_tier): return _fail("unit.synthesis.one_star_only")
+	var materials := synthesis_materials(anchor_id)
+	if materials.is_empty(): return _fail("unit.synthesis.materials_missing")
+	var pool := synthesis_pool(str(anchor.kind))
+	if pool.is_empty(): return _fail("unit.synthesis.unavailable")
+	# 전부 검증한 뒤 난수를 한 번만 사용하고 선택한 칸에 결과를 생성한다.
+	var kind: String = pool[rng.randi_range(0, pool.size() - 1)]
+	var target := int(anchor.cell)
+	for material in materials: units.erase(material)
+	var created := add_unit(kind, target)
+	revision += 1
+	return {"ok": true, "unit_id": created.id, "reason": L.text("unit.synthesis.success") % L.unit_name(kind)}
+
+func sale_price(tier: int = 1) -> int:
+	var multipliers: Dictionary = catalog.rules.T.sale_summon_multipliers
+	if not multipliers.has(str(tier)): return -1
+	return floori(float(catalog.rules.T.summon_cost) * float(multipliers[str(tier)]))
+
+func sell_unit(unit_id: int) -> Dictionary:
+	if not _allowed(): return _fail("error.game.already_ended")
+	var unit := unit_by_id(unit_id)
+	if unit.is_empty(): return _fail("error.unit.none_selected")
+	var refund := sale_price(int(catalog.units[unit.kind].tier))
+	if refund < 0: return _fail("unit.sale.unavailable")
+	units.erase(unit)
+	gold += refund
+	revision += 1
+	return {"ok": true, "gold": refund, "reason": L.text("unit.sale.success")}
+
 func gamble(tier: int) -> Dictionary:
 	if not _allowed() or not catalog.rules.T.gamble.has(str(tier)):
 		return _fail("gamble.unavailable")
@@ -198,13 +267,17 @@ func gamble(tier: int) -> Dictionary:
 	if gold < int(rule.cost):
 		return _fail("error.gold.insufficient")
 	gold -= int(rule.cost)
-	var won := rng.randf() < float(rule.chance)
+	var won := rng.randf() < gamble_chance(tier)
 	var unit_id := -1
 	if won:
 		var pool: Array = catalog.pool(tier)
 		unit_id = add_unit(pool[rng.randi_range(0, pool.size() - 1)], cell).id
 	revision += 1
 	return {"ok": true, "won": won, "unit_id": unit_id, "reason": L.text("gamble.success") % tier if won else L.text("gamble.failure")}
+
+func gamble_chance(tier: int) -> float:
+	if not catalog.rules.T.gamble.has(str(tier)): return 0.0
+	return clampf(float(catalog.rules.T.gamble[str(tier)].chance) + Progression.value("gamble_%d" % tier, int(permanent_levels.get("gamble_%d" % tier, 0))), 0.0, 1.0)
 
 func upgrade_cost(tier: int) -> int:
 	return int(catalog.rules.T.upgrade_cost) * tier * (int(upgrades.get(str(tier), 0)) + 1)
@@ -284,19 +357,33 @@ func _start_wave() -> void:
 func cycle_speed() -> int:
 	if not _allowed():
 		return speed
-	var values := [1, 2, 3, 5]
-	speed = values[(values.find(speed) + 1) % 4]
+	var values := Progression.speeds(permanent_levels)
+	speed = values[(values.find(speed) + 1) % values.size()]
 	revision += 1
 	return speed
 
 func set_pause(reason: String, enabled: bool) -> void:
+	if reason != "user": return
 	if enabled:
 		pause_reasons[reason] = true
 	else:
 		pause_reasons.erase(reason)
 
+func advance_wall_time(real_delta: float) -> void:
+	if not _allowed() or not is_finite(real_delta) or real_delta <= 0.0:
+		return
+	var remaining := real_delta
+	if deployment_remaining > 0.0:
+		var preparation := minf(remaining, deployment_remaining)
+		deployment_remaining = maxf(0.0, deployment_remaining - preparation)
+		remaining -= preparation
+		if deployment_remaining <= 0.000001:
+			deployment_remaining = 0.0
+			_start_wave()
+	advance(remaining * speed)
+
 func advance(game_delta: float) -> void:
-	if result != "active" or not pause_reasons.is_empty() or game_delta <= 0.0:
+	if result != "active" or not pause_reasons.is_empty() or deployment_remaining > 0.0 or not is_finite(game_delta) or game_delta <= 0.0:
 		return
 	var remaining := game_delta
 	while remaining > 0.0000001 and result == "active":
@@ -311,7 +398,7 @@ func attack_damage(unit: Dictionary) -> float:
 		var support: Dictionary = catalog.units[source.kind]
 		if float(support.buff) > 0.0 and cell_position(source.cell).distance_to(cell_position(unit.cell)) <= float(support.range):
 			bonus = maxf(bonus, support.buff)
-	return float(definition.damage) * (1.0 + float(catalog.rules.T.upgrade_factor) * int(upgrades[str(int(definition.tier))])) * (1.0 + bonus)
+	return float(definition.damage) * (1.0 + Progression.value("attack_%d" % int(definition.tier), int(permanent_levels["attack_%d" % int(definition.tier)]))) * (1.0 + float(catalog.rules.T.upgrade_factor) * int(upgrades[str(int(definition.tier))])) * (1.0 + bonus)
 
 func apply_cc(enemy: Dictionary, definition: Dictionary) -> void:
 	if not _allowed():
@@ -354,10 +441,12 @@ func _tick(delta: float) -> void:
 				enemy.hp -= damage
 				apply_cc(enemy, definition)
 				if prior_hp > 0.0:
-					enemy_hit_presented.emit({"id": int(enemy.id), "kind": str(enemy.kind), "progress": float(enemy.progress), "time": time})
+					if not presentation_suppressed:
+						enemy_hit_presented.emit({"id": int(enemy.id), "kind": str(enemy.kind), "progress": float(enemy.progress), "time": time})
 		if effects.size() < 90:
 			effects.append({"from": [origin.x, origin.y], "to": [destination.x, destination.y], "color": definition.color, "life": 0.22})
-		attack_presented.emit({"unit_id": int(unit.id), "kind": str(unit.kind), "target_id": int(target.id), "from": origin, "to": destination, "time": time, "color": str(definition.color)})
+		if not presentation_suppressed:
+			attack_presented.emit({"unit_id": int(unit.id), "kind": str(unit.kind), "target_id": int(target.id), "from": origin, "to": destination, "time": time, "color": str(definition.color)})
 	# 같은 틱의 사망 확정 뒤 마왕 승리, 살아 있는 적의 탈출 순으로 처리한다.
 	var final_dead := false
 	for enemy in enemies.duplicate():
@@ -365,7 +454,8 @@ func _tick(delta: float) -> void:
 			if catalog.enemies[enemy.kind].kind == "final":
 				final_dead = true
 			_reward(enemy)
-			enemy_removed_presented.emit({"id": int(enemy.id), "kind": str(enemy.kind), "progress": float(enemy.progress), "time": time, "reason": "killed"})
+			if not presentation_suppressed:
+				enemy_removed_presented.emit({"id": int(enemy.id), "kind": str(enemy.kind), "progress": float(enemy.progress), "time": time, "reason": "killed"})
 			enemies.erase(enemy)
 	if final_dead:
 		for enemy in enemies:
@@ -393,7 +483,8 @@ func _tick(delta: float) -> void:
 			var travel: float = catalog.enemies[enemy.kind].travel
 			enemy.progress += delta * PATH_LENGTH / travel * (1.0 - strongest)
 		if float(enemy.progress) >= PATH_LENGTH - 0.000001:
-			enemy_removed_presented.emit({"id": int(enemy.id), "kind": str(enemy.kind), "progress": float(enemy.progress), "time": time, "reason": "escaped"})
+			if not presentation_suppressed:
+				enemy_removed_presented.emit({"id": int(enemy.id), "kind": str(enemy.kind), "progress": float(enemy.progress), "time": time, "reason": "escaped"})
 			enemies.erase(enemy)
 			lives = maxi(0, lives - 1)
 			if catalog.enemies[enemy.kind].kind == "final":
@@ -434,17 +525,20 @@ func debug_jump_wave(value: int) -> void:
 	if not _allowed():
 		return
 	developer_run = true
+	deployment_remaining = 0.0
 	wave = clampi(value, 1, 100)
 	time = (wave - 1) * 30.0
 	enemies.clear()
 	_start_wave()
 
 func snapshot() -> Dictionary:
-	return {"schema": 1, "path_length": PATH_LENGTH, "content_version": catalog.rules.content_version, "run_id": run_id, "time": time, "wave": wave, "spawn_index": spawn_index, "gold": gold, "lives": lives, "speed": speed, "result": result, "result_reason": result_reason, "units": units.duplicate(true), "enemies": enemies.duplicate(true), "upgrades": upgrades.duplicate(true), "cooldowns": cooldowns.duplicate(true), "next_id": next_id, "rng_state": str(rng.state), "rng_seed": str(rng.seed), "discovered_units": discovered_units.duplicate(), "discovered_enemies": discovered_enemies.duplicate(), "kills": kills.duplicate(), "developer_run": developer_run}
+	return {"schema": 2, "deployment_remaining": deployment_remaining, "permanent_levels": permanent_levels.duplicate(), "user_paused": pause_reasons.has("user"), "path_length": PATH_LENGTH, "content_version": catalog.rules.content_version, "run_id": run_id, "time": time, "wave": wave, "spawn_index": spawn_index, "gold": gold, "lives": lives, "speed": speed, "result": result, "result_reason": result_reason, "units": units.duplicate(true), "enemies": enemies.duplicate(true), "upgrades": upgrades.duplicate(true), "cooldowns": cooldowns.duplicate(true), "next_id": next_id, "rng_state": str(rng.state), "rng_seed": str(rng.seed), "discovered_units": discovered_units.duplicate(), "discovered_enemies": discovered_enemies.duplicate(), "kills": kills.duplicate(), "developer_run": developer_run}
 
 func restore(saved: Dictionary) -> bool:
 	if not _valid_snapshot(saved):
 		return false
+	permanent_levels = saved.get("permanent_levels", Progression.defaults()).duplicate()
+	deployment_remaining = float(saved.get("deployment_remaining", 0.0))
 	run_id = saved.run_id
 	time = saved.time
 	wave = int(saved.wave)
@@ -471,7 +565,7 @@ func restore(saved: Dictionary) -> bool:
 	kills = saved.kills.duplicate()
 	developer_run = saved.developer_run
 	effects.clear()
-	pause_reasons = {"user": true}
+	pause_reasons = {"user": true} if bool(saved.get("user_paused", false)) else {}
 	revision += 1
 	# 이전 버전의 무제한 군중 저장은 원본 전투 상태를 보존한 채 새 패배 조건을 적용한다.
 	if result == "active" and enemies.size() >= enemy_limit():
@@ -487,12 +581,21 @@ func _valid_snapshot(s: Dictionary) -> bool:
 		return false
 	if not float(saved_path_length) in [LEGACY_PATH_LENGTH, PATH_LENGTH]:
 		return false
-	if s.schema != 1 or not s.content_version in ["0.2.0", catalog.rules.content_version] or not s.run_id is String or s.run_id.is_empty():
+	if not Progression.integer(s.schema, 1, 2) or not s.content_version in ["0.2.0", catalog.rules.content_version] or not s.run_id is String or s.run_id.is_empty():
+		return false
+	var saved_permanent: Dictionary = Progression.defaults()
+	var preparation := 0.0
+	if int(s.schema) == 2:
+		if not s.has_all(["permanent_levels", "deployment_remaining", "user_paused"]) or not s.user_paused is bool or not Progression.valid_levels(s.permanent_levels): return false
+		if not (s.deployment_remaining is int or s.deployment_remaining is float) or not is_finite(float(s.deployment_remaining)) or s.deployment_remaining < 0.0 or s.deployment_remaining > float(catalog.rules.F.deployment_seconds): return false
+		saved_permanent = s.permanent_levels
+		preparation = float(s.deployment_remaining)
+	elif s.has("permanent_levels") or s.has("deployment_remaining") or s.has("user_paused"):
 		return false
 	for key in ["time", "wave", "spawn_index", "gold", "lives", "speed", "next_id"]:
 		if not (s[key] is float or s[key] is int) or not is_finite(float(s[key])):
 			return false
-	if s.wave < 1 or s.wave > 100 or s.time < 0 or s.gold < 0 or s.lives < 0 or s.lives > 20 or s.next_id < 1 or not int(s.speed) in [1, 2, 3, 5]:
+	if s.wave < 1 or s.wave > 100 or s.time < 0 or s.gold < 0 or s.lives < 0 or s.lives > 20 + int(Progression.value("extra_lives", int(saved_permanent.extra_lives))) or s.next_id < 1 or not int(s.speed) in Progression.speeds(saved_permanent):
 		return false
 	for key in ["wave", "spawn_index", "gold", "lives", "speed", "next_id"]:
 		if float(s[key]) != floor(float(s[key])):
@@ -500,7 +603,8 @@ func _valid_snapshot(s: Dictionary) -> bool:
 	var wave_time: float = float(s.time) - (int(s.wave) - 1) * 30.0
 	if wave_time < -0.00001 or (s.wave < 100 and wave_time >= 30.00001):
 		return false
-	var expected_spawns := 1 if int(s.wave) % 10 == 0 else mini(10, floori(wave_time + 0.000001) + 1)
+	if preparation > 0.0 and (float(s.time) != 0.0 or int(s.wave) != 1 or s.result != "active" or not s.enemies is Array or not s.enemies.is_empty()): return false
+	var expected_spawns := 0 if preparation > 0.0 else (1 if int(s.wave) % 10 == 0 else mini(10, floori(wave_time + 0.000001) + 1))
 	if int(s.spawn_index) != expected_spawns:
 		return false
 	if not s.result in ["active", "victory", "defeat"] or not s.result_reason is String or not s.developer_run is bool:
