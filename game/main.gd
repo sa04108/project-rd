@@ -1,6 +1,7 @@
 extends Control
 
 const UiSkin = preload("res://game/ui_skin.gd")
+const DragScrollContainer = preload("res://game/drag_scroll_container.gd")
 const BATTLE_BACKGROUND = preload("res://assets/art/orthographic/battle-map.webp")
 const VisualAssets = preload("res://game/visual_assets.gd")
 var visuals = VisualAssets.new()
@@ -482,6 +483,16 @@ func _open_panel(kind: String, force: bool = false) -> void:
 			_paragraph(panel, "진행 중인 전투가 있습니다. 새 게임을 시작하면 이번 판의 배치와 골드를 잃습니다.", Rect2(38, 140, 560, 150), 25, PALE)
 			_button(panel, "새 게임 시작", Rect2(75, 380, 500, 75), _start_new, true, "confirm_new")
 			_button(panel, "이어하기 유지", Rect2(75, 480, 500, 65), _close_panel, false, "cancel_new")
+	for candidate in overlay.find_children("PanelScroll", "ScrollContainer", true, false):
+		_set_scroll_input_pass(candidate)
+
+func _set_scroll_input_pass(node: Node) -> void:
+	if node is ScrollBar:
+		return
+	if node is Control and not node is ScrollContainer and node.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+		node.mouse_filter = Control.MOUSE_FILTER_PASS
+	for child in node.get_children():
+		_set_scroll_input_pass(child)
 
 func _upgrade_panel(panel: Control) -> void:
 	for tier in range(1, 5):
@@ -533,7 +544,8 @@ func _special_panel(panel: Control) -> void:
 		update.call()
 
 func _scroll(panel: Control, top: float = 72.0) -> VBoxContainer:
-	var scroller := ScrollContainer.new()
+	var scroller := DragScrollContainer.new()
+	scroller.name = "PanelScroll"
 	scroller.position = Vector2(18, top)
 	scroller.size = Vector2(614, 670 - top)
 	scroller.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -771,7 +783,8 @@ func _write_qa_state() -> void:
 		"save_snapshot": resume_data.duplicate(true) if mode == "menu" else {},
 		"save_profile": store.profile.duplicate(true) if mode == "menu" else {},
 		"android_qa": android_qa, "session_id": qa_session, "process_id": OS.get_process_id(), "frame_size": [get_viewport_rect().size.x, get_viewport_rect().size.y],
-		"art_ready": visuals.ready_count() == 87 and visuals.portraits.size() == 87}
+		"art_ready": visuals.ready_count() == 87 and visuals.portraits.size() == 87,
+		"scroll": {}}
 	# 해제되지 않은 개체와 Wasm의 회수되지 않는 최대 용량을 구분하는 관측값이다.
 	# release에서 지원되지 않는 모니터의 0은 측정 도구가 별도로 표시한다.
 	state.qa_ticks_msec = Time.get_ticks_msec()
@@ -801,6 +814,15 @@ func _write_qa_state() -> void:
 		for cell in range(36):
 			var center: Vector2 = board.global_position + board.ground_to_screen(Vector2(cell / 6 + 0.5, cell % 6 + 0.5))
 			state.cell_centers.append({"cell": cell, "x": center.x, "y": center.y})
+	if is_instance_valid(overlay):
+		for node in overlay.find_children("PanelScroll", "ScrollContainer", true, false):
+			var scroller := node as ScrollContainer
+			if scroller.is_visible_in_tree():
+				var rect := scroller.get_global_rect()
+				var scrollbar := scroller.get_v_scroll_bar()
+				state.scroll = {"x": rect.position.x, "y": rect.position.y, "width": rect.size.x, "height": rect.size.y,
+					"value": float(scroller.scroll_vertical), "maximum": maxf(0.0, scrollbar.max_value - scrollbar.page)}
+				break
 	if web_qa:
 		# URL로 명시한 격리 QA 세션에만 읽기 관측값을 공개한다.
 		JavaScriptBridge.eval("window.__projectRdQa = " + JSON.stringify(state) + ";", true)

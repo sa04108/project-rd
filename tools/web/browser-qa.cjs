@@ -152,6 +152,56 @@ function fittedCanvasBounds(rect, logicalWidth, logicalHeight) {
   return { x: rect.x + (rect.width - width) / 2, y: rect.y + (rect.height - height) / 2, width, height };
 }
 
+async function dragPanelContent(page, panel, timeout, useTouch = false, downward = false) {
+  const before = await waitFor(page, s => s.panel_name === panel && s.scroll?.maximum > 0, timeout, `${panel} scroll layout`);
+  const rect = await page.locator('canvas').first().boundingBox();
+  if (!rect) throw new Error('Godot canvas has no visible browser rectangle');
+  const scroll = before.scroll;
+  // 스크롤바를 피하고 초상화·설명 본문 위에서 실제 포인터를 움직입니다.
+  const x = scroll.x + scroll.width * (panel === 'codex' ? 0.08 : 0.4);
+  const upper = logicalToScreen(rect, x, scroll.y + scroll.height * 0.22, ...before.frame_size);
+  const lower = logicalToScreen(rect, x, scroll.y + scroll.height * 0.78, ...before.frame_size);
+  const from = downward ? upper : lower;
+  const to = downward ? lower : upper;
+  if (useTouch) {
+    const cdp = await page.context().newCDPSession(page);
+    const point = p => [{ x: p.x, y: p.y, id: 0, radiusX: 3, radiusY: 3, force: 1 }];
+    try {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: point(from) });
+      for (let step = 1; step <= 10; step += 1) {
+        const fraction = step / 10;
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: point({x: from.x + (to.x - from.x) * fraction, y: from.y + (to.y - from.y) * fraction}) });
+        await page.waitForTimeout(25);
+      }
+    } finally {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await cdp.detach();
+    }
+  } else {
+    await page.mouse.move(from.x, from.y);
+    await page.mouse.down();
+    try {
+      await page.mouse.move(to.x, to.y, { steps: 12 });
+    } finally {
+      await page.mouse.up();
+    }
+  }
+  const moved = await waitFor(page, s => s.panel_name === panel && (downward ? s.scroll?.value < scroll.value - 50 : s.scroll?.value > scroll.value + 50), timeout, `${panel} ${useTouch ? 'touch' : 'mouse'} content drag ${downward ? 'down' : 'up'}`);
+  const placement = s => s.units.map(unit => [unit.id, unit.cell]);
+  if (JSON.stringify(placement(moved)) !== JSON.stringify(placement(before))) throw new Error(`${panel} scrolling moved units behind the overlay`);
+  return moved;
+}
+
+async function wheelPanelContent(page, panel, timeout) {
+  const before = await state(page);
+  const rect = await page.locator('canvas').first().boundingBox();
+  const scroll = before.scroll;
+  const at = logicalToScreen(rect, scroll.x + scroll.width / 2, scroll.y + scroll.height / 2, ...before.frame_size);
+  await page.mouse.move(at.x, at.y);
+  await page.mouse.wheel(0, 160);
+  await waitFor(page, s => s.panel_name === panel && s.scroll?.value > scroll.value, timeout, `${panel} wheel scrolling`);
+}
+
 async function clickButton(page, name, useTouch = false) {
   const current = await state(page);
   const button = current?.buttons?.[name];
@@ -335,6 +385,10 @@ async function main() {
       const oldPanel = (await state(page)).panel_name;
       await clickButton(page, panel);
       await waitFor(page, s => s.panel_name && s.panel_name !== oldPanel, options.timeout, `${panel} panel`);
+      await dragPanelContent(page, panel, options.timeout);
+      captures.push(await capture(page, outDir, `${panel}-drag-scrolled`));
+      await dragPanelContent(page, panel, options.timeout, false, true);
+      await wheelPanelContent(page, panel, options.timeout);
       if (panel === 'recipes') captures.push(await capture(page, outDir, 'recipes'));
       await clickButton(page, 'close_panel');
       await waitFor(page, s => !s.panel_name || s.panel_name === 'battle', options.timeout, `close ${panel}`);
@@ -392,6 +446,11 @@ async function main() {
     captures.push(await capture(page, outDir, 'mobile-resumed'));
     await page.waitForTimeout(500);
     if (Math.abs((await state(page)).time - current.time) > 0.01) throw new Error('Game time advanced while paused at mobile viewport');
+    await clickButton(page, 'guide', true);
+    await dragPanelContent(page, 'guide', options.timeout, true);
+    captures.push(await capture(page, outDir, 'mobile-guide-touch-scroll'));
+    await clickButton(page, 'close_panel', true);
+    await waitFor(page, s => !s.panel_name, options.timeout, 'close touch-scrolled guide');
     await clickButton(page, 'pause', true);
     await waitFor(page, s => Object.keys(s.pause_reasons || {}).length === 0, options.timeout, 'mobile viewport unpause input');
 
@@ -403,6 +462,11 @@ async function main() {
     await clickButton(page, 'pause');
     await waitFor(page, s => Object.keys(s.pause_reasons || {}).length > 0, options.timeout, 'wide viewport pause input');
     captures.push(await capture(page, outDir, 'wide-viewport'));
+    await clickButton(page, 'codex');
+    await dragPanelContent(page, 'codex', options.timeout);
+    captures.push(await capture(page, outDir, 'wide-codex-drag-scroll'));
+    await clickButton(page, 'close_panel');
+    await waitFor(page, s => !s.panel_name, options.timeout, 'close wide scrolled codex');
     await clickButton(page, 'pause');
     await waitFor(page, s => Object.keys(s.pause_reasons || {}).length === 0, options.timeout, 'wide viewport unpause input');
 
@@ -411,6 +475,28 @@ async function main() {
     plainPage.on('console', message => {
       if (message.type() === 'error') failures.push(`public console: ${message.text()}`);
     });
+    // 터치 기능이 없는 일반 데스크톱에서도 본문 드래그가 되는지 별도로 확인합니다.
+    await plainPage.goto(`${options.baseUrl}${options.baseUrl.includes('?') ? '&' : '?'}qa=1`, { waitUntil: 'domcontentloaded', timeout: options.bootTimeout });
+    await waitFor(plainPage, s => s.mode === 'menu' && s.buttons, options.bootTimeout, 'mouse-only desktop menu');
+    await clickButton(plainPage, 'new_game');
+    const desktopStart = await waitFor(plainPage, s => s.buttons?.confirm_new || s.mode === 'battle', options.timeout, 'mouse-only desktop new game');
+    if (desktopStart.buttons?.confirm_new) await clickButton(plainPage, 'confirm_new');
+    await waitFor(plainPage, s => s.mode === 'battle', options.timeout, 'mouse-only desktop battle');
+    await clickButton(plainPage, 'pause');
+    await waitFor(plainPage, s => s.pause_reasons?.user, options.timeout, 'mouse-only desktop paused');
+    for (const panel of ['guide', 'codex', 'recipes']) {
+      const viewport = panel === 'codex' ? { width: 1280, height: 800 } : panel === 'recipes' ? { width: 360, height: 640 } : { width: 720, height: 1280 };
+      await plainPage.setViewportSize(viewport);
+      await plainPage.waitForTimeout(300);
+      await clickButton(plainPage, panel);
+      await dragPanelContent(plainPage, panel, options.timeout);
+      captures.push(await capture(plainPage, outDir, `desktop-${panel}-drag-scroll`));
+      await dragPanelContent(plainPage, panel, options.timeout, false, true);
+      await wheelPanelContent(plainPage, panel, options.timeout);
+      await clickButton(plainPage, 'close_panel');
+      await waitFor(plainPage, s => !s.panel_name, options.timeout, `close mouse-only ${panel}`);
+    }
+    await plainPage.setViewportSize({ width: 720, height: 1280 });
     await plainPage.goto(options.baseUrl, { waitUntil: 'domcontentloaded', timeout: options.bootTimeout });
     await plainPage.waitForFunction(() => {
       const canvas = document.querySelector('canvas');
@@ -428,7 +514,7 @@ async function main() {
       browser: 'Chromium via Playwright',
       browser_version: browser.version(),
       playwright_version: require('playwright/package.json').version,
-      checks: ['QA bridge gated by query flag', 'initial art and frame ready', 'new run and three summons', 'pause freezes simulation', 'speed cycle 1→2→3→5→1', 'unit relocation', 'guide/codex/recipe panels', 'IndexedDB commits complete run and profile without forced sync', 'save-menu-continue', 'browser reload and persistent restore', 'desktop, mobile-touch, and wide viewport input', 'public URL omits QA bridge', 'all screenshots contain visible pixel diversity'],
+      checks: ['QA bridge gated by query flag', 'initial art and frame ready', 'new run and three summons', 'pause freezes simulation', 'speed cycle 1→2→3→5→1', 'unit relocation', 'guide/codex/recipe content mouse drags and wheel scrolling', 'mobile touch scrolling and wide viewport content dragging', 'IndexedDB commits complete run and profile without forced sync', 'save-menu-continue', 'browser reload and persistent restore', 'desktop, mobile-touch, and wide viewport input', 'public URL omits QA bridge', 'all screenshots contain visible pixel diversity'],
       persistence,
       final_state: resumed,
       screenshots: captures,

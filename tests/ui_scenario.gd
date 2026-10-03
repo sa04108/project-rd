@@ -26,6 +26,7 @@ func _run() -> void:
 	await _touch(_action_center("guide"))
 	_check(game.panel_name == "guide", "touch opens guide from menu")
 	_check(game.toast_label.z_index > game.overlay.z_index, "menu toast stays above a later-opened panel")
+	await _check_panel_scroll_input()
 	await _touch(_action_center("close_panel"))
 	_check(game.panel_name.is_empty(), "touch closes guide without removing a node during propagation")
 	await _touch(_action_center("new_game"))
@@ -330,6 +331,54 @@ func _frames(count: int) -> void:
 	for _i in range(count):
 		await process_frame
 
+func _check_panel_scroll_input() -> void:
+	var nodes: Array[Node] = game.overlay.find_children("PanelScroll", "ScrollContainer", true, false)
+	_check(nodes.size() == 1, "guide has one named scroll container")
+	if nodes.is_empty():
+		return
+	var scroller := nodes[0] as ScrollContainer
+	var scrollbar := scroller.get_v_scroll_bar()
+	await _frames(3)
+	var maximum := maxf(0.0, scrollbar.max_value - scrollbar.page)
+	_check(maximum > 0.0, "guide content overflows its scroll viewport")
+	if maximum <= 0.0:
+		return
+	var list := scroller.get_child(0) as VBoxContainer
+	var first_row := list.get_child(0) as Control
+	var probe := Button.new()
+	probe.text = "입력 검사"
+	probe.position = Vector2(455, 104)
+	probe.size = Vector2(110, 44)
+	probe.mouse_filter = Control.MOUSE_FILTER_PASS
+	first_row.add_child(probe)
+	var presses := [0]
+	probe.pressed.connect(func(): presses[0] += 1)
+	await _frames(3)
+	var start_value := float(scroller.scroll_vertical)
+	var probe_center := probe.get_global_rect().get_center()
+	await _tap(probe_center)
+	_check(presses[0] == 1, "short tap on a scroll-content button activates it once")
+	_check(is_equal_approx(float(scroller.scroll_vertical), start_value), "short tap does not move the scroll position")
+	await _drag(probe_center, probe_center - Vector2(0, 120))
+	_check(float(scroller.scroll_vertical) > start_value, "mouse drag on a child button scrolls the panel body")
+	_check(presses[0] == 1, "releasing a drag on a child button does not activate it")
+	var before_wheel := float(scroller.scroll_vertical)
+	await _wheel(scroller.get_global_rect().get_center(), MOUSE_BUTTON_WHEEL_DOWN)
+	_check(float(scroller.scroll_vertical) > before_wheel, "mouse wheel scrolls the panel body")
+	var after_wheel := float(scroller.scroll_vertical)
+	await _wheel(scroller.get_global_rect().get_center(), MOUSE_BUTTON_WHEEL_UP)
+	_check(float(scroller.scroll_vertical) < after_wheel, "mouse wheel scrolls back toward the top")
+	var before_bar_drag := float(scroller.scroll_vertical)
+	var bar_center := scrollbar.get_global_rect().get_center()
+	await _drag(bar_center, bar_center + Vector2(0, 45))
+	_check(float(scroller.scroll_vertical) > before_bar_drag, "dragging the scrollbar thumb still scrolls the panel")
+	scroller.scroll_vertical = 0
+	await _frames(2)
+	var before_track_click := float(scroller.scroll_vertical)
+	var bar_rect := scrollbar.get_global_rect()
+	await _tap(Vector2(bar_rect.get_center().x, bar_rect.position.y + bar_rect.size.y * 0.75))
+	_check(float(scroller.scroll_vertical) > before_track_click, "clicking the scrollbar track advances the page")
+
 func _tap(position: Vector2) -> void:
 	var press := InputEventMouseButton.new()
 	press.position = position
@@ -340,6 +389,19 @@ func _tap(position: Vector2) -> void:
 	var release := InputEventMouseButton.new()
 	release.position = position
 	release.button_index = MOUSE_BUTTON_LEFT
+	release.pressed = false
+	root.push_input(release, true)
+	await _frames(2)
+
+func _wheel(position: Vector2, button_index: int) -> void:
+	var wheel := InputEventMouseButton.new()
+	wheel.position = position
+	wheel.button_index = button_index
+	wheel.factor = 1.0
+	wheel.pressed = true
+	root.push_input(wheel, true)
+	# 실제 휠처럼 release도 전달해야 다음 클릭의 GUI 마우스 캡처가 남지 않는다.
+	var release := wheel.duplicate() as InputEventMouseButton
 	release.pressed = false
 	root.push_input(release, true)
 	await _frames(2)

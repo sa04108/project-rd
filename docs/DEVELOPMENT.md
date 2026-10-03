@@ -159,7 +159,7 @@ CHROMIUM_PATH="$(node -e 'process.stdout.write(require("./tools/web/node_modules
 
 검사는 QA 브리지를 `?qa=1` 주소에서만 사용하며 실제 캔버스 입력, 화면 크기 변화, 저장·이어하기, 새로고침 복원을 검사합니다. 저장 검증은 브라우저의 IndexedDB에 저장된 QA `run.json` 및 `profile.json`을 읽기 전용으로 확인하고, 기대한 전체 스냅샷이 기록될 때까지 최대 20초 기다린 뒤 새로고침 복원값과 비교합니다. 파일 존재만으로 저장 완료라 판단하거나 동기화를 강제하지 않습니다. 이 자동 절차는 저장 직후 탭을 닫아도 데이터가 보존된다는 보장을 하지 않습니다.
 
-수동 배포 검증은 `.github/workflows/web-preview.yml`의 `workflow_dispatch`에서만 시작합니다. 현재 push trigger는 주석 처리되어 있습니다. 선택한 ref의 빌드와 브라우저 검사가 성공하면 그 실행 산출물을 GitHub Pages에 배포합니다. 최초 배포 전 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 설정해야 합니다. 로컬 검사나 Actions 검사만으로 공개 URL이 정상임을 주장하지 말고 실제 URL을 확인합니다.
+`.github/workflows/web-preview.yml`은 `main` push 시 자동으로 실행하며, `workflow_dispatch`로 수동 실행할 수도 있습니다. 대상 ref의 빌드와 브라우저 검사가 성공하면 그 실행 산출물을 GitHub Pages에 배포합니다. 최초 배포 전 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 설정해야 합니다. 로컬 검사나 Actions 검사만으로 공개 URL이 정상임을 주장하지 말고 실제 URL을 확인합니다.
 
 ## Web 장시간 메모리 검사
 
