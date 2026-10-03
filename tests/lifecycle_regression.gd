@@ -40,6 +40,23 @@ func _run() -> void:
 	game.notification(Node.NOTIFICATION_WM_CLOSE_REQUEST)
 	await process_frame
 	_check(game.mode == "battle", "failed close save does not terminate")
+	# 자동 저장이 실패하면 같은 프레임 루프에서 디스크 쓰기를 폭주시키지 않는다.
+	game.set_process(false)
+	game.save_time = game.wall_time - 20.0
+	var retry_deadline: float = game.save_retry_time
+	for _index in range(30):
+		game._process(0.01)
+	_check(game.save_retry_time == retry_deadline, "failed automatic save waits before retry")
+	game.wall_time = retry_deadline
+	game._process(0.01)
+	_check(game.save_retry_time > retry_deadline, "automatic save retries after bounded delay")
+	game.sim.result = "defeat"
+	game.ended_saved = false
+	retry_deadline = game.save_retry_time
+	for _index in range(30):
+		game._process(0.01)
+	_check(game.save_retry_time == retry_deadline, "terminal save failure also waits before retry")
+	game.sim.result = "active"
 	game.store.directory = original
 	_check(game._save(), "save recovers when storage is restored")
 	game._show_menu()

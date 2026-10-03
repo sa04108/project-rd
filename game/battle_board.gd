@@ -23,6 +23,8 @@ var simulation: Object:
 			simulation.enemy_hit_presented.disconnect(_on_enemy_hit)
 			simulation.enemy_removed_presented.disconnect(_on_enemy_removed)
 			simulation.unit_presented.disconnect(_on_unit_presented)
+		if simulation != null and simulation != value:
+			visuals.clear_runtime_cache()
 		simulation = value
 		combat_visuals.reset(value)
 		encounter_visuals.reset(value)
@@ -57,6 +59,15 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	queue_redraw()
+
+func _sync_visual_cache() -> void:
+	var active: Array = []
+	if simulation != null:
+		for unit in simulation.units:
+			active.append(str(unit.kind))
+		for enemy in simulation.enemies:
+			active.append(str(enemy.kind))
+	visuals.retain_identities(active)
 
 func _on_attack(event: Dictionary) -> void:
 	combat_visuals.record(event)
@@ -118,6 +129,7 @@ func _cell_polygon(col: int, row: int) -> PackedVector2Array:
 func _draw() -> void:
 	if size.x <= 0.0 or size.y <= 0.0:
 		return
+	_sync_visual_cache()
 	if simulation != null:
 		combat_visuals.sync(simulation)
 		encounter_visuals.sync(simulation)

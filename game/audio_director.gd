@@ -91,7 +91,10 @@ func _sync_music() -> void:
 	if not active or float(settings.music) <= 0.0:
 		music.stop()
 		return
-	music.stream_paused = not foreground
+	# Web 샘플 백엔드는 같은 false 대입에도 소스를 다시 만들 수 있다.
+	# 포커스 상태가 실제로 바뀐 경우에만 pause/resume을 전달한다.
+	if music.stream_paused != (not foreground):
+		music.stream_paused = not foreground
 	var track: String = MUSIC_TRACK
 	if track != current_track:
 		var stream := _stream("res://assets/audio/music/%s.ogg" % track) as AudioStreamOggVorbis

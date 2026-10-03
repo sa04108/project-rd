@@ -161,6 +161,27 @@ CHROMIUM_PATH="$(node -e 'process.stdout.write(require("./tools/web/node_modules
 
 수동 배포 검증은 `.github/workflows/web-preview.yml`의 `workflow_dispatch`에서만 시작합니다. 현재 push trigger는 주석 처리되어 있습니다. 선택한 ref의 빌드와 브라우저 검사가 성공하면 그 실행 산출물을 GitHub Pages에 배포합니다. 최초 배포 전 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 설정해야 합니다. 로컬 검사나 Actions 검사만으로 공개 URL이 정상임을 주장하지 말고 실제 URL을 확인합니다.
 
+## Web 장시간 메모리 검사
+
+짧은 입력 QA와 별도로 debug export에서 실제 입력 기반 반복 플레이를 검사합니다. `?qa=1`에서만 노출하는 엔진 메모리·노드·리소스·프레임 관측값과 브라우저 렌더러 RSS, WebAudio, Wasm 용량을 함께 기록합니다.
+
+```sh
+WEB_EXPORT_MODE=debug bash scripts/web-export.sh artifacts/web-memory
+python3 scripts/web-serve.py --directory artifacts/web-memory --port 4173
+# 별도 터미널에서 실행
+CHROMIUM_PATH=/usr/bin/chromium node tools/web/memory-soak.cjs \
+  --base-url http://127.0.0.1:4173/ --output artifacts/web-memory-soak \
+  --cycles 12 --warmup-cycles 3 --battle-seconds 30 --endurance-seconds 180
+```
+
+새 게임·소환·배속·도감 필터·메인 복귀·이어하기를 반복하며, 연속 전투 도중 패배하면 남은 실시간 동안 새 전투를 시작합니다. `report.json`, `samples.jsonl`, `events.jsonl`과 캡처는 산출물 디렉터리에 남습니다. 실패·크래시까지의 샘플도 보존합니다. `--music-off`는 설정 UI에서 배경음만 끄는 대조 실험이며 효과음은 유지합니다. `--self-test`는 분석기 자체 검사이고 실제 게임 QA를 대신하지 않습니다.
+
+워크플로는 배포할 release 빌드에 `--allow-release --cycles 3 --warmup-cycles 0 --battle-seconds 20 --endurance-seconds 60` 검사를 추가로 실행합니다. release에서 제공하지 않는 static/orphan 카운터는 검증 근거로 삼지 않고, 자세한 엔진 메모리 비교는 위 debug 절차를 사용합니다.
+
+정착한 동일 화면끼리 살아 있는 리소스·노드·텍스처를 비교합니다. Wasm 메모리의 확보 용량은 해제 뒤에도 최고치로 남을 수 있어 RSS나 JS heap과 구분합니다. 브라우저 오디오 객체 개수도 수거 시점에 영향을 받으므로 순간 개수만으로 누수를 단정하지 않습니다. 강제 GC로 누적을 숨기지 않으며, 소프트웨어 GPU의 FPS를 사용자 기기 성능으로 일반화하지 않습니다.
+
+음악의 `stream_paused`는 실제 상태 전환 때만 설정합니다. Web 샘플 백엔드의 반복 재개가 오디오 소스·버퍼를 재생성할 수 있으므로 전경 관측마다 같은 값을 대입하지 않습니다. 저장 실패의 자동 재시도는 실제 시간 2초 간격으로 제한하고, 사용자가 요청한 저장·메뉴 이동·종료 저장은 즉시 시도합니다.
+
 ## Android 디버그 검사 (선택)
 
 Android 검사는 릴리스 패키지나 스토어 배포가 아니라 내부 디버그 APK를 대상으로 합니다. Linux x86_64, Java, Python 3, `curl`, `unzip`, Android SDK command-line tools 및 에뮬레이터가 필요합니다. 가상화가 가능하면 KVM을 사용하며, 없으면 TCG가 느리거나 시작되지 않을 수 있습니다.

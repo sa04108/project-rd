@@ -41,6 +41,7 @@ func _run() -> void:
 	audio.set_context(true, true)
 	_check(audio.music.playing and audio.current_track == "mist_guard" and audio.music.stream.loop, "전투는 안개의 파수 루프만 재생")
 	_check(audio.music.stream.get_length() >= 30.0, "고정 전투곡 디코드")
+	await _check_music_context_lifecycle(audio, preferences)
 	for sample in Director.UI_CATEGORIES:
 		audio.clock += 1.0
 		_check(audio.play_ui(sample) and audio.ui.playing and audio.ui.stream.get_length() > 0.0, "UI 효과음 재생: " + sample)
@@ -162,3 +163,46 @@ func _run() -> void:
 	print("AUDIO_REPORT ", JSON.stringify({"checks": checks, "failed": failures}))
 	# 코루틴의 임시 리소스 참조까지 해제한 다음 트리를 종료한다.
 	call_deferred("quit", 0 if failures.is_empty() else 1)
+
+func _check_music_context_lifecycle(audio, preferences: Dictionary) -> void:
+	# Web의 소스 누적은 브라우저 검사에서 센다. 여기서는 수정 뒤 재생/포커스 계약을 지킨다.
+	var playback: AudioStreamPlayback = audio.music.get_stream_playback()
+	for _index in range(300):
+		audio.set_context(true, true)
+	_check(audio.music.playing and not audio.music.stream_paused and audio.music.get_stream_playback() == playback, "반복 전경 관측은 같은 음악 재생을 유지")
+	var before: float = audio.music.get_playback_position()
+	var deadline := Time.get_ticks_msec() + 1000
+	while audio.music.get_playback_position() <= before and Time.get_ticks_msec() < deadline:
+		await create_timer(0.02).timeout
+	_check(audio.music.get_playback_position() > before, "반복 전경 관측 뒤 음악 시계는 계속 전진")
+	for _index in range(300):
+		audio.set_context(true, false)
+	# 믹서 스레드가 이미 처리 중인 짧은 블록을 마친 뒤 정지 위치를 관측한다.
+	await create_timer(0.10).timeout
+	var paused_position: float = audio.music.get_playback_position()
+	await create_timer(0.10).timeout
+	_check(audio.music.stream_paused and is_equal_approx(audio.music.get_playback_position(), paused_position), "반복 백그라운드 관측은 음악 위치를 유지")
+	audio.set_context(true, true)
+	_check(audio.music.playing and not audio.music.stream_paused and audio.music.get_stream_playback() == playback, "실제 포커스 복귀는 기존 음악 재생을 재개")
+	before = audio.music.get_playback_position()
+	await create_timer(0.10).timeout
+	_check(audio.music.get_playback_position() > before, "포커스 복귀 뒤 음악 시계가 다시 전진")
+	for _cycle in range(3):
+		audio.set_context(false, true)
+		_check(not audio.music.playing, "메뉴 전환은 기존 음악 재생을 종료")
+		audio.set_context(true, true)
+		_check(audio.music.playing and not audio.music.stream_paused and audio.music.get_playback_position() < 0.05, "새 전투는 정지했던 음악을 처음부터 재생")
+	# 정지된 상태에서 바뀐 포커스도 다음 실제 재생을 막아서는 안 된다.
+	audio.set_context(true, false)
+	var muted := preferences.duplicate()
+	muted.music = 0.0
+	audio.apply_settings(muted)
+	audio.set_context(true, true)
+	_check(not audio.music.playing, "음소거 중 포커스 복귀는 음악을 시작하지 않음")
+	audio.apply_settings(preferences)
+	_check(audio.music.playing and not audio.music.stream_paused, "복귀 후 음소거 해제는 정지했던 음악을 재생")
+	audio.set_context(false, false)
+	audio.set_context(true, false)
+	_check(not audio.music.playing, "백그라운드에서 새 전투로 바뀌어도 음악을 시작하지 않음")
+	audio.set_context(true, true)
+	_check(audio.music.playing and not audio.music.stream_paused, "백그라운드 새 전투는 포커스 복귀 때 음악을 시작")

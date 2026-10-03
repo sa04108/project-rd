@@ -14,6 +14,11 @@ func _init() -> void:
 static func run_all() -> Dictionary:
 	var cases: Array[Callable] = [
 		_test_optional_manifest_and_fallback,
+		_test_lazy_cache_readiness,
+		_test_identity_cache_lifecycle,
+		_test_active_cache_budget_and_warm_gap,
+		_test_portrait_cache_budget,
+		_test_board_cache_roster,
 		_test_duration_boundaries,
 		_test_immediate_first_hit,
 		_test_preparation_requires_target,
@@ -296,5 +301,130 @@ static func _test_idle_frames() -> String:
 	board.reduced_motion = true
 	if not board._unit_idle_frame("u01", 0.5).is_empty():
 		error = "reduced motion must keep the static portrait instead of animated idle"
+	board.free()
+	return error
+
+static func _test_lazy_cache_readiness() -> String:
+	var visuals = VISUAL_ASSETS.new()
+	for _index in range(20):
+		if visuals.ready_count() != 87:
+			return "metadata readiness must preserve all registered art coverage"
+	var stats: Dictionary = visuals.runtime_cache_stats()
+	if stats.identity_count != 0 or stats.portrait_count != 0 or stats.family_count != 0:
+		return "construction and repeated readiness checks must not decode unused textures"
+	if visuals.portrait("u01") == null or visuals.frame("u01", "idle", 0.0).is_empty():
+		return "lazy portraits and family fallback must still resolve on first use"
+	stats = visuals.runtime_cache_stats()
+	if stats.portrait_count != 1 or stats.family_count != 1:
+		return "first fallback use must only retain the requested portrait and family"
+	return ""
+
+static func _test_identity_cache_lifecycle() -> String:
+	var visuals = VISUAL_ASSETS.new()
+	visuals.retain_identities(["u01"])
+	var held: Dictionary = visuals.identity_frame("u01", "idle", 0.0)
+	var texture_ref: WeakRef = weakref(held.texture)
+	var original_region: Rect2 = held.region
+	visuals.clear_runtime_cache()
+	if visuals.runtime_cache_stats().identity_count != 0:
+		return "explicit cache release must drop all owned identity textures"
+	if texture_ref.get_ref() == null or held.region != original_region:
+		return "cache eviction must preserve a frame still owned by another view"
+	held.clear()
+	if texture_ref.get_ref() != null:
+		return "an identity texture must be freed after cache and caller release ownership"
+	for _pass_index in range(2):
+		for identity in visuals.identity_resources:
+			var kind := str(identity)
+			visuals.retain_identities([kind])
+			var state := "idle" if kind.begins_with("u") else "walk"
+			if visuals.identity_frame(kind, state, 0.0).is_empty():
+				return "cache eviction must never remove an identity's frame metadata"
+			var stats: Dictionary = visuals.runtime_cache_stats()
+			var live_bytes := 3 * 1024 * 1024 if kind.begins_with("u") else 1536 * 1024
+			if int(stats.identity_bytes) > live_bytes + VISUAL_ASSETS.IDENTITY_WARM_BYTES:
+				return "repeated species traversal must retain only live textures plus the bounded warm reserve"
+		visuals.clear_runtime_cache()
+		if visuals.runtime_cache_stats().identity_bytes != 0:
+			return "repeat traversal cleanup must return owned texture bytes to zero"
+	return ""
+
+static func _test_active_cache_budget_and_warm_gap() -> String:
+	var visuals = VISUAL_ASSETS.new()
+	var active: Array = []
+	for index in range(1, 35):
+		active.append("u%02d" % index)
+	visuals.retain_identities(active)
+	for identity in active:
+		if visuals.identity_frame(identity, "idle", 0.0).is_empty():
+			return "every visible ally must retain its full-resolution atlas"
+	var stats: Dictionary = visuals.runtime_cache_stats()
+	if stats.identity_count != 34 or stats.identity_bytes != 102 * 1024 * 1024:
+		return "visible textures above the soft target must stay pinned without fidelity loss"
+	var loads: int = stats.identity_loads
+	for _repeat in range(3):
+		for identity in active:
+			visuals.identity_frame(identity, "idle", 0.25)
+	if int(visuals.runtime_cache_stats().identity_loads) != loads:
+		return "visible atlases must not thrash when their total exceeds the soft target"
+	visuals.retain_identities(["u01"])
+	if int(visuals.runtime_cache_stats().identity_bytes) > 15 * 1024 * 1024:
+		return "retired allies must leave only the bounded warm reserve"
+	visuals.clear_runtime_cache()
+	visuals.retain_identities(["n01"])
+	visuals.identity_frame("n01", "walk", 0.0)
+	loads = int(visuals.runtime_cache_stats().identity_loads)
+	for _repeat in range(20):
+		visuals.retain_identities([])
+		visuals.retain_identities(["n01"])
+		visuals.identity_frame("n01", "walk", 0.25)
+	if int(visuals.runtime_cache_stats().identity_loads) != loads:
+		return "short spawn and wave gaps must not reload the same enemy atlas"
+	return ""
+
+static func _test_portrait_cache_budget() -> String:
+	var visuals = VISUAL_ASSETS.new()
+	for identity in visuals.portraits:
+		if visuals.portrait(str(identity)) == null:
+			return "all registered portraits must remain available through the bounded cache"
+		if int(visuals.runtime_cache_stats().portrait_bytes) > VISUAL_ASSETS.PORTRAIT_SOFT_BYTES:
+			return "codex browsing must not retain every historical portrait"
+	var active: Array = []
+	for index in range(1, 35):
+		active.append("u%02d" % index)
+	visuals.retain_identities(active)
+	for identity in active:
+		visuals.portrait(identity)
+	if visuals.runtime_cache_stats().portrait_count != 34:
+		return "reduced-motion live portraits must stay pinned above the soft target"
+	visuals.clear_runtime_cache()
+	var stats: Dictionary = visuals.runtime_cache_stats()
+	if stats.identity_count != 0 or stats.portrait_count != 0 or stats.family_count != 0:
+		return "cache release must drop portraits, fallback families, and identities together"
+	if visuals.ready_count() != 87 or visuals.portraits.size() != 87:
+		return "cache release must preserve metadata for later new-game and restore use"
+	return ""
+
+static func _test_board_cache_roster() -> String:
+	var board = BOARD.new()
+	var sim = SIMULATION.new()
+	sim.new_run(812)
+	board.simulation = sim
+	for index in range(1, 35):
+		sim.add_unit("u%02d" % index, index - 1)
+	board._sync_visual_cache()
+	for unit in sim.units:
+		board._unit_idle_frame(str(unit.kind), 0.0)
+	var error := ""
+	if board.visuals.runtime_cache_stats().identity_count != 34:
+		error = "board roster must pin every visible unit before selecting frames"
+	sim.units.clear()
+	sim.add_unit("u01", 0)
+	board._sync_visual_cache()
+	if int(board.visuals.runtime_cache_stats().identity_bytes) > 15 * 1024 * 1024:
+		error = "board roster changes must retire departed units from the cache"
+	board.simulation = null
+	if board.visuals.runtime_cache_stats().identity_count != 0:
+		error = "detaching a simulation must release the board's old runtime textures"
 	board.free()
 	return error
