@@ -1,0 +1,149 @@
+{
+  "id": "b10",
+  "state": "walk",
+  "status": "gait_candidate_not_selected",
+  "source": "walk.gait-candidate.source.png",
+  "prompt": "walk.gait-candidate.prompt.txt",
+  "prompt_sha256": "9a53f2794fe70934a4a2556d9b624289a1060fbdc65eddc5239eb77c16268f50",
+  "visual_review": {
+    "genuine_alternating_gait_unambiguously_passed": false,
+    "assessment": "Six complete crowned masked bandit poses preserve two curved daggers, amber hood and tattered ochre cloak. Articulated boot/knee and cloak changes exist, but the same leading leg dominates. One bounded gait correction still lacks an unmistakable opposite-leg half-cycle; original kept for identity continuity."
+  },
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "d9ddd9b89737d567a885e23f3b847dada9cf660bf0ed02bfe2cea070ed6c99c2",
+  "byte_count": 2438973,
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 851211,
+    "nonzero_pixels": 721653,
+    "meaningful_alpha128_pixels": 605570,
+    "real_transparency": true,
+    "canvas_edge_max_alpha": 1,
+    "canvas_edges_alpha128_pixels": 0,
+    "note": "Alpha 1 residue is not opaque clipping."
+  },
+  "frames": [
+    {
+      "index": 0,
+      "nominal_slot_alpha128_bbox_local": [
+        45,
+        20,
+        500,
+        479
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 1,
+      "nominal_slot_alpha128_bbox_local": [
+        26,
+        22,
+        481,
+        479
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 2,
+      "nominal_slot_alpha128_bbox_local": [
+        24,
+        23,
+        484,
+        479
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 3,
+      "nominal_slot_alpha128_bbox_local": [
+        34,
+        4,
+        512,
+        464
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 4,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        10,
+        490,
+        468
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 5,
+      "nominal_slot_alpha128_bbox_local": [
+        26,
+        11,
+        487,
+        467
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    }
+  ],
+  "alpha128_components_area100_or_more": [
+    {
+      "area": 104948,
+      "bbox": [
+        34,
+        516,
+        515,
+        976
+      ]
+    },
+    {
+      "area": 102656,
+      "bbox": [
+        1048,
+        23,
+        1508,
+        479
+      ]
+    },
+    {
+      "area": 102390,
+      "bbox": [
+        45,
+        20,
+        500,
+        479
+      ]
+    },
+    {
+      "area": 100518,
+      "bbox": [
+        538,
+        22,
+        993,
+        479
+      ]
+    },
+    {
+      "area": 100505,
+      "bbox": [
+        1050,
+        523,
+        1511,
+        979
+      ]
+    },
+    {
+      "area": 94552,
+      "bbox": [
+        564,
+        522,
+        1002,
+        980
+      ]
+    }
+  ],
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

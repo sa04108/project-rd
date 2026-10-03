@@ -5,7 +5,7 @@
       "identity": "n12",
       "state": "walk",
       "source": "docs/art-generation/n12/walk.source.png",
-      "source_sha256": "685f94e136dd5be63fe45f3c4edfa2be9c1227413834a5283944b154103593bf",
+      "source_sha256": "49b4b170d18785ab97efef62fa02339b0be6b32d38fee4fe0b3c0eeb869f41ca",
       "prompt_sha256": "9a371f5f263aab05fce240b24f2a6e74b85db20e6fab1010425b62b723c25368",
       "generator": "built-in image tool",
       "image_model_id": null,
@@ -102,8 +102,10 @@
           ]
         }
       ],
-      "atlas_sha256": "dc3a94e381f9233bf592ef49f80c17155938fa1e2352be7519e4691910fc384e",
-      "review": "agent visually inspected all six poses; runtime review pending"
+      "review": "agent visually inspected all six poses; runtime review pending",
+      "atlas_sha256_at_import": "dc3a94e381f9233bf592ef49f80c17155938fa1e2352be7519e4691910fc384e",
+      "source_encoding_note": "Current source normalized without alpha/visible RGB changes; original hash in docs/art-generation/source-optimization.json."
     }
-  }
+  },
+  "runtime_atlas_sha256": "dc3a94e381f9233bf592ef49f80c17155938fa1e2352be7519e4691910fc384e"
 }

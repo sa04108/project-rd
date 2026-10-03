@@ -19,6 +19,7 @@ static func run_all() -> Dictionary:
 		_test_preparation_requires_target,
 		_test_board_selection_and_reduced_motion,
 		_test_enemy_distance_clock,
+		_test_idle_frames,
 		_test_read_only_pause_and_speed,
 	]
 	var failed: Array[String] = []
@@ -275,5 +276,25 @@ static func _test_read_only_pause_and_speed() -> String:
 			error = "identity animation reads must preserve damage, cooldown, RNG, save state, and speed semantics"
 			break
 	board.simulation = null
+	board.free()
+	return error
+
+static func _test_idle_frames() -> String:
+	var board = BOARD.new()
+	board.visuals = _new_visuals()
+	var layout: Dictionary = board.visuals.identity_resources.u01.layout
+	layout.frame_layout.rows["idle"] = layout.frame_layout.rows.attack.duplicate(true)
+	layout.animation.rows["idle"] = {"loop": true, "durations_ms": [250, 250, 250, 250, 250, 250], "render_scale": 1.2}
+	var error := ""
+	for sample in [[0.0, 0], [0.25, 1], [1.49, 5], [1.5, 0]]:
+		if _frame_index(board._unit_idle_frame("u01", sample[0])) != sample[1]:
+			error = "idle frames must follow their own looping game clock"
+	if not is_equal_approx(float(board._unit_idle_frame("u01", 0.0).render_scale), 1.2):
+		error = "each state must retain its own uniform body-size correction"
+	if not board._unit_idle_frame("u02", 0.0).is_empty():
+		error = "missing idle rows must preserve the portrait fallback"
+	board.reduced_motion = true
+	if not board._unit_idle_frame("u01", 0.5).is_empty():
+		error = "reduced motion must keep the static portrait instead of animated idle"
 	board.free()
 	return error

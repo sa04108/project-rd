@@ -1,0 +1,205 @@
+{
+  "id": "u09",
+  "state": "idle",
+  "source": "docs/art-generation/u09/idle.source.png",
+  "prompt": "docs/art-generation/u09/idle.prompt.txt",
+  "source_sha256": "3a4d84635a4eb3814e6aa8781e975f80b2e7fd2827605964c937d1158970eed9",
+  "source_bytes": 1758720,
+  "prompt_sha256": "55287484d96f7efa7dd28cee00ddd7f0f166d9c7de0d0c670007a8f46b76895c",
+  "reference": "assets/art/portraits/u09.png",
+  "reference_sha256": "7c890378ed89edb82bd4ce2b158ad53c88cb5f13bd61cecf2a1c22464b303ced",
+  "generation_route": "built-in image tool; one call per asset, no external API",
+  "model_identifier": "not exposed by image tool",
+  "template_provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/heavy/sprite_run/prompts/idle.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "preparation_command": "python3 tools/art/prepare_identity_prompts.py u09 --state idle",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_min": 0,
+  "alpha_max": 254,
+  "transparent_pixel_fraction": 0.5641441345214844,
+  "nontransparent_pixel_fraction": 0.4358558654785156,
+  "low_alpha_pixel_fraction_1_to_127": 0.04023170471191406,
+  "meaningful_alpha_threshold": 128,
+  "meaningful_alpha_bbox": [
+    105,
+    47,
+    1437,
+    972
+  ],
+  "components_alpha_ge128_area_ge64": [
+    {
+      "bbox": [
+        105,
+        47,
+        444,
+        485
+      ],
+      "area": 104275
+    },
+    {
+      "bbox": [
+        592,
+        48,
+        930,
+        484
+      ],
+      "area": 104429
+    },
+    {
+      "bbox": [
+        1101,
+        47,
+        1436,
+        485
+      ],
+      "area": 104000
+    },
+    {
+      "bbox": [
+        106,
+        537,
+        444,
+        972
+      ],
+      "area": 103295
+    },
+    {
+      "bbox": [
+        596,
+        537,
+        932,
+        972
+      ],
+      "area": 103853
+    },
+    {
+      "bbox": [
+        1100,
+        542,
+        1437,
+        972
+      ],
+      "area": 102410
+    }
+  ],
+  "major_component_count_alpha_ge128_area_ge1000": 6,
+  "pose_groups_alpha_ge128": [
+    {
+      "frame_zero_based": 0,
+      "bbox": [
+        105,
+        47,
+        444,
+        485
+      ],
+      "meaningful_area": 104276,
+      "connected_component_count": 2,
+      "crop_rgba_sha256": "5bca0d50f9ad054723b1cef39450ac88a861241513b12290310d0aa9edb4035a"
+    },
+    {
+      "frame_zero_based": 1,
+      "bbox": [
+        592,
+        48,
+        930,
+        484
+      ],
+      "meaningful_area": 104429,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "49f0d6628f9f6879e6b112ae25273311216b5e9fd0a59ff29173f335c14eef0a"
+    },
+    {
+      "frame_zero_based": 2,
+      "bbox": [
+        1101,
+        47,
+        1436,
+        485
+      ],
+      "meaningful_area": 104000,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "80615e439091d74a58ebb42ca98096604b328303a582885869b6446e9267b4ee"
+    },
+    {
+      "frame_zero_based": 3,
+      "bbox": [
+        106,
+        537,
+        444,
+        972
+      ],
+      "meaningful_area": 103295,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "13a15adb9a351a542b61575dbeaee008b603205fe689ffccd4ae7d71ff665ffc"
+    },
+    {
+      "frame_zero_based": 4,
+      "bbox": [
+        596,
+        537,
+        932,
+        972
+      ],
+      "meaningful_area": 103853,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "395c3f0a9fefd1990199625feb759e594f4e145c36261db2b5cbdc061f3c16d2"
+    },
+    {
+      "frame_zero_based": 5,
+      "bbox": [
+        1100,
+        542,
+        1437,
+        972
+      ],
+      "meaningful_area": 102410,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "9772c03927aaa9039477ef1720ecce34bf0a86bc1bd8aecb34be4dc70f3d371e"
+    }
+  ],
+  "pose_grouping_method": "Whole connected components grouped by centroid into visually confirmed 3x2 pose neighborhoods; boxes are not clipped to nominal cells. Includes small components and intentional ornaments.",
+  "edge_touch_alpha_ge128": false,
+  "visual_review_performed": true,
+  "pose_count_observed": 6,
+  "review_notes": [
+    "One targeted wrong-state-motion repair replaced raised/drumming arms with both beaters kept low near the drum rim in all six poses. Subtle chest, shoulder, wrist, head and fur changes remain with fixed feet.",
+    "Strapped drum, two held beaters and green orc-like anatomy remain intact. Beater heads visually rest close to the drum surface, so there is no large striking cycle; exact skin-contact ambiguity at sprite scale is left for integrated loop review.",
+    "Raw source has low-alpha exterior haze. Preserve source bytes; use actual meaningful component bounds instead of treating nominal equal cells as extraction authority.",
+    "Requested 15-percent slot padding is not fully met, but six complete figures are spatially separate."
+  ],
+  "source_layout_contract_pass": false,
+  "source_geometry_extractable": true,
+  "needs_nonuniform_pose_extraction": true,
+  "subtle_idle_motion_review": "visually_distinct_idle_phases",
+  "packed": false,
+  "runtime_verified": false,
+  "rejected_layout_revisions": [],
+  "review_scope": "Raw-source visual and alpha inspection only; no packing, integrated looping, cross-state scale, timing or runtime verification.",
+  "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-49c25e99-086d-4c65-890a-702f8f8bb031.png",
+  "original_bytes_copy_verified": true,
+  "motion_repair": {
+    "attempt_count": 1,
+    "reason": "Initial idle had raised-to-rest drumming motion",
+    "rejected_source": "docs/art-generation/u09/idle.rejected-motion.source.png",
+    "rejected_prompt": "docs/art-generation/u09/idle.rejected-motion.prompt.txt",
+    "rejected_review": "docs/art-generation/u09/idle.rejected-motion.review.json",
+    "rejected_source_sha256": "3be8325cae221142b7225783acf62f617f786e3e7e19eda9536d1680843c6b3c",
+    "repair_prompt": "docs/art-generation/u09/idle.repair-motion.prompt.txt",
+    "repair_prompt_sha256": "55287484d96f7efa7dd28cee00ddd7f0f166d9c7de0d0c670007a8f46b76895c",
+    "outcome": "Raised striking cycle removed; both beaters remain low near rim"
+  },
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

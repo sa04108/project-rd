@@ -1,0 +1,149 @@
+{
+  "id": "b90",
+  "state": "walk",
+  "status": "gait_candidate_not_selected",
+  "source": "walk.gait-candidate.source.png",
+  "prompt": "walk.gait-candidate.prompt.txt",
+  "prompt_sha256": "999e43e58eafad9956a2b9455efc13fe8392d35d6ffa3c1cb51f6d2d8a440f30",
+  "visual_review": {
+    "genuine_alternating_gait_unambiguously_passed": false,
+    "assessment": "Six complete crimson dragon-knight poses preserve screen-left long sword, screen-right pointed shield, horned helmet and cape. Knee and boot changes are visible, but the same leading leg dominates and opposite-leg leadership remains unclear. One bounded correction did not clearly improve it; original kept."
+  },
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "d62253399bbffe30d2f07825c7ea379ffb632d7e1fdb3ba681ff833d788b3445",
+  "byte_count": 2391583,
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 946275,
+    "nonzero_pixels": 626589,
+    "meaningful_alpha128_pixels": 510453,
+    "real_transparency": true,
+    "canvas_edge_max_alpha": 0,
+    "canvas_edges_alpha128_pixels": 0,
+    "note": "Alpha 1 residue is not opaque clipping."
+  },
+  "frames": [
+    {
+      "index": 0,
+      "nominal_slot_alpha128_bbox_local": [
+        51,
+        56,
+        512,
+        471
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 1,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        54,
+        512,
+        470
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 2,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        50,
+        491,
+        475
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 3,
+      "nominal_slot_alpha128_bbox_local": [
+        47,
+        21,
+        512,
+        432
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 4,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        20,
+        512,
+        426
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 5,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        21,
+        493,
+        436
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    }
+  ],
+  "alpha128_components_area100_or_more": [
+    {
+      "area": 87744,
+      "bbox": [
+        528,
+        54,
+        1026,
+        470
+      ]
+    },
+    {
+      "area": 86727,
+      "bbox": [
+        1036,
+        50,
+        1515,
+        475
+      ]
+    },
+    {
+      "area": 85175,
+      "bbox": [
+        51,
+        56,
+        525,
+        471
+      ]
+    },
+    {
+      "area": 84854,
+      "bbox": [
+        47,
+        533,
+        541,
+        944
+      ]
+    },
+    {
+      "area": 83497,
+      "bbox": [
+        528,
+        532,
+        1026,
+        938
+      ]
+    },
+    {
+      "area": 82435,
+      "bbox": [
+        1042,
+        533,
+        1517,
+        948
+      ]
+    }
+  ],
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

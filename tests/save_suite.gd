@@ -13,6 +13,7 @@ static func run_all() -> Dictionary:
         _test_corrupt_quarantine_survives_saves,
         _test_result_and_developer_run_records,
         _test_snapshot_rejects_invalid_state_atomically,
+        _test_path_progress_migration,
         _test_snapshot_just_before_spawn,
         _test_empty_json_is_quarantined,
         _test_restart_and_interrupted_result,
@@ -323,6 +324,29 @@ static func _test_snapshot_rejects_invalid_state_atomically() -> String:
     var baseline: Dictionary = sim.snapshot()
     var error: String = ""
 
+    for invalid_length in [null, true, "28", [], {}, NAN, INF, -INF, 0.0, -26.0, 27.0, 28.01]:
+        var bad_length: Dictionary = baseline.duplicate(true)
+        bad_length.path_length = invalid_length
+        error = _assert_invalid_restore_unchanged(sim, bad_length, "invalid path length %s" % str(invalid_length))
+        if not error.is_empty():
+            return error
+    for invalid_progress in [-0.001, SIMULATION.PATH_LENGTH + 0.001, NAN, INF, -INF, "1.0"]:
+        var bad_progress: Dictionary = baseline.duplicate(true)
+        bad_progress.enemies[0].progress = invalid_progress
+        error = _assert_invalid_restore_unchanged(sim, bad_progress, "invalid current path progress %s" % str(invalid_progress))
+        if not error.is_empty():
+            return error
+    for explicit_length in [false, true]:
+        var bad_legacy: Dictionary = baseline.duplicate(true)
+        if explicit_length:
+            bad_legacy.path_length = SIMULATION.LEGACY_PATH_LENGTH
+        else:
+            bad_legacy.erase("path_length")
+        bad_legacy.enemies[0].progress = SIMULATION.LEGACY_PATH_LENGTH + 0.001
+        error = _assert_invalid_restore_unchanged(sim, bad_legacy, "legacy progress beyond its original path")
+        if not error.is_empty():
+            return error
+
     var bad_cc: Dictionary = baseline.duplicate(true)
     bad_cc.enemies[0].slows = [{"strength": 2.0, "until": 20.0}]
     error = _assert_invalid_restore_unchanged(sim, bad_cc, "impossible crowd control strength")
@@ -347,6 +371,69 @@ static func _test_snapshot_rejects_invalid_state_atomically() -> String:
     error = _assert_invalid_restore_unchanged(sim, mismatched_wave, "wave and time mismatch")
     if not error.is_empty():
         return error
+    return ""
+
+static func _test_path_progress_migration() -> String:
+    var original: Variant = _new_sim(28026)
+    var unit: Dictionary = original.add_unit("u01", 14)
+    unit.cooldown = 0.41
+    original.enemies[0].hp -= 2.0
+    original.apply_cc(original.enemies[0], {"slow": 0.2, "slow_duration": 3.0, "stun": 0.4})
+    var baseline: Dictionary = original.snapshot()
+    if not baseline.has("path_length") or baseline.path_length != SIMULATION.PATH_LENGTH:
+        return "new snapshots must explicitly identify the 28-cell path"
+    for saved_length in [null, SIMULATION.LEGACY_PATH_LENGTH, SIMULATION.PATH_LENGTH]:
+        var source_length: float = SIMULATION.LEGACY_PATH_LENGTH if saved_length == null else float(saved_length)
+        for fraction in [0.0, 0.25, 0.5, 0.75, 0.95, 1.0]:
+            var saved: Dictionary = baseline.duplicate(true)
+            if saved_length == null:
+                saved.erase("path_length")
+            else:
+                saved.path_length = saved_length
+            saved.enemies[0].progress = source_length * fraction
+            var expected: Dictionary = saved.duplicate(true)
+            expected.path_length = SIMULATION.PATH_LENGTH
+            expected.enemies[0].progress = SIMULATION.PATH_LENGTH * fraction
+            var restored: Variant = _new_sim(1)
+            if not restored.restore(JSON.parse_string(JSON.stringify(saved))):
+                return "supported path length must restore at every lap boundary and near the exit"
+            if not _same_saved_value(restored.snapshot(), expected) or not restored.pause_reasons.get("user", false):
+                return "path migration must change only progress and path length while resuming paused"
+            if not restored.restore(JSON.parse_string(JSON.stringify(restored.snapshot()))) or not _same_saved_value(restored.snapshot(), expected):
+                return "a resaved 28-cell path must not be migrated a second time"
+            if saved.enemies[0].progress != source_length * fraction:
+                return "migration must not mutate the caller's source snapshot"
+            var expected_rng := RandomNumberGenerator.new()
+            expected_rng.seed = int(saved.rng_seed)
+            expected_rng.state = int(saved.rng_state)
+            if restored.rng.randi() != expected_rng.randi():
+                return "path migration must preserve the next RNG draw"
+
+    # 저장소를 거친 이전 저장도 남은 주회 시간과 탈출 생명 차감을 그대로 유지한다.
+    var directory: String = _directory()
+    var store: Variant = SAVE_STORE.new(directory)
+    var legacy: Dictionary = _new_sim(28027).snapshot()
+    legacy.erase("path_length")
+    legacy.enemies[0].progress = SIMULATION.LEGACY_PATH_LENGTH * 0.9
+    if not _write_json(directory.path_join("run.json"), legacy):
+        return "legacy path save fixture must write"
+    var loaded: Variant = _new_sim(2)
+    if not loaded.restore(store.load_run()):
+        return "the save store must accept a legacy path snapshot"
+    var migrating_enemy: Dictionary = loaded.enemies[0]
+    var remaining_seconds: float = float(loaded.catalog.enemies[migrating_enemy.kind].travel) * 0.1
+    loaded.set_pause("user", false)
+    loaded.advance(remaining_seconds - 0.001)
+    if not loaded.enemies.has(migrating_enemy) or loaded.lives != 20:
+        return "migrated enemy must remain alive until its original remaining travel time"
+    loaded.advance(0.002)
+    if loaded.enemies.has(migrating_enemy) or loaded.lives != 19:
+        return "migrated enemy must escape once at its original remaining travel time"
+    if not store.save_run(loaded):
+        return "a migrated path run must save with the current path length"
+    var reloaded: Variant = _new_sim(3)
+    if not reloaded.restore(store.load_run()) or not _same_saved_value(reloaded.snapshot(), loaded.snapshot()):
+        return "a migrated run must roundtrip through the save store without further scaling"
     return ""
 
 static func _test_snapshot_just_before_spawn() -> String:

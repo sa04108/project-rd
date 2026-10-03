@@ -1,0 +1,111 @@
+{
+  "identity": "b40",
+  "states": {
+    "walk": {
+      "identity": "b40",
+      "state": "walk",
+      "source": "docs/art-generation/b40/walk.source.png",
+      "source_sha256": "6e9b01117d5ff1f33b7bceb624e32feb4eaef1431aff37a0b1a021168e2e1fb1",
+      "prompt_sha256": "c7761e2402c283bca8ad73cd905d2e315c922163e4b6b820a2c70c7462cac2d7",
+      "generator": "built-in image tool",
+      "image_model_id": null,
+      "sprite_gen_source_commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+      "source_dimensions": [
+        1536,
+        1024
+      ],
+      "packing": "6 connected full poses, single uniform scale, feet baseline232; no repainted pixels",
+      "uniform_scale": 0.4426877470355731,
+      "source_regions": [
+        {
+          "box": [
+            61,
+            90,
+            491,
+            529
+          ],
+          "anchor_x": 278.0,
+          "ground_y": 525,
+          "center": [
+            276.0,
+            309.5
+          ]
+        },
+        {
+          "box": [
+            560,
+            86,
+            994,
+            533
+          ],
+          "anchor_x": 789.5,
+          "ground_y": 529,
+          "center": [
+            777.0,
+            309.5
+          ]
+        },
+        {
+          "box": [
+            1075,
+            93,
+            1495,
+            534
+          ],
+          "anchor_x": 1290.5,
+          "ground_y": 530,
+          "center": [
+            1285.0,
+            313.5
+          ]
+        },
+        {
+          "box": [
+            47,
+            558,
+            495,
+            998
+          ],
+          "anchor_x": 300.0,
+          "ground_y": 994,
+          "center": [
+            271.0,
+            778.0
+          ]
+        },
+        {
+          "box": [
+            566,
+            558,
+            998,
+            994
+          ],
+          "anchor_x": 802.5,
+          "ground_y": 990,
+          "center": [
+            782.0,
+            776.0
+          ]
+        },
+        {
+          "box": [
+            1072,
+            558,
+            1484,
+            996
+          ],
+          "anchor_x": 1285.0,
+          "ground_y": 992,
+          "center": [
+            1278.0,
+            777.0
+          ]
+        }
+      ],
+      "review": "agent visually inspected all six poses; runtime review pending",
+      "atlas_sha256_at_import": "57b4e156acef84df0d9c321383e8ec937aac8971a2efad70273f2c58928b2a77",
+      "source_encoding_note": "Current source normalized without alpha/visible RGB changes; original hash in docs/art-generation/source-optimization.json."
+    }
+  },
+  "runtime_atlas_sha256": "57b4e156acef84df0d9c321383e8ec937aac8971a2efad70273f2c58928b2a77"
+}

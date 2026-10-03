@@ -16,7 +16,7 @@
     254
   ],
   "transparent_pixels": 1048312,
-  "sha256": "438c117141c70221d2dfab9272527ac41c597ee0a5c3b825107f20327492598d",
+  "sha256": "44f85f8c914b80413a927abdb650ff43749af07115346f6544f55c85024d24d3",
   "frames": [
     {
       "index": 0,
@@ -111,5 +111,6 @@
   ],
   "visually_reviewed": true,
   "finding": "Candidate improves knee lift variation but repeats similar leg phases across rows rather than reliably alternating complete two-step gait. Do not auto-promote over stable layout-repaired source.",
-  "runtime_verified": false
+  "runtime_verified": false,
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
 }

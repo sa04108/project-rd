@@ -3,7 +3,7 @@
   "state": "attack",
   "source": "docs/art-generation/u07/attack.source.png",
   "prompt": "docs/art-generation/u07/attack.prompt.txt",
-  "source_sha256": "a8f9604f3054c2568469519d69395979eb0044b29f4cc9ba6f43335cc6492d4c",
+  "source_sha256": "3cf278f1390038f26b188b81f565fbe852031bae6e884d68acf423f61452280a",
   "reference": "assets/art/portraits/u07.png",
   "reference_sha256": "607eb37b44b096fd35fe6ccdc31dfb47c72764e6623c81bfdb44cb210a5f70f5",
   "generation_route": "built-in image tool; one call per asset, no external API",
@@ -102,5 +102,7 @@
   ],
   "review_scope": "Raw source visual/alpha inspection only; no packing, runtime, timing or engine verification by this worker.",
   "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-11954678-a7a9-43cb-be6c-b8f72f6d2330.png",
-  "original_bytes_copy_verified": true
+  "original_bytes_copy_verified": true,
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals.",
+  "source_bytes": 722591
 }

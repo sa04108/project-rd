@@ -1,0 +1,248 @@
+{
+  "id": "u19",
+  "state": "idle",
+  "source": "docs/art-generation/u19/idle.source.png",
+  "prompt": "docs/art-generation/u19/idle.prompt.txt",
+  "source_sha256": "b4660466e7df2b1529d7cc4e596879b6c23ab97a9821f55a3e4668eaccce6e2f",
+  "source_bytes": 1494473,
+  "prompt_sha256": "18e931493a7d2dd1764dc2d3724e7ffc4d3ca51f9ed1f099fcc5f54603b2c611",
+  "reference": "assets/art/portraits/u19.png",
+  "reference_sha256": "4fa4d5b807cc9be95f2d1be506245d430e85ef12a89e239862b3d21b29cc3a5c",
+  "generation_route": "built-in image tool; one call per asset, no external API",
+  "model_identifier": "not exposed by image tool",
+  "template_provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/blob/sprite_run/prompts/idle.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "preparation_command": "python3 tools/art/prepare_identity_prompts.py u19 --state idle",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_min": 0,
+  "alpha_max": 254,
+  "transparent_pixel_fraction": 0.5698541005452474,
+  "nontransparent_pixel_fraction": 0.4301458994547526,
+  "low_alpha_pixel_fraction_1_to_127": 0.07938639322916667,
+  "meaningful_alpha_threshold": 128,
+  "meaningful_alpha_bbox": [
+    42,
+    142,
+    1512,
+    943
+  ],
+  "components_alpha_ge128_area_ge64": [
+    {
+      "bbox": [
+        553,
+        142,
+        990,
+        490
+      ],
+      "area": 87204
+    },
+    {
+      "bbox": [
+        56,
+        153,
+        498,
+        490
+      ],
+      "area": 90154
+    },
+    {
+      "bbox": [
+        1062,
+        154,
+        1500,
+        495
+      ],
+      "area": 83634
+    },
+    {
+      "bbox": [
+        620,
+        194,
+        681,
+        291
+      ],
+      "area": 4111
+    },
+    {
+      "bbox": [
+        1118,
+        203,
+        1186,
+        308
+      ],
+      "area": 4921
+    },
+    {
+      "bbox": [
+        1160,
+        319,
+        1176,
+        336
+      ],
+      "area": 215
+    },
+    {
+      "bbox": [
+        561,
+        595,
+        1004,
+        943
+      ],
+      "area": 89063
+    },
+    {
+      "bbox": [
+        42,
+        596,
+        502,
+        943
+      ],
+      "area": 88432
+    },
+    {
+      "bbox": [
+        1052,
+        598,
+        1512,
+        943
+      ],
+      "area": 95144
+    },
+    {
+      "bbox": [
+        633,
+        640,
+        693,
+        754
+      ],
+      "area": 3985
+    },
+    {
+      "bbox": [
+        116,
+        650,
+        180,
+        754
+      ],
+      "area": 4587
+    },
+    {
+      "bbox": [
+        148,
+        763,
+        165,
+        782
+      ],
+      "area": 247
+    }
+  ],
+  "major_component_count_alpha_ge128_area_ge1000": 10,
+  "pose_groups_alpha_ge128": [
+    {
+      "frame_zero_based": 0,
+      "bbox": [
+        56,
+        153,
+        498,
+        490
+      ],
+      "meaningful_area": 90154,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "99295f7ce469cb3340d31974cda46d8c769e008bc718d06c38f0ea3b2835e5f6"
+    },
+    {
+      "frame_zero_based": 1,
+      "bbox": [
+        553,
+        142,
+        990,
+        490
+      ],
+      "meaningful_area": 91315,
+      "connected_component_count": 2,
+      "crop_rgba_sha256": "e151a691235d7d75c1a3941d1a14792178bd5848395c67aeb26f4f7cab40daee"
+    },
+    {
+      "frame_zero_based": 2,
+      "bbox": [
+        1062,
+        154,
+        1500,
+        495
+      ],
+      "meaningful_area": 88770,
+      "connected_component_count": 3,
+      "crop_rgba_sha256": "59a44075ec9f67c176610ce8fb8fb17dc099959bbbac631c87234b80bf68a9e6"
+    },
+    {
+      "frame_zero_based": 3,
+      "bbox": [
+        42,
+        596,
+        502,
+        943
+      ],
+      "meaningful_area": 93266,
+      "connected_component_count": 3,
+      "crop_rgba_sha256": "262b8d63b0300ae582c60e616486f280d6ee3a8d3e013bb118470d4895dd0541"
+    },
+    {
+      "frame_zero_based": 4,
+      "bbox": [
+        561,
+        595,
+        1004,
+        943
+      ],
+      "meaningful_area": 93048,
+      "connected_component_count": 2,
+      "crop_rgba_sha256": "2c2a9edf8b027458e75f3fcab304e433b3fd5cb6db146c590d4ac6b52376c01c"
+    },
+    {
+      "frame_zero_based": 5,
+      "bbox": [
+        1052,
+        598,
+        1512,
+        943
+      ],
+      "meaningful_area": 95144,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "27cdbdc0d5d6f714ba5ca69455458a0e0d0ea5ed0152f0a1ad551272489983be"
+    }
+  ],
+  "pose_grouping_method": "Whole eight-connected components grouped by bounding-box center into visually confirmed 3x2 pose neighborhoods; boxes are not clipped to nominal cells. Includes tiny components and intentional ornaments.",
+  "edge_touch_alpha_ge128": false,
+  "visual_review_performed": true,
+  "pose_count_observed": 6,
+  "review_notes": [
+    "Six cyan crystal-creature poses retain two eyes, rounded faceted torso, paired crystal arms, feet and crown shards. Torso breathing pulse and low-amplitude arm/hand settling are visibly distinct.",
+    "Several crown shards are separate alpha components just as the reference; include them within the corresponding full-pose extraction. No attack burst or added humanoid anatomy.",
+    "Raw source contains low-alpha exterior haze. Preserve generated bytes; use meaningful connected-component bounds for pose extraction.",
+    "Requested 15-percent slot padding is not fully met, but complete figures are spatially separate."
+  ],
+  "source_layout_contract_pass": false,
+  "source_geometry_extractable": true,
+  "needs_nonuniform_pose_extraction": true,
+  "subtle_idle_motion_review": "visually_distinct_idle_phases",
+  "packed": false,
+  "runtime_verified": false,
+  "rejected_layout_revisions": [],
+  "review_scope": "Raw-source visual and alpha inspection only; no packing, integrated looping, cross-state scale, timing or runtime verification.",
+  "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-71f982b1-2c17-47a4-9aaf-3aa77922c6d6.png",
+  "original_bytes_copy_verified": true,
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

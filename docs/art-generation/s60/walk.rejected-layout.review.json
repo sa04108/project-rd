@@ -1,0 +1,144 @@
+{
+  "id": "s60",
+  "state": "walk",
+  "status": "rejected_outer_saber_clipping",
+  "source": "walk.rejected-layout.source.png",
+  "prompt": "walk.original.prompt.txt",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "f99109fa36bd4e4af8ff3607ef0a26f7701b11f19fc12c38d096942b6b7d4dd8",
+  "byte_count": 2328791,
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 940738,
+    "nonzero_pixels": 632126,
+    "meaningful_alpha128_pixels": 556499,
+    "real_transparency": true,
+    "canvas_edge_max_alpha": 248,
+    "canvas_edges_alpha128_pixels": 5,
+    "note": "Alpha 1 residue is not opaque clipping."
+  },
+  "frames": [
+    {
+      "index": 0,
+      "nominal_slot_alpha128_bbox_local": [
+        96,
+        75,
+        512,
+        482
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 1,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        78,
+        512,
+        475
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 2,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        74,
+        505,
+        484
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 3,
+      "nominal_slot_alpha128_bbox_local": [
+        97,
+        49,
+        512,
+        455
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 4,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        49,
+        512,
+        455
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 5,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        56,
+        512,
+        453
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    }
+  ],
+  "alpha128_components_area100_or_more": [
+    {
+      "area": 99360,
+      "bbox": [
+        599,
+        78,
+        1061,
+        475
+      ]
+    },
+    {
+      "area": 92997,
+      "bbox": [
+        586,
+        561,
+        1036,
+        967
+      ]
+    },
+    {
+      "area": 92290,
+      "bbox": [
+        1103,
+        74,
+        1529,
+        484
+      ]
+    },
+    {
+      "area": 91906,
+      "bbox": [
+        96,
+        75,
+        536,
+        482
+      ]
+    },
+    {
+      "area": 90031,
+      "bbox": [
+        97,
+        561,
+        546,
+        967
+      ]
+    },
+    {
+      "area": 89897,
+      "bbox": [
+        1104,
+        568,
+        1536,
+        965
+      ]
+    }
+  ],
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

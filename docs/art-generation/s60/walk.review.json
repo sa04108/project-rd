@@ -1,0 +1,202 @@
+{
+  "id": "s60",
+  "state": "walk",
+  "status": "generated_and_source_visually_reviewed_with_gait_residual_not_runtime_verified",
+  "source": "walk.source.png",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "d3f31cf1c914280139546afdfc1db7f93f186843e0002ece5a7c17b8d9a4a8e3",
+  "byte_count": 2369709,
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 940741,
+    "nonzero_pixels": 632123,
+    "meaningful_alpha128_pixels": 570654,
+    "real_transparency": true,
+    "canvas_edge_max_alpha": 1,
+    "canvas_edges_alpha128_pixels": 0,
+    "note": "Alpha 1 residue is not opaque clipping."
+  },
+  "frames": [
+    {
+      "index": 0,
+      "nominal_slot_alpha128_bbox_local": [
+        60,
+        74,
+        512,
+        492
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 1,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        75,
+        512,
+        492
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 2,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        67,
+        502,
+        483
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 3,
+      "nominal_slot_alpha128_bbox_local": [
+        56,
+        49,
+        512,
+        452
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 4,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        49,
+        512,
+        456
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 5,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        43,
+        507,
+        446
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    }
+  ],
+  "alpha128_components_area100_or_more": [
+    {
+      "area": 97221,
+      "bbox": [
+        567,
+        75,
+        1046,
+        492
+      ]
+    },
+    {
+      "area": 96902,
+      "bbox": [
+        60,
+        74,
+        537,
+        492
+      ]
+    },
+    {
+      "area": 96806,
+      "bbox": [
+        544,
+        561,
+        1036,
+        968
+      ]
+    },
+    {
+      "area": 93782,
+      "bbox": [
+        1098,
+        67,
+        1526,
+        483
+      ]
+    },
+    {
+      "area": 93313,
+      "bbox": [
+        56,
+        561,
+        519,
+        964
+      ]
+    },
+    {
+      "area": 92629,
+      "bbox": [
+        1089,
+        555,
+        1531,
+        958
+      ]
+    }
+  ],
+  "reference": "assets/art/portraits/s60.png",
+  "reference_sha256": "c0b505bb48ca509d0cd5874c007ac03bd495aa91f571bd1840f57e922667f3f7",
+  "prompt": "walk.prompt.txt",
+  "prompt_sha256": "071eb21bdfd3b9b8aacb86893aa515d588950197453048a61db1a379b50c39e8",
+  "provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "generation": {
+    "tool": "built-in image_gen",
+    "original_calls": 1,
+    "repair_calls": 1,
+    "call_count": 2,
+    "model_identifier": "not exposed",
+    "source_bytes_preserved": true,
+    "deterministic_pose_fabrication": false,
+    "prompt_preparation_command": "python3 tools/art/prepare_identity_prompts.py s60 --state walk"
+  },
+  "visual_review": {
+    "complete_six_characters": true,
+    "true_pose_overlap_or_canvas_clipping_observed": false,
+    "genuine_alternating_gait_unambiguously_passed": false,
+    "identity_and_anatomy": "Six complete human bandit-chief poses preserve beard, headband, black fur shoulders, crimson sash and screen-right curved saber. Selected already-generated gait candidate eliminates the original sheet's five alpha128 outer-edge saber pixels. Knee flex and strides vary, but one leading leg still dominates; true alternating gait remains a residual issue after the one allowed correction.",
+    "limitations": [
+      "Strict 70-percent extent and 15-percent padding are not consistently met; complete independent figures were not repaired for nominal layout differences.",
+      "Only source-sheet visual inspection is complete. Normalized animation loop, runtime scale, integration and gameplay remain parent-owned and unverified.",
+      "A single bounded gait correction has been exhausted; this row must not be reported as fully gait-accepted without further review."
+    ]
+  },
+  "preserved_generated_artifacts": [
+    {
+      "file": "walk.source.png",
+      "sha256": "d3f31cf1c914280139546afdfc1db7f93f186843e0002ece5a7c17b8d9a4a8e3",
+      "generator_source": "/workspace/scratch/efd85aae97ef/generated_images/exec-b3e91800-2b18-4df7-9ba2-6569d4351f3b.png",
+      "bytes_match_original": true
+    },
+    {
+      "file": "walk.gait-candidate.source.png",
+      "sha256": "d3f31cf1c914280139546afdfc1db7f93f186843e0002ece5a7c17b8d9a4a8e3",
+      "generator_source": "/workspace/scratch/efd85aae97ef/generated_images/exec-b3e91800-2b18-4df7-9ba2-6569d4351f3b.png",
+      "bytes_match_original": true,
+      "selected": true
+    },
+    {
+      "file": "walk.rejected-layout.source.png",
+      "sha256": "f99109fa36bd4e4af8ff3607ef0a26f7701b11f19fc12c38d096942b6b7d4dd8",
+      "generator_source": "/workspace/scratch/efd85aae97ef/generated_images/exec-9432b8f7-5bd4-4dc2-96f9-244a96cfc475.png",
+      "bytes_match_original": true,
+      "selected": false,
+      "rejection": "Five alpha128 pixels touch outer right canvas edge at saber tip; original prompt retained in walk.original.prompt.txt."
+    }
+  ],
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

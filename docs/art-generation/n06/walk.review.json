@@ -8,7 +8,7 @@
     1024
   ],
   "mode": "RGBA",
-  "sha256": "3388e1461b02907953ac333a47bfb4c27eb77c6a889af6206b6daa2545fd781e",
+  "sha256": "9c070d56ac517eaf9d5d27d216cd4521681967628d3cd5cf2d437d9224a39a5b",
   "alpha": {
     "min": 0,
     "max": 254,
@@ -207,5 +207,6 @@
     "real_alpha": true,
     "visible_silhouette_within_slot_at_alpha_over_20": true,
     "strict_alpha_nonzero_edge_pass": false
-  }
+  },
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
 }

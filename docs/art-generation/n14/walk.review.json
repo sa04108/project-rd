@@ -1,0 +1,296 @@
+{
+  "id": "n14",
+  "state": "walk",
+  "status": "generated_and_source_visually_reviewed_not_packed_or_runtime_verified",
+  "source": "walk.source.png",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "deb6c99a8981d32ae53cefc1e6c9b05871814a98c5b7e27f2fecb2b5bf511c2e",
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 935148,
+    "nonzero_pixels": 637716,
+    "real_transparency": true,
+    "canvas_edges_above_20": false
+  },
+  "frames": [
+    {
+      "index": 0,
+      "nominal_slot_alpha_over_20_bbox_local": [
+        93,
+        52,
+        435,
+        494
+      ],
+      "bbox_occupancy_fraction": [
+        0.668,
+        0.8633
+      ],
+      "warning": "Nominal slots are measurement only; parent must use actual component packing, not blind equal slicing."
+    },
+    {
+      "index": 1,
+      "nominal_slot_alpha_over_20_bbox_local": [
+        82,
+        60,
+        458,
+        490
+      ],
+      "bbox_occupancy_fraction": [
+        0.7344,
+        0.8398
+      ],
+      "warning": "Nominal slots are measurement only; parent must use actual component packing, not blind equal slicing."
+    },
+    {
+      "index": 2,
+      "nominal_slot_alpha_over_20_bbox_local": [
+        79,
+        71,
+        425,
+        491
+      ],
+      "bbox_occupancy_fraction": [
+        0.6758,
+        0.8203
+      ],
+      "warning": "Nominal slots are measurement only; parent must use actual component packing, not blind equal slicing."
+    },
+    {
+      "index": 3,
+      "nominal_slot_alpha_over_20_bbox_local": [
+        113,
+        36,
+        445,
+        466
+      ],
+      "bbox_occupancy_fraction": [
+        0.6484,
+        0.8398
+      ],
+      "warning": "Nominal slots are measurement only; parent must use actual component packing, not blind equal slicing."
+    },
+    {
+      "index": 4,
+      "nominal_slot_alpha_over_20_bbox_local": [
+        83,
+        34,
+        453,
+        469
+      ],
+      "bbox_occupancy_fraction": [
+        0.7227,
+        0.8496
+      ],
+      "warning": "Nominal slots are measurement only; parent must use actual component packing, not blind equal slicing."
+    },
+    {
+      "index": 5,
+      "nominal_slot_alpha_over_20_bbox_local": [
+        101,
+        53,
+        441,
+        464
+      ],
+      "bbox_occupancy_fraction": [
+        0.6641,
+        0.8027
+      ],
+      "warning": "Nominal slots are measurement only; parent must use actual component packing, not blind equal slicing."
+    }
+  ],
+  "major_alpha_components": [
+    {
+      "area": 76749,
+      "bbox": [
+        614,
+        546,
+        965,
+        981
+      ]
+    },
+    {
+      "area": 76288,
+      "bbox": [
+        613,
+        60,
+        970,
+        490
+      ]
+    },
+    {
+      "area": 75487,
+      "bbox": [
+        120,
+        52,
+        435,
+        494
+      ]
+    },
+    {
+      "area": 74678,
+      "bbox": [
+        1140,
+        71,
+        1449,
+        491
+      ]
+    },
+    {
+      "area": 72567,
+      "bbox": [
+        113,
+        548,
+        445,
+        978
+      ]
+    },
+    {
+      "area": 69581,
+      "bbox": [
+        1147,
+        565,
+        1463,
+        976
+      ]
+    },
+    {
+      "area": 2980,
+      "bbox": [
+        1103,
+        198,
+        1165,
+        283
+      ]
+    },
+    {
+      "area": 2416,
+      "bbox": [
+        1125,
+        688,
+        1169,
+        767
+      ]
+    },
+    {
+      "area": 2355,
+      "bbox": [
+        93,
+        190,
+        135,
+        270
+      ]
+    },
+    {
+      "area": 2260,
+      "bbox": [
+        597,
+        688,
+        639,
+        766
+      ]
+    },
+    {
+      "area": 2011,
+      "bbox": [
+        597,
+        200,
+        636,
+        274
+      ]
+    },
+    {
+      "area": 1989,
+      "bbox": [
+        152,
+        625,
+        195,
+        693
+      ]
+    },
+    {
+      "area": 1980,
+      "bbox": [
+        1164,
+        612,
+        1207,
+        678
+      ]
+    },
+    {
+      "area": 1858,
+      "bbox": [
+        639,
+        629,
+        682,
+        693
+      ]
+    },
+    {
+      "area": 1780,
+      "bbox": [
+        640,
+        128,
+        680,
+        191
+      ]
+    },
+    {
+      "area": 1604,
+      "bbox": [
+        1430,
+        713,
+        1465,
+        784
+      ]
+    }
+  ],
+  "reference": "assets/art/portraits/n14.png",
+  "reference_sha256": "ab0eb0eef382938c8c8283edac5a02a6a9927039e026a730c5e8acbe1cff0984",
+  "prompt": "walk.prompt.txt",
+  "prompt_sha256": "3597c70b1b680d93571a3911aadb998c4791e14ad2d8bd85e3eef2d3ec09e861",
+  "provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "generation": {
+    "tool": "built-in image_gen",
+    "original_calls": 1,
+    "repair_calls": 0,
+    "call_count": 1,
+    "model_identifier": "not exposed",
+    "source_bytes_preserved": true,
+    "deterministic_pose_fabrication": false,
+    "prompt_preparation_command": "python3 tools/art/prepare_identity_prompts.py n14 --state walk"
+  },
+  "visual_review": {
+    "complete_six_characters": true,
+    "true_pose_overlap_or_canvas_clipping_observed": false,
+    "identity_and_anatomy": "Six full flame-elemental gliding poses show flowing lower flame compression, shoulder/arm shifts and flame-crown undulation. Rocky plates and intentionally floating rocky anatomy remain recognizable; no feet introduced. Some small surrounding embers resemble the reference but should be reviewed as ornament rather than discarded blindly.",
+    "limitations": [
+      "Strict 70-percent occupancy and 15-percent padding targets were not consistently met. Figures remain complete and separate; source not repaired solely for nominal cell boundary differences.",
+      "Fine semitransparent edge pixels require parent packing review; no generated pixels were repainted or alpha-cleaned here.",
+      "Loop, runtime scale, integration and game verification remain parent-owned and unverified."
+    ]
+  },
+  "preserved_generated_artifacts": [
+    {
+      "file": "walk.source.png",
+      "sha256": "deb6c99a8981d32ae53cefc1e6c9b05871814a98c5b7e27f2fecb2b5bf511c2e",
+      "generator_source": "/workspace/scratch/efd85aae97ef/generated_images/exec-271a01d1-9bad-4432-a683-28481bb24845.png",
+      "bytes_match_original": true
+    }
+  ],
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

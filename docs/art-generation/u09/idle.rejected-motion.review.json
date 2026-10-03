@@ -1,0 +1,120 @@
+{
+  "id": "u09",
+  "state": "idle",
+  "source": "docs/art-generation/u09/idle.rejected-motion.source.png",
+  "prompt": "docs/art-generation/u09/idle.rejected-motion.prompt.txt",
+  "source_sha256": "3be8325cae221142b7225783acf62f617f786e3e7e19eda9536d1680843c6b3c",
+  "prompt_sha256": "378ab8d434fcd980362b5d7833c2bd826c0466da53fa6a45922941279bab94c5",
+  "reference": "assets/art/portraits/u09.png",
+  "reference_sha256": "7c890378ed89edb82bd4ce2b158ad53c88cb5f13bd61cecf2a1c22464b303ced",
+  "generation_route": "built-in image tool; one call per asset, no external API",
+  "model_identifier": "not exposed by image tool",
+  "template_provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/heavy/sprite_run/prompts/idle.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "preparation_command": "python3 tools/art/prepare_identity_prompts.py u09 --state idle",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_min": 0,
+  "alpha_max": 254,
+  "transparent_pixel_fraction": 0.5826606750488281,
+  "nontransparent_pixel_fraction": 0.4173393249511719,
+  "low_alpha_pixel_fraction_1_to_127": 0.04198455810546875,
+  "meaningful_alpha_threshold": 128,
+  "meaningful_alpha_bbox": [
+    85,
+    25,
+    1470,
+    962
+  ],
+  "components_alpha_ge128_area_ge64": [
+    {
+      "bbox": [
+        88,
+        25,
+        479,
+        480
+      ],
+      "area": 103061
+    },
+    {
+      "bbox": [
+        602,
+        63,
+        929,
+        481
+      ],
+      "area": 95431
+    },
+    {
+      "bbox": [
+        1081,
+        29,
+        1470,
+        480
+      ],
+      "area": 101545
+    },
+    {
+      "bbox": [
+        85,
+        545,
+        477,
+        962
+      ],
+      "area": 98904
+    },
+    {
+      "bbox": [
+        593,
+        540,
+        976,
+        961
+      ],
+      "area": 98526
+    },
+    {
+      "bbox": [
+        1111,
+        549,
+        1435,
+        960
+      ],
+      "area": 92915
+    }
+  ],
+  "major_component_count_alpha_ge128_area_ge1000": 6,
+  "edge_touch_alpha_ge128": false,
+  "visual_review_performed": true,
+  "pose_count_observed": 6,
+  "review_notes": [
+    "Six separate planted drummer poses retain strapped drum, broad green orc-like anatomy and two connected beaters in every frame.",
+    "Motion concern: large raised-beater to drum-rest movements in poses 2 and 6 can read as drumming, exceeding requested restrained breathing. Flagged to parent; not counted as an accepted subtle idle loop.",
+    "Raw source has low-alpha exterior haze. Preserve source bytes; use actual meaningful component bounds instead of treating nominal equal cells as extraction authority.",
+    "Requested 15-percent slot padding is not fully met, but six complete figures are spatially separate."
+  ],
+  "source_layout_contract_pass": false,
+  "source_geometry_extractable": true,
+  "needs_nonuniform_pose_extraction": true,
+  "subtle_idle_motion_review": "concern",
+  "packed": false,
+  "runtime_verified": false,
+  "rejected_layout_revisions": [],
+  "review_scope": "Raw-source visual and alpha inspection only; no packing, integrated looping, cross-state scale, timing or runtime verification.",
+  "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-67e7ccae-9b28-4962-8b33-1c88cfc9f400.png",
+  "original_bytes_copy_verified": true,
+  "status": "rejected_wrong_state_motion",
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals.",
+  "source_bytes": 1707039
+}

@@ -1,7 +1,7 @@
 extends Control
 
 const UiSkin = preload("res://game/ui_skin.gd")
-const BATTLE_BACKGROUND = preload("res://assets/art/orthographic/battle-map.png")
+const BATTLE_BACKGROUND = preload("res://assets/art/orthographic/battle-map.webp")
 const VisualAssets = preload("res://game/visual_assets.gd")
 var visuals = VisualAssets.new()
 
@@ -13,9 +13,9 @@ const MENU_BACKGROUND = preload("res://assets/art/backgrounds/guild.png")
 const FONT = preload("res://assets/fonts/GuildSans.otf")
 const SYMBOL_FONT = preload("res://assets/fonts/GuildSymbols.ttf")
 const GOLD := Color("dfbb6c")
-const INK := Color("111e2d")
+const INK := Color("2b241d")
 const PALE := Color("f2e5c7")
-const MUTED := Color("a8b4bb")
+const MUTED := Color("c2b79e")
 
 var sim = Simulation.new()
 var store: RefCounted
@@ -162,6 +162,40 @@ func _button(parent: Node, text_value: String, rect: Rect2, callback: Callable, 
 	parent.add_child(button)
 	return button
 
+func _hud_icon(parent: Control, kind: String, rect: Rect2) -> TextureRect:
+	var icon := TextureRect.new()
+	icon.texture = UiSkin.icon_texture(kind)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.position = rect.position
+	icon.size = rect.size
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(icon)
+	return icon
+
+func _hud_button(parent: Node, text_value: String, rect: Rect2, callback: Callable, action: String, icon_kind: String = "", accent: bool = false) -> Button:
+	var button := _button(parent, text_value, rect, callback, false, action)
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		button.add_theme_stylebox_override(state, UiSkin.button_style("brass_accent" if accent else "brass", state))
+	button.add_theme_color_override("font_color", PALE)
+	button.add_theme_color_override("font_hover_color", Color("fff5d7"))
+	button.add_theme_color_override("font_pressed_color", GOLD)
+	button.add_theme_font_size_override("font_size", 30)
+	if not icon_kind.is_empty():
+		_hud_icon(button, icon_kind, Rect2((rect.size.x - 48) * 0.5, (rect.size.y - 48) * 0.5, 48, 48))
+	return button
+
+func _battle_action(text_value: String, rect: Rect2, callback: Callable, action: String, icon_kind: String) -> Button:
+	var button := _hud_button(screen, "", rect, callback, action, "", action == "summon")
+	button.tooltip_text = "용병 소환" if action == "summon" else text_value
+	button.accessibility_name = button.tooltip_text
+	_hud_icon(button, icon_kind, Rect2((rect.size.x - 44) * 0.5, 9, 44, 44))
+	var caption := _label(button, text_value, Vector2(9, 57), rect.size.x - 18, 22, PALE)
+	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	caption.size.y = 33
+	button.set_meta("caption", caption)
+	return button
+
 func _clear_screen() -> void:
 	_close_panel()
 	if is_instance_valid(screen):
@@ -192,19 +226,20 @@ func _show_menu() -> void:
 		if not check.restore(resume_data) or resume_data.result != "active":
 			resume_data = {}
 			store.last_error = "이어하기 파일이 손상되었거나 버전이 다릅니다. 원본은 보존됩니다."
-	_label(screen, "M E R C E N A R Y   G U I L D", Vector2(106, 100), 560, 19, GOLD)
-	_label(screen, "project-rd", Vector2(67, 155), 650, 82, PALE)
-	_label(screen, "용병 길드", Vector2(270, 255), 300, 28, GOLD)
-	_label(screen, "마지막 성문을 지켜라", Vector2(215, 590), 450, 24, PALE)
-	_button(screen, "⚔   새 게임", Rect2(130, 675, 460, 80), _request_new, true, "new_game")
-	var resume := _button(screen, "이어하기", Rect2(130, 773, 460, 64), _resume, false, "continue")
+	# 표시 이름은 프로젝트 설정 한 곳에서만 읽고 저장·리소스 식별자로 사용하지 않는다.
+	var display_name := str(ProjectSettings.get_setting("presentation/display_name"))
+	DisplayServer.window_set_title(display_name)
+	_panel(screen, Rect2(46, 98, 628, 118), INK, GOLD, "brass")
+	labels.menu_title = _label(screen, display_name, Vector2(65, 123), 590, 50, GOLD)
+	labels.menu_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hud_button(screen, "새 게임", Rect2(126, 688, 468, 108), _request_new, "new_game", "", true)
+	var resume := _hud_button(screen, "이어하기", Rect2(126, 808, 468, 100), _resume, "continue")
 	resume.disabled = resume_data.is_empty()
-	_button(screen, "도감", Rect2(130, 855, 220, 60), func(): _open_panel("codex"), false, "codex")
-	_button(screen, "설정", Rect2(370, 855, 220, 60), func(): _open_panel("settings"), false, "settings")
-	_button(screen, "게임 가이드", Rect2(130, 933, 460, 55), func(): _open_panel("guide"), false, "guide")
-	_label(screen, "최고 도달  %d / 100     ·     %s" % [store.profile.best_wave, "마왕 격파" if store.profile.cleared else "미클리어"], Vector2(145, 1030), 550, 20, MUTED)
-	_label(screen, "오프라인 · 이번 판의 용병으로 쌓는 전략", Vector2(155, 1120), 530, 18, MUTED)
-	_label(screen, "INTERNAL MVP  0.4    /    GODOT 4.7.2", Vector2(168, 1223), 520, 15, Color("75848c"))
+	_hud_button(screen, "도감", Rect2(126, 920, 228, 100), func(): _open_panel("codex"), "codex")
+	_hud_button(screen, "설정", Rect2(366, 920, 228, 100), func(): _open_panel("settings"), "settings")
+	_hud_button(screen, "게임 가이드", Rect2(126, 1032, 468, 100), func(): _open_panel("guide"), "guide")
+	labels.menu_footer = _label(screen, "© 2026 %s  ·  v0.4" % display_name, Vector2(48, 1222), 624, 18, MUTED)
+	labels.menu_footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	if not store.last_error.is_empty():
 		_toast(store.last_error)
 
@@ -238,31 +273,42 @@ func _show_battle() -> void:
 	audio.reset_battle(sim.run_id, sim.lives, sim.result)
 	_sync_audio()
 	_clear_screen()
-	# 전장 원화는 전체 화면에 깔고 HUD는 그 위의 작은 장식판으로 배치한다.
-	_panel(screen, Rect2(22, 20, 126, 47), INK, GOLD, "dark")
-	_panel(screen, Rect2(224, 20, 242, 47))
-	_panel(screen, Rect2(494, 20, 132, 47), INK, GOLD, "dark")
-	labels.lives = _label(screen, "", Vector2(37, 27), 110, 23, Color("ff9584"))
-	labels.wave = _label(screen, "", Vector2(245, 29), 220, 20, INK)
-	labels.gold = _label(screen, "", Vector2(509, 28), 116, 22, GOLD)
-	labels.speed = _button(screen, "×1", Rect2(472, 72, 108, 100), func(): sim.cycle_speed(); _mark_dirty(); _refresh(), false, "speed")
+	# 320px 화면에서도 44px 이상인 터치 영역을 유지하고, 도구는 오른쪽 위에 모은다.
+	_panel(screen, Rect2(22, 20, 166, 64), INK, GOLD, "brass")
+	labels.lives = _label(screen, "", Vector2(36, 32), 139, 28, Color("ff9484"))
+	labels.lives.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var home := _hud_button(screen, "", Rect2(190, 20, 100, 100), _show_menu, "battle_home", "home")
+	home.tooltip_text = "저장 후 메인 메뉴"
+	home.accessibility_name = home.tooltip_text
+	_panel(screen, Rect2(202, 135, 276, 51), INK, GOLD, "brass")
+	labels.wave = _label(screen, "", Vector2(217, 141), 246, 26, PALE)
+	labels.wave.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var tools := [["recipes", "조합법"], ["guide", "게임 가이드"], ["codex", "도감"], ["settings", "설정"]]
+	for index in range(tools.size()):
+		var action: String = tools[index][0]
+		var button := _hud_button(screen, "", Rect2(292 + index * 102, 20, 100, 100), func(): _open_panel(action), action, action)
+		button.tooltip_text = tools[index][1]
+		button.accessibility_name = tools[index][1]
+	_panel(screen, Rect2(510, 132, 188, 54), INK, GOLD, "brass")
+	_hud_icon(screen, "coin", Rect2(524, 143, 30, 30))
+	labels.gold = _label(screen, "", Vector2(558, 141), 123, 26, PALE)
+	labels.gold.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	labels.speed = _hud_button(screen, "×1", Rect2(486, 192, 100, 100), func(): sim.cycle_speed(); _mark_dirty(); _refresh(), "speed")
+	labels.speed.tooltip_text = "배속 변경 · ×1 / ×2 / ×3 / ×5"
+	labels.speed.accessibility_name = "배속 변경"
+	labels.pause = _hud_button(screen, "Ⅱ", Rect2(598, 192, 100, 100), _toggle_pause, "pause")
+	labels.pause.tooltip_text = "일시정지 / 재개"
+	labels.pause.accessibility_name = "일시정지 / 재개"
 	var banner := TextureRect.new()
 	banner.texture = UiSkin.banner_texture()
 	banner.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	banner.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	banner.position = Vector2(24, 76)
-	banner.size = Vector2(93, 185)
+	banner.position = Vector2(24, 91)
+	banner.size = Vector2(82, 163)
 	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	screen.add_child(banner)
-	var guild := _label(screen, "길드", Vector2(41, 191), 58, 17, GOLD)
-	guild.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	labels.pause = _button(screen, "Ⅱ", Rect2(590, 72, 108, 100), _toggle_pause, false, "pause")
-	_button(screen, "가이드", Rect2(354, 72, 108, 100), func(): _open_panel("guide"), false, "guide").add_theme_font_size_override("font_size", 16)
-	_button(screen, "도감", Rect2(354, 180, 108, 100), func(): _open_panel("codex"), false, "codex").add_theme_font_size_override("font_size", 17)
-	_button(screen, "설정", Rect2(472, 180, 108, 100), func(): _open_panel("settings"), false, "settings").add_theme_font_size_override("font_size", 16)
-	_button(screen, "조합법", Rect2(590, 180, 108, 100), func(): _open_panel("recipes"), false, "recipes").add_theme_font_size_override("font_size", 17)
-	_panel(screen, Rect2(209, 292, 303, 43), INK, GOLD, "dark")
-	labels.clock = _label(screen, "", Vector2(220, 299), 281, 15, PALE)
+	labels.clock_panel = _panel(screen, Rect2(209, 244, 270, 43), INK, GOLD, "brass")
+	labels.clock = _label(screen, "", Vector2(220, 251), 248, 15, PALE)
 	labels.clock.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	board = BattleBoard.new()
 	board.position = Vector2(0, 224)
@@ -273,32 +319,27 @@ func _show_battle() -> void:
 	board.cell_dragged.connect(_cell_dragged)
 	screen.add_child(board)
 	screen.move_child(board, 0)
-	_panel(screen, Rect2(161, 945, 398, 69), INK, GOLD, "dark")
-	labels.selection = _label(screen, "", Vector2(176, 950), 368, 19, PALE)
+	labels.selection_panel = _panel(screen, Rect2(161, 945, 398, 69), INK, GOLD, "brass")
+	labels.selection = _label(labels.selection_panel, "", Vector2(15, 5), 368, 19, PALE)
 	labels.selection.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	labels.detail = _label(screen, "", Vector2(176, 980), 368, 13, MUTED)
+	labels.detail = _label(labels.selection_panel, "", Vector2(15, 35), 368, 13, MUTED)
 	labels.detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	labels.summon = _button(screen, "", Rect2(229, 1030, 262, 100), _summon, true, "summon")
-	labels.summon.add_theme_font_size_override("font_size", 24)
-	_panel(screen, Rect2(225, 1132, 270, 35), INK, GOLD, "dark")
+	# 하단의 소환 중심 배치와 강화·도박·특수몬스터 순서는 그대로 유지한다.
+	labels.summon = _battle_action("", Rect2(229, 1030, 262, 100), _summon, "summon", "summon")
+	_panel(screen, Rect2(225, 1132, 270, 35), INK, GOLD, "brass")
 	labels.count = _label(screen, "", Vector2(234, 1138), 252, 13, PALE)
 	labels.count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_button(screen, "↑ 업그레이드", Rect2(27, 1172, 216, 100), func(): _open_panel("upgrade"), false, "upgrade")
-	_button(screen, "✦ 도박", Rect2(252, 1172, 216, 100), func(): _open_panel("gamble"), false, "gamble")
-	_button(screen, "특수몬스터", Rect2(477, 1172, 216, 100), func(): _open_panel("special"), false, "special")
+	_battle_action("강화", Rect2(27, 1172, 216, 100), func(): _open_panel("upgrade"), "upgrade", "upgrade")
+	_battle_action("도박", Rect2(252, 1172, 216, 100), func(): _open_panel("gamble"), "gamble", "gamble")
+	_battle_action("특수몬스터", Rect2(477, 1172, 216, 100), func(): _open_panel("special"), "special", "special")
 	_refresh()
 
 func _cell_pressed(cell: int) -> void:
 	if not panel_name.is_empty() and panel_name in ["settings", "result", "confirm_new"]:
 		return
 	var current: Dictionary = sim.unit_at(cell)
-	if selected < 0:
-		if not current.is_empty():
-			selected = int(current.id)
-	elif not current.is_empty() and int(current.id) == selected:
-		selected = -1
-	else:
-		_transaction(sim.move_unit(selected, cell))
+	# 탭은 정보 선택만 수행하며 이동과 교환은 드래그에서만 처리한다.
+	selected = int(current.id) if not current.is_empty() else -1
 	_refresh()
 
 func _cell_dragged(unit_id: int, cell: int) -> void:
@@ -345,22 +386,24 @@ func _refresh() -> void:
 	if mode != "battle" or labels.is_empty():
 		return
 	labels.lives.text = "♥ × %d" % sim.lives
-	labels.wave.text = "WAVE  %d / 100" % sim.wave
-	labels.gold.text = "◈ %d" % sim.gold
-	labels.count.text = "용병 %d/36  적 %d/%d" % [sim.units.size(), sim.enemies.size(), sim.enemy_limit()]
+	labels.wave.text = "%d / 100" % sim.wave
+	labels.gold.text = "%d" % sim.gold
+	labels.count.text = "전장 적  %d / %d" % [sim.enemies.size(), sim.enemy_limit()]
 	labels.count.add_theme_color_override("font_color", Color("ff8871") if sim.enemies.size() >= sim.enemy_limit() - 10 else MUTED)
 	labels.clock.text = "마왕을 처치하세요" if sim.wave == 100 else "다음 웨이브  %04.1f초" % maxf(0, sim.wave * 30.0 - sim.time)
 	if sim.developer_run:
 		labels.clock.text += "  [개발 기록]"
 	labels.speed.text = "×%d" % sim.speed
 	labels.pause.text = "▶" if sim.pause_reasons.has("user") else "Ⅱ"
-	labels.summon.text = "⚔  소환  ◈ %d" % int(sim.catalog.rules.T.summon_cost)
+	labels.summon.get_meta("caption").text = "소환   ◈ %d" % int(sim.catalog.rules.T.summon_cost)
 	labels.summon.disabled = sim.gold < int(sim.catalog.rules.T.summon_cost) or sim.units.size() >= 36 or sim.result != "active"
 	var unit: Dictionary = sim.unit_by_id(selected)
+	labels.selection_panel.visible = not unit.is_empty()
+	labels.summon.get_meta("caption").modulate.a = 0.72 if labels.summon.disabled else 1.0
 	if unit.is_empty():
 		selected = -1
-		labels.selection.text = "소환으로 길드의 전열을 채우세요" if sim.units.is_empty() else "용병 진형  ·  %d / 36" % sim.units.size()
-		labels.detail.text = "소환한 용병은 자동으로 공격합니다" if sim.units.is_empty() else "선택한 용병의 사거리를 보고 재배치할 수 있습니다"
+		labels.selection.text = ""
+		labels.detail.text = ""
 	else:
 		var definition: Dictionary = sim.catalog.units[unit.kind]
 		labels.selection.text = "%s  %s" % ["★".repeat(int(definition.tier)), definition.name]
@@ -568,7 +611,7 @@ func _guide_panel(panel: Control) -> void:
 	var list := _scroll(panel)
 	for entry in [
 		["01  소환하고 전열을 갖추세요", "시작 골드로 1성 용병 세 명을 소환할 수 있습니다. 적을 처치해 골드를 얻고, 첫 빈칸부터 열 우선으로 채웁니다."],
-		["02  사거리와 배치가 전략입니다", "용병을 누른 뒤 목적지 칸을 누르거나 드래그하세요. 점유된 칸은 교환합니다. 아군은 다치지 않으며 배치한 자리에서 공격합니다."],
+		["02  사거리와 배치가 전략입니다", "용병을 누르면 정보를 확인합니다. 이동할 용병을 목적지 칸까지 드래그하세요. 점유된 칸은 교환합니다. 아군은 다치지 않으며 배치한 자리에서 공격합니다."],
 		["03  조합으로 전력을 높이세요", "조합법 창에서 정확한 재료와 결과 칸을 확인한 뒤 조합합니다. 드래그만으로 조합되지는 않습니다. 강화는 해당 성급 전체에 적용됩니다."],
 		["04  100웨이브, 마왕을 처치하세요", "일반 웨이브는 30게임초마다 시작됩니다. 적은 한 바퀴를 돌면 탈출하며 목숨이 1 줄어듭니다. 100웨이브 마왕은 처치하면 승리, 탈출하면 즉시 패배합니다. 전장에 모든 종류의 적을 합쳐 %d마리가 모이면 즉시 패배합니다." % sim.enemy_limit()],
 		["05  위험을 감수하고 골드를 버세요", "특수몬스터는 아군이 아닌 보상형 적입니다. 10·30·60웨이브 완료 후 해금되며 종류마다 300게임초의 재소환 대기가 있습니다."],
@@ -644,13 +687,17 @@ func _toast(message: String) -> void:
 	if not is_instance_valid(screen):
 		return
 	if not is_instance_valid(toast_label):
-		toast_label = _label(self, "", Vector2(30, 1235), 660, 19, GOLD)
+		toast_label = _label(self, "", Vector2(30, 8), 660, 19, GOLD)
 		toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		toast_label.add_theme_stylebox_override("normal", _style(INK, GOLD, 1, 3))
-	toast_label.position = Vector2(166, 950) if mode == "battle" else Vector2(30, 1180)
-	toast_label.size = Vector2(388, 62) if mode == "battle" else Vector2(660, 62)
+		# 모든 화면의 맨 위에 반투명 알림을 겹치되 뒤의 HUD 터치 입력은 통과시킨다.
+		toast_label.add_theme_stylebox_override("normal", _style(Color(INK, 0.82), Color(GOLD, 0.55), 1, 3))
+		toast_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		toast_label.z_as_relative = false
+		toast_label.z_index = 100
+	toast_label.position = Vector2(30, 8)
+	toast_label.size = Vector2(660, 76)
 	toast_label.show()
 	toast_label.text = message
 	toast_until = wall_time + 3.0
@@ -759,9 +806,13 @@ func _handle_back() -> void:
 	_write_qa_state()
 
 func _draw() -> void:
-	draw_texture_rect(MENU_BACKGROUND if mode == "menu" else BATTLE_BACKGROUND, Rect2(0, 0, 720, 1280), false)
 	if mode == "menu":
-		draw_rect(Rect2(0, 0, 720, 1280), Color(0.02, 0.05, 0.09, 0.15))
+		draw_texture_rect(MENU_BACKGROUND, Rect2(0, 0, 720, 1280), false)
+	else:
+		_draw_battle_background()
+	if mode == "menu":
+		draw_rect(Rect2(0, 0, 720, 1280), Color(0.15, 0.105, 0.055, 0.22))
+		draw_rect(Rect2(0, 1184, 720, 96), Color(0.08, 0.065, 0.04, 0.62))
 
 func _setup_sound() -> void:
 	audio = AudioDirector.new()
@@ -792,3 +843,13 @@ func run_automation_tests() -> bool:
 
 func _exit_tree() -> void:
 	dynamic.clear()
+
+func _draw_battle_background() -> void:
+	# 생성 그림의 풀밭 경계를 실제 정사각 전장에 맞춘다. 지면 판정은 바꾸지 않는다.
+	var source_y := [0.0, 474.0 / 1672.0, 1108.0 / 1672.0, 1.0]
+	var target_y := [0.0, 354.0, 870.0, 1280.0]
+	var source_size := BATTLE_BACKGROUND.get_size()
+	for index in range(3):
+		var region := Rect2(0, source_y[index] * source_size.y, source_size.x, (source_y[index + 1] - source_y[index]) * source_size.y)
+		var destination := Rect2(0, target_y[index], 720, target_y[index + 1] - target_y[index])
+		draw_texture_rect_region(BATTLE_BACKGROUND, destination, region)

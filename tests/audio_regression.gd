@@ -158,7 +158,7 @@ func _run() -> void:
 	game.queue_free()
 	await process_frame
 	# 비동기 오디오 믹서가 정지된 보이스 참조를 반환할 시간을 준다.
-	await create_timer(0.15).timeout
+	await create_timer(0.5).timeout
 	print("AUDIO_REPORT ", JSON.stringify({"checks": checks, "failed": failures}))
 	# 코루틴의 임시 리소스 참조까지 해제한 다음 트리를 종료한다.
 	call_deferred("quit", 0 if failures.is_empty() else 1)

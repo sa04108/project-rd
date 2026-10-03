@@ -188,6 +188,166 @@
     "n13": {
       "atlas": "assets/art/identities/n13/atlas.png",
       "frame_layout": "assets/art/identities/n13/layout.json"
+    },
+    "n14": {
+      "atlas": "assets/art/identities/n14/atlas.png",
+      "frame_layout": "assets/art/identities/n14/layout.json"
+    },
+    "n15": {
+      "atlas": "assets/art/identities/n15/atlas.png",
+      "frame_layout": "assets/art/identities/n15/layout.json"
+    },
+    "n16": {
+      "atlas": "assets/art/identities/n16/atlas.png",
+      "frame_layout": "assets/art/identities/n16/layout.json"
+    },
+    "n17": {
+      "atlas": "assets/art/identities/n17/atlas.png",
+      "frame_layout": "assets/art/identities/n17/layout.json"
+    },
+    "n18": {
+      "atlas": "assets/art/identities/n18/atlas.png",
+      "frame_layout": "assets/art/identities/n18/layout.json"
+    },
+    "n19": {
+      "atlas": "assets/art/identities/n19/atlas.png",
+      "frame_layout": "assets/art/identities/n19/layout.json"
+    },
+    "n20": {
+      "atlas": "assets/art/identities/n20/atlas.png",
+      "frame_layout": "assets/art/identities/n20/layout.json"
+    },
+    "n21": {
+      "atlas": "assets/art/identities/n21/atlas.png",
+      "frame_layout": "assets/art/identities/n21/layout.json"
+    },
+    "n22": {
+      "atlas": "assets/art/identities/n22/atlas.png",
+      "frame_layout": "assets/art/identities/n22/layout.json"
+    },
+    "n23": {
+      "atlas": "assets/art/identities/n23/atlas.png",
+      "frame_layout": "assets/art/identities/n23/layout.json"
+    },
+    "n24": {
+      "atlas": "assets/art/identities/n24/atlas.png",
+      "frame_layout": "assets/art/identities/n24/layout.json"
+    },
+    "n25": {
+      "atlas": "assets/art/identities/n25/atlas.png",
+      "frame_layout": "assets/art/identities/n25/layout.json"
+    },
+    "n26": {
+      "atlas": "assets/art/identities/n26/atlas.png",
+      "frame_layout": "assets/art/identities/n26/layout.json"
+    },
+    "n27": {
+      "atlas": "assets/art/identities/n27/atlas.png",
+      "frame_layout": "assets/art/identities/n27/layout.json"
+    },
+    "n28": {
+      "atlas": "assets/art/identities/n28/atlas.png",
+      "frame_layout": "assets/art/identities/n28/layout.json"
+    },
+    "n29": {
+      "atlas": "assets/art/identities/n29/atlas.png",
+      "frame_layout": "assets/art/identities/n29/layout.json"
+    },
+    "n30": {
+      "atlas": "assets/art/identities/n30/atlas.png",
+      "frame_layout": "assets/art/identities/n30/layout.json"
+    },
+    "n31": {
+      "atlas": "assets/art/identities/n31/atlas.png",
+      "frame_layout": "assets/art/identities/n31/layout.json"
+    },
+    "n32": {
+      "atlas": "assets/art/identities/n32/atlas.png",
+      "frame_layout": "assets/art/identities/n32/layout.json"
+    },
+    "n33": {
+      "atlas": "assets/art/identities/n33/atlas.png",
+      "frame_layout": "assets/art/identities/n33/layout.json"
+    },
+    "n34": {
+      "atlas": "assets/art/identities/n34/atlas.png",
+      "frame_layout": "assets/art/identities/n34/layout.json"
+    },
+    "n35": {
+      "atlas": "assets/art/identities/n35/atlas.png",
+      "frame_layout": "assets/art/identities/n35/layout.json"
+    },
+    "n36": {
+      "atlas": "assets/art/identities/n36/atlas.png",
+      "frame_layout": "assets/art/identities/n36/layout.json"
+    },
+    "n37": {
+      "atlas": "assets/art/identities/n37/atlas.png",
+      "frame_layout": "assets/art/identities/n37/layout.json"
+    },
+    "n38": {
+      "atlas": "assets/art/identities/n38/atlas.png",
+      "frame_layout": "assets/art/identities/n38/layout.json"
+    },
+    "n39": {
+      "atlas": "assets/art/identities/n39/atlas.png",
+      "frame_layout": "assets/art/identities/n39/layout.json"
+    },
+    "n40": {
+      "atlas": "assets/art/identities/n40/atlas.png",
+      "frame_layout": "assets/art/identities/n40/layout.json"
+    },
+    "b10": {
+      "atlas": "assets/art/identities/b10/atlas.png",
+      "frame_layout": "assets/art/identities/b10/layout.json"
+    },
+    "b20": {
+      "atlas": "assets/art/identities/b20/atlas.png",
+      "frame_layout": "assets/art/identities/b20/layout.json"
+    },
+    "b30": {
+      "atlas": "assets/art/identities/b30/atlas.png",
+      "frame_layout": "assets/art/identities/b30/layout.json"
+    },
+    "b40": {
+      "atlas": "assets/art/identities/b40/atlas.png",
+      "frame_layout": "assets/art/identities/b40/layout.json"
+    },
+    "b50": {
+      "atlas": "assets/art/identities/b50/atlas.png",
+      "frame_layout": "assets/art/identities/b50/layout.json"
+    },
+    "b60": {
+      "atlas": "assets/art/identities/b60/atlas.png",
+      "frame_layout": "assets/art/identities/b60/layout.json"
+    },
+    "b70": {
+      "atlas": "assets/art/identities/b70/atlas.png",
+      "frame_layout": "assets/art/identities/b70/layout.json"
+    },
+    "b80": {
+      "atlas": "assets/art/identities/b80/atlas.png",
+      "frame_layout": "assets/art/identities/b80/layout.json"
+    },
+    "b90": {
+      "atlas": "assets/art/identities/b90/atlas.png",
+      "frame_layout": "assets/art/identities/b90/layout.json"
+    },
+    "b100": {
+      "atlas": "assets/art/identities/b100/atlas.png",
+      "frame_layout": "assets/art/identities/b100/layout.json"
+    },
+    "s10": {
+      "atlas": "assets/art/identities/s10/atlas.png",
+      "frame_layout": "assets/art/identities/s10/layout.json"
+    },
+    "s30": {
+      "atlas": "assets/art/identities/s30/atlas.png",
+      "frame_layout": "assets/art/identities/s30/layout.json"
+    },
+    "s60": {
+      "atlas": "assets/art/identities/s60/atlas.png",
+      "frame_layout": "assets/art/identities/s60/layout.json"
     }
   }
 }

@@ -1,0 +1,194 @@
+{
+  "id": "u27",
+  "state": "idle",
+  "source": "docs/art-generation/u27/idle.source.png",
+  "prompt": "docs/art-generation/u27/idle.prompt.txt",
+  "source_sha256": "4343229792ef024a7b3440cb979f24bbedc0bde2fa3e6bd65c29c02775ee7d53",
+  "source_bytes": 1376648,
+  "prompt_sha256": "5d5255a13f16ec67247dc5fd2d9e864c4d12a39c9025ce0b72daaa698864ca1a",
+  "reference": "assets/art/portraits/u27.png",
+  "reference_sha256": "eaf55b141781e0b9e8db7fe217ddb4be262cebf03702c2eb5945f02ced74304f",
+  "generation_route": "built-in image tool; one call per asset, no external API",
+  "model_identifier": "not exposed by image tool",
+  "template_provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/idle.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "preparation_command": "python3 tools/art/prepare_identity_prompts.py u27 --state idle",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_min": 0,
+  "alpha_max": 254,
+  "transparent_pixel_fraction": 0.6425221761067709,
+  "nontransparent_pixel_fraction": 0.3574778238932292,
+  "low_alpha_pixel_fraction_1_to_127": 0.06548309326171875,
+  "meaningful_alpha_threshold": 128,
+  "meaningful_alpha_bbox": [
+    32,
+    85,
+    1510,
+    965
+  ],
+  "components_alpha_ge128_area_ge64": [
+    {
+      "bbox": [
+        32,
+        85,
+        504,
+        486
+      ],
+      "area": 73984
+    },
+    {
+      "bbox": [
+        545,
+        85,
+        1008,
+        486
+      ],
+      "area": 76858
+    },
+    {
+      "bbox": [
+        1036,
+        87,
+        1510,
+        483
+      ],
+      "area": 76544
+    },
+    {
+      "bbox": [
+        35,
+        562,
+        498,
+        965
+      ],
+      "area": 76821
+    },
+    {
+      "bbox": [
+        1055,
+        562,
+        1507,
+        965
+      ],
+      "area": 78327
+    },
+    {
+      "bbox": [
+        547,
+        565,
+        1017,
+        965
+      ],
+      "area": 76734
+    }
+  ],
+  "major_component_count_alpha_ge128_area_ge1000": 6,
+  "pose_groups_alpha_ge128": [
+    {
+      "frame_zero_based": 0,
+      "bbox": [
+        32,
+        85,
+        504,
+        486
+      ],
+      "meaningful_area": 73984,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "08a288b0a11cb7cfc599f8d8f718d447c323ca04cf32976b7387aea2d2454f76"
+    },
+    {
+      "frame_zero_based": 1,
+      "bbox": [
+        545,
+        85,
+        1008,
+        486
+      ],
+      "meaningful_area": 76858,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "c89ca4d423556bac6ba2e4215fcadb112b1a4bacefc02c7413c34c5545ec3bd9"
+    },
+    {
+      "frame_zero_based": 2,
+      "bbox": [
+        1036,
+        87,
+        1510,
+        483
+      ],
+      "meaningful_area": 76544,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "29da66ce60bb932a136b081862f9b894c1c0f358d12a3d46142a15d3dd40f932"
+    },
+    {
+      "frame_zero_based": 3,
+      "bbox": [
+        35,
+        562,
+        498,
+        965
+      ],
+      "meaningful_area": 76821,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "d0a0630be98ad83fb2719fae99dcf88930443532f393f53fc64eba30f481abbd"
+    },
+    {
+      "frame_zero_based": 4,
+      "bbox": [
+        547,
+        565,
+        1017,
+        965
+      ],
+      "meaningful_area": 76734,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "07f65ba671f03a17427ecd5a77d49a3ef14b38c1d26fccb1ba36452739b7036b"
+    },
+    {
+      "frame_zero_based": 5,
+      "bbox": [
+        1055,
+        562,
+        1507,
+        965
+      ],
+      "meaningful_area": 78327,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "e6c99d46437cfa313af210f6a10b1b51b468e8b02074539ceba180714584edbd"
+    }
+  ],
+  "pose_grouping_method": "Whole eight-connected components grouped by bounding-box center into visually confirmed 3x2 pose neighborhoods; boxes are not clipped to nominal cells. Includes tiny components and intentional ornaments.",
+  "edge_touch_alpha_ge128": false,
+  "visual_review_performed": true,
+  "pose_count_observed": 6,
+  "review_notes": [
+    "Six masked assassin poses retain navy hood, orange scarf, segmented armor and exactly two complete curved blades in the same lowered guard. Breathing, shoulder, wrist and scarf settling vary subtly.",
+    "Feet remain planted; no slash, coil, shadow copy or travel.",
+    "Raw source contains low-alpha exterior haze. Preserve generated bytes; use meaningful connected-component bounds for pose extraction.",
+    "Requested 15-percent slot padding is not fully met, but complete figures are spatially separate."
+  ],
+  "source_layout_contract_pass": false,
+  "source_geometry_extractable": true,
+  "needs_nonuniform_pose_extraction": true,
+  "subtle_idle_motion_review": "visually_distinct_idle_phases",
+  "packed": false,
+  "runtime_verified": false,
+  "rejected_layout_revisions": [],
+  "review_scope": "Raw-source visual and alpha inspection only; no packing, integrated looping, cross-state scale, timing or runtime verification.",
+  "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-f1160528-760d-4151-a22a-3f134d351fbd.png",
+  "original_bytes_copy_verified": true,
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

@@ -45,11 +45,19 @@ static func _test_initial_state_and_coordinates() -> String:
         return "new run must begin with 150 gold, 20 lives, and no free units"
     if not sim.cell_position(14).is_equal_approx(Vector2(2.5, 2.5)):
         return "cell 14 must map to the center of row 3, column 3"
-    var distance: float = sim.cell_position(14).distance_to(sim.path_position(16.75))
-    if not is_equal_approx(distance, 3.75):
-        return "the sample cell-to-path distance must be 3.75"
-    if distance <= 3.0 or distance > 3.8:
-        return "3.0 range must miss and 3.8 range must reach the sample path point"
+    var vertices: Array[Vector2] = [Vector2(-0.5, -0.5), Vector2(-0.5, 6.5), Vector2(6.5, 6.5), Vector2(6.5, -0.5), Vector2(-0.5, -0.5)]
+    if SIMULATION.PATH_SIDE != 7.0 or SIMULATION.PATH_LENGTH != 28.0:
+        return "the one-cell path centerline must have four seven-cell sides"
+    for index in range(vertices.size()):
+        if not sim.path_position(index * SIMULATION.PATH_SIDE).is_equal_approx(vertices[index]):
+            return "path vertex %d must follow the one-cell outer lane centerline" % index
+    if not is_equal_approx(sim.cell_position(0).distance_to(sim.path_position(1.0)), 1.0):
+        return "the first ally-cell center must be exactly one cell from the adjacent lane center"
+    var distance: float = sim.cell_position(14).distance_to(sim.path_position(18.0))
+    if not is_equal_approx(distance, 4.0):
+        return "the sample cell-to-path distance must be 4.0"
+    if distance <= 3.8 or distance > 4.0:
+        return "3.8 range must miss and 4.0 range must reach the sample path point"
     return ""
 
 static func _test_column_major_summon() -> String:
@@ -145,27 +153,39 @@ static func _test_range_and_target_priority() -> String:
     var unit: Dictionary = sim.add_unit("u01", 14)
     unit.cooldown = 0.0
     var target: Dictionary = sim.add_enemy("n01", 1)
-    target.progress = 16.75
+    target.progress = 18.0
     target.stun_until = 100.0
     var base_hp: float = target.hp
-    sim.catalog.units["u01"].range = 3.0
-    sim.advance(0.04)
-    if not is_equal_approx(target.hp, base_hp):
-        return "range 3.0 must miss the path point 3.75 units from cell 14"
     sim.catalog.units["u01"].range = 3.8
     sim.advance(0.04)
+    if not is_equal_approx(target.hp, base_hp):
+        return "range 3.8 must miss the path point 4.0 units from cell 14"
+    sim.catalog.units["u01"].range = 4.0
+    sim.advance(0.04)
     if not target.hp < base_hp:
-        return "range 3.8 must hit the same controlled path point"
+        return "range 4.0 must hit the exact controlled path boundary"
+
+    sim = _new_sim()
+    sim.enemies.clear()
+    sim.add_unit("u01", 0)
+    sim.catalog.units["u01"].range = 1.0
+    target = sim.add_enemy("n01", 1)
+    target.progress = 1.0
+    target.stun_until = 100.0
+    base_hp = target.hp
+    sim.advance(0.02)
+    if not target.hp < base_hp:
+        return "range one must immediately hit the adjacent lane center exactly one ally cell away"
 
     sim = _new_sim()
     sim.enemies.clear()
     unit = sim.add_unit("u01", 14)
     unit.cooldown = 0.0
-    sim.catalog.units["u01"].range = 3.8
+    sim.catalog.units["u01"].range = 4.1
     var earlier: Dictionary = sim.add_enemy("n01", 1)
     var later: Dictionary = sim.add_enemy("n02", 1)
-    earlier.progress = 16.5
-    later.progress = 17.0
+    earlier.progress = 17.75
+    later.progress = 18.25
     earlier.stun_until = 100.0
     later.stun_until = 100.0
     var earlier_hp: float = earlier.hp
@@ -178,11 +198,11 @@ static func _test_range_and_target_priority() -> String:
     sim.enemies.clear()
     unit = sim.add_unit("u01", 14)
     unit.cooldown = 0.0
-    sim.catalog.units["u01"].range = 3.8
+    sim.catalog.units["u01"].range = 4.1
     var low_id: Dictionary = sim.add_enemy("n01", 1)
     var high_id: Dictionary = sim.add_enemy("n02", 1)
-    low_id.progress = 16.5
-    high_id.progress = 16.5
+    low_id.progress = 18.0
+    high_id.progress = 18.0
     low_id.stun_until = 100.0
     high_id.stun_until = 100.0
     var low_hp: float = low_id.hp
@@ -418,7 +438,7 @@ static func _test_final_boss_and_terminal_order() -> String:
     if boss.is_empty() or escaping.is_empty():
         return "test setup could not create final boss and escaping enemy"
     boss["hp"] = 0.0
-    escaping["progress"] = 26.0
+    escaping["progress"] = SIMULATION.PATH_LENGTH
     sim.advance(0.04)
     if sim.result != "victory":
         return "final boss death must win even when another enemy escapes in the same tick"
@@ -437,7 +457,7 @@ static func _test_final_boss_and_terminal_order() -> String:
     boss = sim.add_enemy("b100", 100)
     if boss.is_empty():
         return "test setup could not create a final boss"
-    boss["progress"] = 26.0
+    boss["progress"] = SIMULATION.PATH_LENGTH
     sim.advance(0.04)
     if sim.result != "defeat" or sim.lives != 19:
         return "final boss escape must immediately cause defeat and subtract exactly one life"
@@ -445,7 +465,7 @@ static func _test_final_boss_and_terminal_order() -> String:
     sim.lives = 1
     sim.enemies.clear()
     var normal: Dictionary = sim.add_enemy("n01", 1)
-    normal.progress = 26.0
+    normal.progress = SIMULATION.PATH_LENGTH
     sim.advance(0.04)
     if sim.result != "defeat" or sim.lives != 0 or not sim.enemies.is_empty():
         return "the last normal enemy escape must reduce lives to zero and cause defeat"
@@ -658,15 +678,21 @@ static func _test_previous_content_snapshot() -> String:
     # 실제 이전 커밋의 엔진과 데이터로 만든 저장을 사용하여 재표기만 한 가짜 이행을 막는다.
     var fixture: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/content-v0.2.0.json"))
     var old: Dictionary = fixture.normal
-    if not sim.restore(old) or sim.enemies != old.enemies or sim.units != old.units:
-        return "previous content saves must preserve distinct live HP and units on migration"
+    var expected_enemies: Array = old.enemies.duplicate(true)
+    for enemy in expected_enemies:
+        enemy.progress = float(enemy.progress) * SIMULATION.PATH_LENGTH / SIMULATION.LEGACY_PATH_LENGTH
+    if not sim.restore(old) or sim.enemies != expected_enemies or sim.units != old.units:
+        return "previous content saves must preserve live state while rescaling path progress"
     if sim.rng.randi() != int(fixture.next_rng_draw):
         return "previous content saves must preserve the next random draw"
     var fresh: Dictionary = sim.add_enemy("n02", 31)
     if fresh.max_hp == old.enemies[1].max_hp:
         return "new spawns after migration must use the new balance"
-    if not sim.restore(fixture.crowded) or sim.result != "defeat" or sim.enemies != fixture.crowded.enemies:
-        return "old crowded saves must migrate to defeat without losing live enemies"
+    expected_enemies = fixture.crowded.enemies.duplicate(true)
+    for enemy in expected_enemies:
+        enemy.progress = float(enemy.progress) * SIMULATION.PATH_LENGTH / SIMULATION.LEGACY_PATH_LENGTH
+    if not sim.restore(fixture.crowded) or sim.result != "defeat" or sim.enemies != expected_enemies:
+        return "old crowded saves must migrate path progress and defeat without losing live enemies"
     if sim.rng.randi() != int(fixture.next_rng_draw):
         return "crowded migration must preserve RNG"
     if not sim.restore(sim.snapshot()):

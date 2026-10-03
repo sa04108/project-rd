@@ -15,11 +15,17 @@ func _run() -> void:
 	await _frames(4)
 	var ui_font: FontFile = game.theme.default_font
 	_check(not ui_font.allow_system_fallback and ["⚔", "◈", "✦", "Ⅱ"].all(func(symbol): return ui_font.has_char(symbol.unicode_at(0)) or ui_font.fallbacks.any(func(font): return font.has_char(symbol.unicode_at(0)))), "bundled fonts cover every HUD symbol without host fonts")
+	_check(game.labels.menu_title.text == str(ProjectSettings.get_setting("presentation/display_name")), "menu title uses the editable display name")
+	_check(game.screen.find_children("*", "Label", true, false).size() == 2, "menu shows no extra slogan, statistics, or internal labels")
+	_check(game.labels.menu_footer.text == "© 2026 %s  ·  v0.4" % ProjectSettings.get_setting("presentation/display_name"), "menu footer shows only copyright and the current version")
 	await _capture("menu")
+	game._toast("알림 위치와 입력 통과를 확인합니다")
+	_check_toast("menu")
 
 	# Android와 같은 터치 입력 전파 중 화면을 교체하는 경로를 검사한다.
 	await _touch(_action_center("guide"))
 	_check(game.panel_name == "guide", "touch opens guide from menu")
+	_check(game.toast_label.z_index > game.overlay.z_index, "menu toast stays above a later-opened panel")
 	await _touch(_action_center("close_panel"))
 	_check(game.panel_name.is_empty(), "touch closes guide without removing a node during propagation")
 	await _touch(_action_center("new_game"))
@@ -31,7 +37,7 @@ func _run() -> void:
 
 	# 최소 320px 폭에서도 모든 주요 버튼은 44px 이상의 입력 영역을 갖는다.
 	var action_rects: Array[Rect2] = []
-	for action in ["speed", "pause", "guide", "codex", "settings", "recipes", "summon", "upgrade", "gamble", "special"]:
+	for action in ["battle_home", "speed", "pause", "guide", "codex", "settings", "recipes", "summon", "upgrade", "gamble", "special"]:
 		var target: Control = null
 		for node in game.find_children("*", "Button", true, false):
 			if node.is_visible_in_tree() and node.get_meta("qa_action", "") == action:
@@ -47,6 +53,14 @@ func _run() -> void:
 			_check(not rect.intersects(prior), "main touch targets do not overlap: " + action)
 		action_rects.append(rect)
 	await _capture("battle_empty")
+	game._toast("알림 위치와 입력 통과를 확인합니다")
+	_check_toast("battle")
+	_check(game.toast_label.get_global_rect().has_point(_action_center("guide")), "toast overlaps the tested top tool input point")
+	await _touch(_action_center("guide"))
+	_check(game.panel_name == "guide", "top HUD receives real touch through the visible toast")
+	_check(game.toast_label.z_index > game.overlay.z_index, "battle toast stays above a later-opened panel")
+	await _capture("battle_toast")
+	await _touch(_action_center("close_panel"))
 
 	await _tap(_action_center("pause"))
 	for _i in range(3):
@@ -70,9 +84,9 @@ func _run() -> void:
 		var col := cell / 6
 		var row := cell % 6
 		var poly: PackedVector2Array = board._cell_polygon(col, row)
-		_check(poly[1] - poly[0] == Vector2(86, 0) and poly[3] - poly[0] == Vector2(0, 86), "cell %d is an axis-aligned 86px square" % cell)
+		_check(poly[1] - poly[0] == Vector2(78, 0) and poly[3] - poly[0] == Vector2(0, 78), "cell %d is an axis-aligned 78px square" % cell)
 		_check(board.screen_to_cell(board.ground_to_screen(Vector2(col + 0.5, row + 0.5))) == cell, "cell %d input center matches drawing" % cell)
-	_check(board.global_position + board.ground_to_screen(Vector2.ZERO) == Vector2(102, 354), "grid aligns with the full-screen orthographic map")
+	_check(board.global_position + board.ground_to_screen(Vector2.ZERO) == Vector2(126, 382), "grid aligns with the full-screen orthographic map")
 	_check(board.screen_to_cell(board.ground_to_screen(Vector2(6, 3))) == -1, "right boundary does not select an invalid column")
 	_check(board.screen_to_cell(board.ground_to_screen(Vector2(3, 6))) == -1, "bottom boundary does not select an invalid row")
 	if game.selected >= 0:
@@ -84,13 +98,19 @@ func _run() -> void:
 	await _tap(_cell_screen(board, first_cell))
 	_check(game.selected == first_id, "board tap selects a unit through input")
 	await _tap(_cell_screen(board, 35))
-	_check(int(game.sim.unit_by_id(first_id).cell) == 35, "board tap moves selected unit")
-	await _tap(_cell_screen(board, 35))
+	_check(int(game.sim.unit_by_id(first_id).cell) == first_cell and game.selected == -1, "empty-cell tap clears selection without moving a unit")
+	_check(not game.labels.selection_panel.visible, "empty selection hides the formation plaque")
+	await _tap(_cell_screen(board, first_cell))
+	await _tap(_cell_screen(board, second_cell))
+	_check(game.selected == second_id, "occupied-cell tap selects the second unit")
+	_check(int(game.sim.unit_by_id(first_id).cell) == first_cell and int(game.sim.unit_by_id(second_id).cell) == second_cell, "tapping another unit never swaps placement")
+	await _drag(_cell_screen(board, first_cell), _cell_screen(board, 35))
+	_check(int(game.sim.unit_by_id(first_id).cell) == 35, "drag moves the intended unit into an empty cell")
 	await _tap(_cell_screen(board, second_cell))
 	_check(game.selected == second_id, "board tap selects second unit")
-	await _tap(_cell_screen(board, 35))
-	_check(int(game.sim.unit_by_id(second_id).cell) == 35, "occupied destination receives second unit")
-	_check(int(game.sim.unit_by_id(first_id).cell) == second_cell, "occupied destination swaps atomically")
+	await _drag(_cell_screen(board, second_cell), _cell_screen(board, 35))
+	_check(int(game.sim.unit_by_id(second_id).cell) == 35, "drag onto occupied destination receives second unit")
+	_check(int(game.sim.unit_by_id(first_id).cell) == second_cell, "drag onto occupied destination swaps atomically")
 	var before_invalid_drag: Array = game.sim.units.duplicate(true)
 	var drag_start := _cell_screen(board, 35)
 	await _drag(drag_start, Vector2(10, 300))
@@ -197,6 +217,19 @@ func _run() -> void:
 	_check(game.sim.pause_reasons.has("user"), "closing settings preserves user pause state")
 
 	var saved_units: Array = game.sim.units.duplicate(true)
+	var saved_run_id: String = game.sim.run_id
+	var saved_gold: int = game.sim.gold
+	var saved_time: float = game.sim.time
+	var saved_speed: int = game.sim.speed
+	await _touch(_action_center("battle_home"))
+	_check(game.mode == "menu", "home touch returns directly to the main menu")
+	var home_snapshot: Dictionary = game.store.load_run()
+	_check(not home_snapshot.is_empty() and home_snapshot.run_id == saved_run_id and int(home_snapshot.gold) == saved_gold and is_equal_approx(float(home_snapshot.time), saved_time), "home stores the same run, resources, and progression")
+	await _capture("menu_home")
+	await _touch(_action_center("continue"))
+	_check(game.mode == "battle" and _unit_layout_matches(saved_units), "continue after home restores the exact formation")
+	_check(game.sim.run_id == saved_run_id and game.sim.gold == saved_gold and is_equal_approx(game.sim.time, saved_time) and game.sim.speed == saved_speed, "home round trip preserves run identity, resources, time, and speed")
+	_check(game.sim.pause_reasons.has("user"), "home round trip waits for explicit battle resume")
 	await _tap(_action_center("settings"))
 	await _tap(_action_center("save_menu"))
 	_check(game.mode == "menu", "settings save action returns to menu")
@@ -278,6 +311,14 @@ func _run() -> void:
 	# 비동기 오디오 믹서가 정지한 보이스를 반환한 뒤 종료한다.
 	await create_timer(0.15).timeout
 	call_deferred("quit", status)
+
+func _check_toast(context: String) -> void:
+	_check(game.toast_label.visible and game.toast_label.position == Vector2(30, 8), context + " toast stays at the screen top")
+	_check(game.toast_label.size == Vector2(660, 76), context + " toast uses the same full-width layout")
+	_check(game.toast_label.mouse_filter == Control.MOUSE_FILTER_IGNORE, context + " toast never intercepts HUD input")
+	_check(not game.toast_label.z_as_relative and game.toast_label.z_index == 100, context + " toast uses explicit top draw order")
+	var style: StyleBoxFlat = game.toast_label.get_theme_stylebox("normal")
+	_check(style.bg_color.a >= 0.7 and style.bg_color.a < 0.9, context + " toast background remains translucent and readable")
 
 func _check(condition: bool, label: String) -> void:
 	checks += 1

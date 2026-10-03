@@ -1,0 +1,206 @@
+{
+  "id": "n15",
+  "state": "walk",
+  "status": "generated_and_source_visually_reviewed_not_packed_or_runtime_verified",
+  "source": "walk.source.png",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "14f28302cf25453ff29294164219f12d7ded823aadda9ff8575dfb3bd04ad2de",
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 1012992,
+    "nonzero_pixels": 559872,
+    "real_transparency": true,
+    "canvas_edges_above_20": false
+  },
+  "frames": [
+    {
+      "index": 0,
+      "nominal_slot_alpha_over_20_bbox_local": [
+        26,
+        152,
+        483,
+        452
+      ],
+      "bbox_occupancy_fraction": [
+        0.8926,
+        0.5859
+      ],
+      "warning": "Nominal slots are measurement only; parent must use actual component packing, not blind equal slicing."
+    },
+    {
+      "index": 1,
+      "nominal_slot_alpha_over_20_bbox_local": [
+        40,
+        136,
+        460,
+        475
+      ],
+      "bbox_occupancy_fraction": [
+        0.8203,
+        0.6621
+      ],
+      "warning": "Nominal slots are measurement only; parent must use actual component packing, not blind equal slicing."
+    },
+    {
+      "index": 2,
+      "nominal_slot_alpha_over_20_bbox_local": [
+        35,
+        152,
+        485,
+        465
+      ],
+      "bbox_occupancy_fraction": [
+        0.8789,
+        0.6113
+      ],
+      "warning": "Nominal slots are measurement only; parent must use actual component packing, not blind equal slicing."
+    },
+    {
+      "index": 3,
+      "nominal_slot_alpha_over_20_bbox_local": [
+        27,
+        117,
+        488,
+        438
+      ],
+      "bbox_occupancy_fraction": [
+        0.9004,
+        0.627
+      ],
+      "warning": "Nominal slots are measurement only; parent must use actual component packing, not blind equal slicing."
+    },
+    {
+      "index": 4,
+      "nominal_slot_alpha_over_20_bbox_local": [
+        31,
+        115,
+        483,
+        420
+      ],
+      "bbox_occupancy_fraction": [
+        0.8828,
+        0.5957
+      ],
+      "warning": "Nominal slots are measurement only; parent must use actual component packing, not blind equal slicing."
+    },
+    {
+      "index": 5,
+      "nominal_slot_alpha_over_20_bbox_local": [
+        20,
+        0,
+        490,
+        425
+      ],
+      "bbox_occupancy_fraction": [
+        0.918,
+        0.8301
+      ],
+      "warning": "Nominal slots are measurement only; parent must use actual component packing, not blind equal slicing."
+    }
+  ],
+  "major_alpha_components": [
+    {
+      "area": 83415,
+      "bbox": [
+        1044,
+        621,
+        1514,
+        937
+      ]
+    },
+    {
+      "area": 81615,
+      "bbox": [
+        552,
+        136,
+        972,
+        475
+      ]
+    },
+    {
+      "area": 80663,
+      "bbox": [
+        27,
+        629,
+        488,
+        950
+      ]
+    },
+    {
+      "area": 80138,
+      "bbox": [
+        26,
+        152,
+        483,
+        452
+      ]
+    },
+    {
+      "area": 79352,
+      "bbox": [
+        543,
+        627,
+        995,
+        932
+      ]
+    },
+    {
+      "area": 77762,
+      "bbox": [
+        1059,
+        152,
+        1509,
+        465
+      ]
+    }
+  ],
+  "reference": "assets/art/portraits/n15.png",
+  "reference_sha256": "61119f9616d298b5eafe2150b4d5c466b0ff47fbbda60752d801872b2dded73b",
+  "prompt": "walk.prompt.txt",
+  "prompt_sha256": "d522b2a6ed3bb054d72494b2e85c8e5fa6d991b5467878b2b1b8ff9daf85f2da",
+  "provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "generation": {
+    "tool": "built-in image_gen",
+    "original_calls": 1,
+    "repair_calls": 0,
+    "call_count": 1,
+    "model_identifier": "not exposed",
+    "source_bytes_preserved": true,
+    "deterministic_pose_fabrication": false,
+    "prompt_preparation_command": "python3 tools/art/prepare_identity_prompts.py n15 --state walk"
+  },
+  "visual_review": {
+    "complete_six_characters": true,
+    "true_pose_overlap_or_canvas_clipping_observed": false,
+    "identity_and_anatomy": "Six complete gray-wolf poses preserve head, fur, yellow eyes, tail and quadruped anatomy. Paws articulate through raised, passing and extended contacts with small head/tail changes. Near/far limb overlap obscures individual paws in some poses; parent should inspect the packed loop for phase balance.",
+    "limitations": [
+      "Strict 70-percent occupancy and 15-percent padding targets were not consistently met. Figures remain complete and separate; source not repaired solely for nominal cell boundary differences.",
+      "Fine semitransparent edge pixels require parent packing review; no generated pixels were repainted or alpha-cleaned here.",
+      "Loop, runtime scale, integration and game verification remain parent-owned and unverified."
+    ]
+  },
+  "preserved_generated_artifacts": [
+    {
+      "file": "walk.source.png",
+      "sha256": "14f28302cf25453ff29294164219f12d7ded823aadda9ff8575dfb3bd04ad2de",
+      "generator_source": "/workspace/scratch/efd85aae97ef/generated_images/exec-df4d3d43-6078-41b3-b103-84fccb1b2a39.png",
+      "bytes_match_original": true
+    }
+  ],
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

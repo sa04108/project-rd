@@ -2,8 +2,17 @@ extends RefCounted
 
 # 피해 확정 시 표시 계층에 값만 전달한다. 저장·판정·난수에는 관여하지 않는다.
 signal attack_presented(event: Dictionary)
+signal enemy_hit_presented(event: Dictionary)
+signal enemy_removed_presented(event: Dictionary)
+signal unit_presented(event: Dictionary)
 
 const Catalog = preload("res://game/catalog.gd")
+# 아군 한 칸을 1로 두고 폭 1인 외곽 길의 중심선을 따른다.
+const PATH_SIDE := 7.0
+const PATH_LENGTH := PATH_SIDE * 4.0
+const LEGACY_PATH_LENGTH := 26.0
+const PATH_MIN := -0.5
+const PATH_MAX := PATH_MIN + PATH_SIDE
 var catalog = Catalog.new()
 var rng := RandomNumberGenerator.new()
 var units: Array = []
@@ -59,14 +68,14 @@ func cell_position(cell: int) -> Vector2:
 	return Vector2(floori(float(cell) / 6.0) + 0.5, cell % 6 + 0.5)
 
 func path_position(progress: float) -> Vector2:
-	var p := clampf(progress, 0.0, 26.0)
-	if p <= 6.5:
-		return Vector2(-0.25, -0.25 + p)
-	if p <= 13.0:
-		return Vector2(-0.25 + p - 6.5, 6.25)
-	if p <= 19.5:
-		return Vector2(6.25, 6.25 - (p - 13.0))
-	return Vector2(6.25 - (p - 19.5), -0.25)
+	var p := clampf(progress, 0.0, PATH_LENGTH)
+	if p <= PATH_SIDE:
+		return Vector2(PATH_MIN, PATH_MIN + p)
+	if p <= PATH_SIDE * 2.0:
+		return Vector2(PATH_MIN + p - PATH_SIDE, PATH_MAX)
+	if p <= PATH_SIDE * 3.0:
+		return Vector2(PATH_MAX, PATH_MAX - (p - PATH_SIDE * 2.0))
+	return Vector2(PATH_MAX - (p - PATH_SIDE * 3.0), PATH_MIN)
 
 func unit_at(cell: int) -> Dictionary:
 	for unit in units:
@@ -99,6 +108,7 @@ func add_unit(kind: String, cell: int) -> Dictionary:
 	next_id += 1
 	units.append(unit)
 	discovered_units[kind] = true
+	unit_presented.emit({"id": int(unit.id), "kind": kind, "cell": cell, "time": time, "action": "appear"})
 	return unit
 
 func summon() -> Dictionary:
@@ -129,6 +139,9 @@ func move_unit(id: int, cell: int) -> Dictionary:
 		other.cell = unit.cell
 	unit.cell = cell
 	revision += 1
+	unit_presented.emit({"id": int(unit.id), "kind": str(unit.kind), "cell": cell, "time": time, "action": "move"})
+	if not other.is_empty():
+		unit_presented.emit({"id": int(other.id), "kind": str(other.kind), "cell": int(other.cell), "time": time, "action": "move"})
 	return {"ok": true, "reason": "배치를 변경했습니다"}
 
 func recipe_materials(recipe: Dictionary, anchor_id: int = -1) -> Array:
@@ -335,8 +348,11 @@ func _tick(delta: float) -> void:
 		var destination := path_position(target.progress)
 		for enemy in enemies:
 			if enemy.id == target.id or (float(definition.splash) > 0.0 and path_position(enemy.progress).distance_to(destination) <= float(definition.splash)):
+				var prior_hp := float(enemy.hp)
 				enemy.hp -= damage
 				apply_cc(enemy, definition)
+				if prior_hp > 0.0:
+					enemy_hit_presented.emit({"id": int(enemy.id), "kind": str(enemy.kind), "progress": float(enemy.progress), "time": time})
 		if effects.size() < 90:
 			effects.append({"from": [origin.x, origin.y], "to": [destination.x, destination.y], "color": definition.color, "life": 0.22})
 		attack_presented.emit({"unit_id": int(unit.id), "kind": str(unit.kind), "target_id": int(target.id), "from": origin, "to": destination, "time": time, "color": str(definition.color)})
@@ -347,6 +363,7 @@ func _tick(delta: float) -> void:
 			if catalog.enemies[enemy.kind].kind == "final":
 				final_dead = true
 			_reward(enemy)
+			enemy_removed_presented.emit({"id": int(enemy.id), "kind": str(enemy.kind), "progress": float(enemy.progress), "time": time, "reason": "killed"})
 			enemies.erase(enemy)
 	if final_dead:
 		for enemy in enemies:
@@ -372,8 +389,9 @@ func _tick(delta: float) -> void:
 		enemy.slow_until = until if had_slows else float(enemy.slow_until)
 		if float(enemy.stun_until) <= time:
 			var travel: float = catalog.enemies[enemy.kind].travel
-			enemy.progress += delta * 26.0 / travel * (1.0 - strongest)
-		if float(enemy.progress) >= 26.0 - 0.000001:
+			enemy.progress += delta * PATH_LENGTH / travel * (1.0 - strongest)
+		if float(enemy.progress) >= PATH_LENGTH - 0.000001:
+			enemy_removed_presented.emit({"id": int(enemy.id), "kind": str(enemy.kind), "progress": float(enemy.progress), "time": time, "reason": "escaped"})
 			enemies.erase(enemy)
 			lives = maxi(0, lives - 1)
 			if catalog.enemies[enemy.kind].kind == "final":
@@ -420,7 +438,7 @@ func debug_jump_wave(value: int) -> void:
 	_start_wave()
 
 func snapshot() -> Dictionary:
-	return {"schema": 1, "content_version": catalog.rules.content_version, "run_id": run_id, "time": time, "wave": wave, "spawn_index": spawn_index, "gold": gold, "lives": lives, "speed": speed, "result": result, "result_reason": result_reason, "units": units.duplicate(true), "enemies": enemies.duplicate(true), "upgrades": upgrades.duplicate(true), "cooldowns": cooldowns.duplicate(true), "next_id": next_id, "rng_state": str(rng.state), "rng_seed": str(rng.seed), "discovered_units": discovered_units.duplicate(), "discovered_enemies": discovered_enemies.duplicate(), "kills": kills.duplicate(), "developer_run": developer_run}
+	return {"schema": 1, "path_length": PATH_LENGTH, "content_version": catalog.rules.content_version, "run_id": run_id, "time": time, "wave": wave, "spawn_index": spawn_index, "gold": gold, "lives": lives, "speed": speed, "result": result, "result_reason": result_reason, "units": units.duplicate(true), "enemies": enemies.duplicate(true), "upgrades": upgrades.duplicate(true), "cooldowns": cooldowns.duplicate(true), "next_id": next_id, "rng_state": str(rng.state), "rng_seed": str(rng.seed), "discovered_units": discovered_units.duplicate(), "discovered_enemies": discovered_enemies.duplicate(), "kills": kills.duplicate(), "developer_run": developer_run}
 
 func restore(saved: Dictionary) -> bool:
 	if not _valid_snapshot(saved):
@@ -436,6 +454,11 @@ func restore(saved: Dictionary) -> bool:
 	result_reason = saved.result_reason
 	units = saved.units.duplicate(true)
 	enemies = saved.enemies.duplicate(true)
+	# 길의 실제 폭을 넓혀도 이전 저장의 주회 비율과 남은 이동 시간은 유지한다.
+	var saved_path_length := float(saved.get("path_length", LEGACY_PATH_LENGTH))
+	if saved_path_length != PATH_LENGTH:
+		for enemy in enemies:
+			enemy.progress = float(enemy.progress) * PATH_LENGTH / saved_path_length
 	upgrades = saved.upgrades.duplicate(true)
 	cooldowns = saved.cooldowns.duplicate(true)
 	next_id = int(saved.next_id)
@@ -457,6 +480,11 @@ func _valid_snapshot(s: Dictionary) -> bool:
 	for key in ["schema", "content_version", "run_id", "time", "wave", "spawn_index", "gold", "lives", "speed", "result", "result_reason", "units", "enemies", "upgrades", "cooldowns", "next_id", "rng_state", "rng_seed", "discovered_units", "discovered_enemies", "kills", "developer_run"]:
 		if not s.has(key):
 			return false
+	var saved_path_length: Variant = s.get("path_length", LEGACY_PATH_LENGTH)
+	if not (saved_path_length is float or saved_path_length is int) or not is_finite(float(saved_path_length)):
+		return false
+	if not float(saved_path_length) in [LEGACY_PATH_LENGTH, PATH_LENGTH]:
+		return false
 	if s.schema != 1 or not s.content_version in ["0.2.0", catalog.rules.content_version] or not s.run_id is String or s.run_id.is_empty():
 		return false
 	for key in ["time", "wave", "spawn_index", "gold", "lives", "speed", "next_id"]:
@@ -525,7 +553,7 @@ func _valid_snapshot(s: Dictionary) -> bool:
 		for key in ["id", "hp", "max_hp", "progress", "wave", "slow", "slow_until", "stun_until"]:
 			if not (enemy[key] is float or enemy[key] is int) or not is_finite(float(enemy[key])):
 				return false
-		if float(enemy.id) != floor(float(enemy.id)) or float(enemy.wave) != floor(float(enemy.wave)) or enemy.wave < 1 or enemy.wave > s.wave or enemy.hp > enemy.max_hp or enemy.slow_until < 0 or enemy.stun_until < 0 or ids.has(int(enemy.id)) or enemy.id < 1 or enemy.id >= s.next_id or enemy.hp <= 0 or enemy.max_hp <= 0 or enemy.progress < 0 or enemy.progress > 26 or enemy.slow < 0 or enemy.slow >= 1:
+		if float(enemy.id) != floor(float(enemy.id)) or float(enemy.wave) != floor(float(enemy.wave)) or enemy.wave < 1 or enemy.wave > s.wave or enemy.hp > enemy.max_hp or enemy.slow_until < 0 or enemy.stun_until < 0 or ids.has(int(enemy.id)) or enemy.id < 1 or enemy.id >= s.next_id or enemy.hp <= 0 or enemy.max_hp <= 0 or enemy.progress < 0 or enemy.progress > float(saved_path_length) or enemy.slow < 0 or enemy.slow >= 1:
 			return false
 		ids[int(enemy.id)] = true
 		for entry in enemy.slows:

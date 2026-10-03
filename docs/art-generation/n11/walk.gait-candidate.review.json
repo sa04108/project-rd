@@ -16,7 +16,7 @@
     254
   ],
   "transparent_pixels": 990547,
-  "sha256": "c39184ba9bf557ac0f66c253f2b97f2aea8509f0411bacd4de1bda5b5213c817",
+  "sha256": "b762a7db6e064e8ea5734b24631dd1ab3b9d3d3f93ea5c1f5b174c489608d5bf",
   "frames": [
     {
       "index": 0,
@@ -111,5 +111,6 @@
   ],
   "visually_reviewed": true,
   "finding": "Candidate remains dominated by one leading-leg silhouette and is larger than the repaired source. Do not auto-promote.",
-  "runtime_verified": false
+  "runtime_verified": false,
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
 }

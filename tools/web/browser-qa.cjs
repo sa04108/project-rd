@@ -302,29 +302,33 @@ async function main() {
     await clickButton(page, 'pause');
     await waitFor(page, s => Object.keys(s.pause_reasons || {}).length === 0, options.timeout, 'unpaused state');
 
-    let unitsBeforeMove = (await state(page)).units;
-    let selectedId = (await state(page)).selected;
-    if (selectedId >= 0) {
-      const selectedUnit = unitsBeforeMove.find(unit => unit.id === selectedId);
-      if (!selectedUnit) throw new Error(`Selected unit ${selectedId} is absent from the unit list`);
-      const cells = (await state(page)).cell_centers;
-      const selectedCell = cells.find(cell => cell.cell === selectedUnit.cell);
-      if (!selectedCell) throw new Error(`Selected unit cell ${selectedUnit.cell} has no input coordinate`);
-      await clickLogical(page, selectedCell.x, selectedCell.y);
-      await waitFor(page, s => s.selected === -1, options.timeout, 'clear initial unit selection');
-    }
-    unitsBeforeMove = (await state(page)).units;
+    const unitsBeforeMove = (await state(page)).units;
     const first = unitsBeforeMove[0];
     const occupied = new Set(unitsBeforeMove.map(unit => unit.cell));
     const targetCell = (await state(page)).cell_centers?.find(cell => !occupied.has(cell.cell));
     if (first && targetCell) {
-      const cells = await state(page).then(s => s.cell_centers);
-      const source = cells.find(cell => cell.cell === first.cell);
+      const currentFrame = await state(page);
+      const source = currentFrame.cell_centers.find(cell => cell.cell === first.cell);
       if (!source) throw new Error(`No coordinate for occupied cell ${first.cell}`);
       await clickLogical(page, source.x, source.y);
-      await waitFor(page, s => s.selected === first.id, options.timeout, 'select unit for relocation');
+      await waitFor(page, s => s.selected === first.id, options.timeout, 'select unit details');
       await clickLogical(page, targetCell.x, targetCell.y);
-      await waitFor(page, s => s.units?.some(unit => unit.id === first.id && unit.cell === targetCell.cell), options.timeout, 'unit relocation');
+      await waitFor(page, s => s.selected === -1, options.timeout, 'empty tap deselects');
+      if (!(await state(page)).units.some(unit => unit.id === first.id && unit.cell === first.cell)) {
+        throw new Error('A click moved a unit; only dragging may relocate it');
+      }
+      const rect = await page.locator('canvas').first().boundingBox();
+      if (!rect) throw new Error('Godot canvas has no visible browser rectangle');
+      const logicalWidth = Number(currentFrame.frame_size?.[0] || 720);
+      const logicalHeight = Number(currentFrame.frame_size?.[1] || 1280);
+      const from = logicalToScreen(rect, source.x, source.y, logicalWidth, logicalHeight);
+      const to = logicalToScreen(rect, targetCell.x, targetCell.y, logicalWidth, logicalHeight);
+      await page.mouse.move(from.x, from.y);
+      await page.mouse.down();
+      await page.mouse.move(to.x, to.y, { steps: 8 });
+      captures.push(await capture(page, outDir, 'battle-drag-guide'));
+      await page.mouse.up();
+      await waitFor(page, s => s.units?.some(unit => unit.id === first.id && unit.cell === targetCell.cell), options.timeout, 'drag unit relocation');
     }
 
     for (const panel of ['guide', 'codex', 'recipes']) {

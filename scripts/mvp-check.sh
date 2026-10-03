@@ -34,6 +34,12 @@ run audio timeout --kill-after=5s 60s "$GODOT" --headless --path . --script res:
 rg -q '"failed":\[\]' artifacts/logs/audio.log
 run identity-animation timeout --kill-after=5s 60s "$GODOT" --headless --path . --script res://tests/identity_animation_test.gd
 rg -q '"failed":\[\]' artifacts/logs/identity-animation.log
+run battle-pointer timeout --kill-after=5s 60s "$GODOT" --headless --path . --script res://tests/battle_pointer_test.gd
+rg -q '"failed":\[\]' artifacts/logs/battle-pointer.log
+run hud-regression timeout --kill-after=5s 60s "$GODOT" --headless --path . --script res://tests/hud_regression.gd -- --ui-test
+rg -q '"failed":\[\]' artifacts/logs/hud-regression.log
+run effects-contract timeout --kill-after=5s 60s "$GODOT" --headless --path . --script res://tests/effects_contract_test.gd
+rg -q '"failed":\[\]' artifacts/logs/effects-contract.log
 run mvp-smoke timeout --kill-after=5s 60s "$GODOT" --headless --path . --quit-after 300
 if [[ "${VERIFY_VISUAL:-0}" == 1 ]]; then
   run ui-scenario timeout --kill-after=5s 90s xvfb-run -a -s '-screen 0 900x1400x24' env LIBGL_ALWAYS_SOFTWARE=1 "$GODOT" --path . --audio-driver Dummy --rendering-method gl_compatibility --resolution 720x1280 --script res://tests/ui_scenario.gd -- --ui-test

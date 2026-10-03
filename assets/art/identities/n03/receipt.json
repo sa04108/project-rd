@@ -5,7 +5,7 @@
       "identity": "n03",
       "state": "walk",
       "source": "docs/art-generation/n03/walk.source.png",
-      "source_sha256": "85361efd1165fd4b2e092a5fb63559d5f250a9beccadd589a468f23fd48bd9ab",
+      "source_sha256": "f6878b5737275778f89fa12aa732ae14d69d18c2472b14dc51a5898abb640e8c",
       "prompt_sha256": "cce2c32dc4a1f715e84a9092374545ee467500f2b47eb03c5309dc0127f56f67",
       "generator": "built-in image tool",
       "image_model_id": null,
@@ -102,8 +102,10 @@
           ]
         }
       ],
-      "atlas_sha256": "77bd364fef10cdaa6889cbf13f384111537b8266cade7b5f12b1d8b5586992dc",
-      "review": "agent visually inspected all six poses; runtime review pending"
+      "review": "agent visually inspected all six poses; runtime review pending",
+      "atlas_sha256_at_import": "77bd364fef10cdaa6889cbf13f384111537b8266cade7b5f12b1d8b5586992dc",
+      "source_encoding_note": "Current source normalized without alpha/visible RGB changes; original hash in docs/art-generation/source-optimization.json."
     }
-  }
+  },
+  "runtime_atlas_sha256": "77bd364fef10cdaa6889cbf13f384111537b8266cade7b5f12b1d8b5586992dc"
 }

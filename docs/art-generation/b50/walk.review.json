@@ -1,0 +1,247 @@
+{
+  "id": "b50",
+  "state": "walk",
+  "status": "generated_and_source_visually_reviewed_not_packed_or_runtime_verified",
+  "source": "walk.source.png",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "4b82e34794dcc1c7a2ea8a2d8ceb4cf36b7a4ceeb7ab43bc3003917475dd031a",
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 770884,
+    "nonzero_pixels": 801980,
+    "meaningful_alpha128_pixels": 720133,
+    "real_transparency": true,
+    "canvas_edge_max_alpha": 1,
+    "canvas_edges_alpha128_pixels": 0,
+    "note": "Alpha 1 residue is not opaque cropping."
+  },
+  "frames": [
+    {
+      "index": 0,
+      "nominal_slot_alpha128_bbox_local": [
+        35,
+        87,
+        496,
+        488
+      ],
+      "warning": "Nominal slot bounds are measurements only; use actual connected-pose packing, never blind equal slicing."
+    },
+    {
+      "index": 1,
+      "nominal_slot_alpha128_bbox_local": [
+        16,
+        108,
+        508,
+        486
+      ],
+      "warning": "Nominal slot bounds are measurements only; use actual connected-pose packing, never blind equal slicing."
+    },
+    {
+      "index": 2,
+      "nominal_slot_alpha128_bbox_local": [
+        20,
+        150,
+        482,
+        479
+      ],
+      "warning": "Nominal slot bounds are measurements only; use actual connected-pose packing, never blind equal slicing."
+    },
+    {
+      "index": 3,
+      "nominal_slot_alpha128_bbox_local": [
+        26,
+        49,
+        512,
+        454
+      ],
+      "warning": "Nominal slot bounds are measurements only; use actual connected-pose packing, never blind equal slicing."
+    },
+    {
+      "index": 4,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        55,
+        511,
+        459
+      ],
+      "warning": "Nominal slot bounds are measurements only; use actual connected-pose packing, never blind equal slicing."
+    },
+    {
+      "index": 5,
+      "nominal_slot_alpha128_bbox_local": [
+        33,
+        57,
+        489,
+        465
+      ],
+      "warning": "Nominal slot bounds are measurements only; use actual connected-pose packing, never blind equal slicing."
+    }
+  ],
+  "alpha128_components_area100_or_more": [
+    {
+      "area": 126131,
+      "bbox": [
+        1057,
+        569,
+        1513,
+        977
+      ]
+    },
+    {
+      "area": 125060,
+      "bbox": [
+        35,
+        87,
+        496,
+        488
+      ]
+    },
+    {
+      "area": 123944,
+      "bbox": [
+        539,
+        567,
+        1017,
+        971
+      ]
+    },
+    {
+      "area": 122891,
+      "bbox": [
+        26,
+        561,
+        524,
+        966
+      ]
+    },
+    {
+      "area": 115944,
+      "bbox": [
+        528,
+        108,
+        1020,
+        486
+      ]
+    },
+    {
+      "area": 95120,
+      "bbox": [
+        1044,
+        150,
+        1506,
+        479
+      ]
+    },
+    {
+      "area": 1968,
+      "bbox": [
+        438,
+        244,
+        491,
+        290
+      ]
+    },
+    {
+      "area": 1967,
+      "bbox": [
+        969,
+        763,
+        1023,
+        810
+      ]
+    },
+    {
+      "area": 1584,
+      "bbox": [
+        1116,
+        663,
+        1165,
+        704
+      ]
+    },
+    {
+      "area": 1577,
+      "bbox": [
+        105,
+        657,
+        155,
+        698
+      ]
+    },
+    {
+      "area": 1494,
+      "bbox": [
+        90,
+        185,
+        137,
+        225
+      ]
+    },
+    {
+      "area": 1326,
+      "bbox": [
+        626,
+        196,
+        671,
+        233
+      ]
+    },
+    {
+      "area": 1127,
+      "bbox": [
+        1112,
+        253,
+        1153,
+        287
+      ]
+    }
+  ],
+  "reference": "assets/art/portraits/b50.png",
+  "reference_sha256": "3a8e42a01ae01614da0369535055c4bf07ce00647ad9bf30ba1924cb619420a6",
+  "prompt": "walk.prompt.txt",
+  "prompt_sha256": "75e5012c9f7c8338d1c4cc8a08ad5249c4d09d1b74efe645724277603bdf2283",
+  "provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "generation": {
+    "tool": "built-in image_gen",
+    "original_calls": 1,
+    "repair_calls": 0,
+    "call_count": 1,
+    "model_identifier": "not exposed",
+    "source_bytes_preserved": true,
+    "deterministic_pose_fabrication": false,
+    "prompt_preparation_command": "python3 tools/art/prepare_identity_prompts.py b50 --state walk"
+  },
+  "visual_review": {
+    "complete_six_characters": true,
+    "true_pose_overlap_or_canvas_clipping_observed": false,
+    "identity_and_anatomy": "Six complete turquoise ancient-slime phases visibly compress and re-expand dome/base. Embedded crown/columns/arches remain attached and base lobes change. Small isolated turquoise bubbles are legitimate reference ornaments, not new locomotion debris.",
+    "limitations": [
+      "Strict 70-percent extent and 15-percent padding are not consistently met. Complete independent figures were not repaired for nominal layout differences.",
+      "Only source-sheet inspection is complete; normalized loop, runtime scale, integration and gameplay remain parent-owned and unverified."
+    ]
+  },
+  "preserved_generated_artifacts": [
+    {
+      "file": "walk.source.png",
+      "sha256": "4b82e34794dcc1c7a2ea8a2d8ceb4cf36b7a4ceeb7ab43bc3003917475dd031a",
+      "generator_source": "/workspace/scratch/efd85aae97ef/generated_images/exec-c5a6a4c3-7459-4286-9744-c41ba1e4483b.png",
+      "bytes_match_original": true
+    }
+  ],
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

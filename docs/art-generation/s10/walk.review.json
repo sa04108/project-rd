@@ -1,0 +1,194 @@
+{
+  "id": "s10",
+  "state": "walk",
+  "status": "generated_and_source_visually_reviewed_with_gait_residual_not_runtime_verified",
+  "source": "walk.source.png",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "8a5e02a02e419426198f569958498ffa0af93f0fae67ef16d9db935b7df7ab37",
+  "byte_count": 2264851,
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 1006904,
+    "nonzero_pixels": 565960,
+    "meaningful_alpha128_pixels": 470894,
+    "real_transparency": true,
+    "canvas_edge_max_alpha": 1,
+    "canvas_edges_alpha128_pixels": 0,
+    "note": "Alpha 1 residue is not opaque clipping."
+  },
+  "frames": [
+    {
+      "index": 0,
+      "nominal_slot_alpha128_bbox_local": [
+        90,
+        68,
+        446,
+        461
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 1,
+      "nominal_slot_alpha128_bbox_local": [
+        89,
+        85,
+        443,
+        462
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 2,
+      "nominal_slot_alpha128_bbox_local": [
+        67,
+        75,
+        408,
+        455
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 3,
+      "nominal_slot_alpha128_bbox_local": [
+        75,
+        63,
+        435,
+        428
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 4,
+      "nominal_slot_alpha128_bbox_local": [
+        87,
+        45,
+        453,
+        442
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 5,
+      "nominal_slot_alpha128_bbox_local": [
+        69,
+        63,
+        441,
+        438
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    }
+  ],
+  "alpha128_components_area100_or_more": [
+    {
+      "area": 81843,
+      "bbox": [
+        599,
+        557,
+        965,
+        954
+      ]
+    },
+    {
+      "area": 79555,
+      "bbox": [
+        90,
+        68,
+        446,
+        461
+      ]
+    },
+    {
+      "area": 79310,
+      "bbox": [
+        1093,
+        575,
+        1465,
+        950
+      ]
+    },
+    {
+      "area": 78076,
+      "bbox": [
+        75,
+        575,
+        435,
+        940
+      ]
+    },
+    {
+      "area": 76397,
+      "bbox": [
+        1091,
+        75,
+        1432,
+        455
+      ]
+    },
+    {
+      "area": 75713,
+      "bbox": [
+        601,
+        85,
+        955,
+        462
+      ]
+    }
+  ],
+  "reference": "assets/art/portraits/s10.png",
+  "reference_sha256": "d2c4a589d3202a40218e56785c0c04decdc6c48d2fb6847127089b76d23ef514",
+  "prompt": "walk.prompt.txt",
+  "prompt_sha256": "3b7a203d955f396f8a23d63766fa834ce14e26de5dabbabea1e97865c3e1e8bf",
+  "provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "generation": {
+    "tool": "built-in image_gen",
+    "original_calls": 1,
+    "repair_calls": 1,
+    "call_count": 2,
+    "model_identifier": "not exposed",
+    "source_bytes_preserved": true,
+    "deterministic_pose_fabrication": false,
+    "prompt_preparation_command": "python3 tools/art/prepare_identity_prompts.py s10 --state walk"
+  },
+  "visual_review": {
+    "complete_six_characters": true,
+    "true_pose_overlap_or_canvas_clipping_observed": false,
+    "genuine_alternating_gait_unambiguously_passed": false,
+    "identity_and_anatomy": "Six complete golden treasure-goblin poses preserve goggles, one screen-left dagger, strapped loaded sack and bare clawed feet. Leg/knee changes are genuine, but the same near leg stays ahead through too much of the cycle. One bounded correction did not establish an unambiguous opposite-leg stride; original kept.",
+    "limitations": [
+      "Strict 70-percent extent and 15-percent padding are not consistently met; complete independent figures were not repaired for nominal layout differences.",
+      "Only source-sheet visual inspection is complete. Normalized animation loop, runtime scale, integration and gameplay remain parent-owned and unverified.",
+      "A single bounded gait correction has been exhausted; this row must not be reported as fully gait-accepted without further review."
+    ]
+  },
+  "preserved_generated_artifacts": [
+    {
+      "file": "walk.source.png",
+      "sha256": "8a5e02a02e419426198f569958498ffa0af93f0fae67ef16d9db935b7df7ab37",
+      "generator_source": "/workspace/scratch/efd85aae97ef/generated_images/exec-351630bc-e4d1-471f-9285-ded75e22fcf6.png",
+      "bytes_match_original": true
+    },
+    {
+      "file": "walk.gait-candidate.source.png",
+      "sha256": "41cb3fb8f7061d2aa9b87f9e77b3b6dbb6d2ed7564e430670e94b09fac234412",
+      "generator_source": "/workspace/scratch/efd85aae97ef/generated_images/exec-f133bfc5-8e83-4467-96c1-5e81134e9354.png",
+      "bytes_match_original": true,
+      "selected": false
+    }
+  ],
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

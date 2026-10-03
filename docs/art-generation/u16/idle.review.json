@@ -1,0 +1,194 @@
+{
+  "id": "u16",
+  "state": "idle",
+  "source": "docs/art-generation/u16/idle.source.png",
+  "prompt": "docs/art-generation/u16/idle.prompt.txt",
+  "source_sha256": "96bdaf7882db10f6e65b7517d1a7e26dadc824516db052db87ae269cc6dcf3b3",
+  "source_bytes": 2141964,
+  "prompt_sha256": "5df6f8322bf9446e5325f121139c6ad9b5ec5b6800bbdecdba342cfb180cf98c",
+  "reference": "assets/art/portraits/u16.png",
+  "reference_sha256": "23babad0fb9fd1b10d5f623b5e87ffb32fd9c93b55fdef967e08c93448027e95",
+  "generation_route": "built-in image tool; one call per asset, no external API",
+  "model_identifier": "not exposed by image tool",
+  "template_provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/dragon/sprite_run/prompts/idle.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "preparation_command": "python3 tools/art/prepare_identity_prompts.py u16 --state idle",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_min": 0,
+  "alpha_max": 254,
+  "transparent_pixel_fraction": 0.46674474080403644,
+  "nontransparent_pixel_fraction": 0.5332552591959635,
+  "low_alpha_pixel_fraction_1_to_127": 0.10841941833496094,
+  "meaningful_alpha_threshold": 128,
+  "meaningful_alpha_bbox": [
+    75,
+    44,
+    1514,
+    978
+  ],
+  "components_alpha_ge128_area_ge64": [
+    {
+      "bbox": [
+        78,
+        63,
+        525,
+        473
+      ],
+      "area": 108756
+    },
+    {
+      "bbox": [
+        576,
+        44,
+        1018,
+        473
+      ],
+      "area": 115339
+    },
+    {
+      "bbox": [
+        1080,
+        67,
+        1513,
+        471
+      ],
+      "area": 106773
+    },
+    {
+      "bbox": [
+        75,
+        567,
+        532,
+        977
+      ],
+      "area": 111535
+    },
+    {
+      "bbox": [
+        577,
+        533,
+        1028,
+        978
+      ],
+      "area": 120248
+    },
+    {
+      "bbox": [
+        1077,
+        573,
+        1514,
+        977
+      ],
+      "area": 105557
+    }
+  ],
+  "major_component_count_alpha_ge128_area_ge1000": 6,
+  "pose_groups_alpha_ge128": [
+    {
+      "frame_zero_based": 0,
+      "bbox": [
+        78,
+        63,
+        525,
+        473
+      ],
+      "meaningful_area": 108756,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "7ea5c72ac7a76fd0755665848d96caded25597f544ef33b8f949871ec5af6177"
+    },
+    {
+      "frame_zero_based": 1,
+      "bbox": [
+        576,
+        44,
+        1018,
+        473
+      ],
+      "meaningful_area": 115340,
+      "connected_component_count": 2,
+      "crop_rgba_sha256": "8e9ebdf4b724d169a945e727adaf7fa03dc22fa5708091b344a8b99e3e2ca6f0"
+    },
+    {
+      "frame_zero_based": 2,
+      "bbox": [
+        1080,
+        67,
+        1513,
+        471
+      ],
+      "meaningful_area": 106773,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "608a81b43ebe14f26fbca394b2007665756e6ff3710811b27e3976c1a17ef3ff"
+    },
+    {
+      "frame_zero_based": 3,
+      "bbox": [
+        75,
+        567,
+        532,
+        977
+      ],
+      "meaningful_area": 111535,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "637ed1b232a0190dd6a5d78aae4ca579291d897fbcef72e05e77d50ffe28aeac"
+    },
+    {
+      "frame_zero_based": 4,
+      "bbox": [
+        577,
+        533,
+        1028,
+        978
+      ],
+      "meaningful_area": 120248,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "93f738f97f75d2ca5378910f35281b463b57e91ec3ffb6a05f9b4ce685340347"
+    },
+    {
+      "frame_zero_based": 5,
+      "bbox": [
+        1077,
+        573,
+        1514,
+        977
+      ],
+      "meaningful_area": 105557,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "f712a3c8176f358657ab9292526ac0d80665f2db4057ddb56efefeed920449c3"
+    }
+  ],
+  "pose_grouping_method": "Whole connected components grouped by centroid into visually confirmed 3x2 pose neighborhoods; boxes are not clipped to nominal cells. Includes small components and intentional ornaments.",
+  "edge_touch_alpha_ge128": false,
+  "visual_review_performed": true,
+  "pose_count_observed": 6,
+  "review_notes": [
+    "Six separate planted purple-dragon idle poses retain wings, horns, tail and existing quadruped anatomy. Wing membrane/arm adjustment, slight head/chest settling and tail-tip variation provide articulated idle phases.",
+    "All visible wing and tail tips remain complete despite tight nominal margins. No flight, travel, bite, flame, projectile or detached effect.",
+    "Raw source has low-alpha exterior haze. Preserve source bytes; use actual meaningful component bounds instead of treating nominal equal cells as extraction authority.",
+    "Requested 15-percent slot padding is not fully met, but six complete figures are spatially separate."
+  ],
+  "source_layout_contract_pass": false,
+  "source_geometry_extractable": true,
+  "needs_nonuniform_pose_extraction": true,
+  "subtle_idle_motion_review": "visually_distinct_idle_phases",
+  "packed": false,
+  "runtime_verified": false,
+  "rejected_layout_revisions": [],
+  "review_scope": "Raw-source visual and alpha inspection only; no packing, integrated looping, cross-state scale, timing or runtime verification.",
+  "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-bdfafd4b-c501-48dd-b2a1-e71b8ee86059.png",
+  "original_bytes_copy_verified": true,
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

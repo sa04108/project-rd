@@ -1,0 +1,205 @@
+{
+  "id": "u29",
+  "state": "idle",
+  "source": "docs/art-generation/u29/idle.source.png",
+  "prompt": "docs/art-generation/u29/idle.prompt.txt",
+  "source_sha256": "82d56e3ee01900f779d7729eea65fec29828b0b29b25c01e27c50fca7c0beb85",
+  "source_bytes": 1801331,
+  "prompt_sha256": "ec4ab77ac487099ebcafc841dbad5f098ab3041ab4b41debb38883b363573874",
+  "reference": "assets/art/portraits/u29.png",
+  "reference_sha256": "e4298c051622805be062f15ca95db1dcac2f85f4eed27044dd17b22a397de5b4",
+  "generation_route": "built-in image tool; one initial generation and one targeted motion repair, no external API",
+  "model_identifier": "not exposed by image tool",
+  "template_provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/floating/sprite_run/prompts/idle.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "preparation_command": "python3 tools/art/prepare_identity_prompts.py u29 --state idle",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_min": 0,
+  "alpha_max": 254,
+  "transparent_pixel_fraction": 0.5698566436767578,
+  "nontransparent_pixel_fraction": 0.4301433563232422,
+  "low_alpha_pixel_fraction_1_to_127": 0.08282852172851562,
+  "meaningful_alpha_threshold": 128,
+  "meaningful_alpha_bbox": [
+    105,
+    37,
+    1495,
+    981
+  ],
+  "components_alpha_ge128_area_ge64": [
+    {
+      "bbox": [
+        112,
+        37,
+        482,
+        482
+      ],
+      "area": 91345
+    },
+    {
+      "bbox": [
+        619,
+        41,
+        990,
+        484
+      ],
+      "area": 90823
+    },
+    {
+      "bbox": [
+        1125,
+        41,
+        1493,
+        484
+      ],
+      "area": 90627
+    },
+    {
+      "bbox": [
+        618,
+        541,
+        994,
+        978
+      ],
+      "area": 90843
+    },
+    {
+      "bbox": [
+        105,
+        544,
+        489,
+        981
+      ],
+      "area": 92109
+    },
+    {
+      "bbox": [
+        1126,
+        544,
+        1495,
+        981
+      ],
+      "area": 90532
+    }
+  ],
+  "major_component_count_alpha_ge128_area_ge1000": 6,
+  "pose_groups_alpha_ge128": [
+    {
+      "frame_zero_based": 0,
+      "bbox": [
+        112,
+        37,
+        482,
+        482
+      ],
+      "meaningful_area": 91345,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "796738a3d291a535d07c0ad535857c092ee2d82272591812c90e8b96959736e5"
+    },
+    {
+      "frame_zero_based": 1,
+      "bbox": [
+        619,
+        41,
+        990,
+        484
+      ],
+      "meaningful_area": 90823,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "e4c45e5eab1f428d805a6fcec464cb68fb2b43ab55b671400f71816e47591981"
+    },
+    {
+      "frame_zero_based": 2,
+      "bbox": [
+        1125,
+        41,
+        1493,
+        484
+      ],
+      "meaningful_area": 90627,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "47f4cc37f555231157dfe502c8808b9e9e42c63c78f14ecb502b2a8606ac327a"
+    },
+    {
+      "frame_zero_based": 3,
+      "bbox": [
+        105,
+        544,
+        489,
+        981
+      ],
+      "meaningful_area": 92109,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "c30921d1f01d7eae91f3e49f55dc346de65844791ab06a584d0397601c408c26"
+    },
+    {
+      "frame_zero_based": 4,
+      "bbox": [
+        618,
+        541,
+        994,
+        978
+      ],
+      "meaningful_area": 90843,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "497ab80f07b0fb8d4025f4fe5b46301c2a3292e2fdeda4a2eef09e4411e63f4d"
+    },
+    {
+      "frame_zero_based": 5,
+      "bbox": [
+        1126,
+        544,
+        1495,
+        981
+      ],
+      "meaningful_area": 90532,
+      "connected_component_count": 1,
+      "crop_rgba_sha256": "3538b66889274cb300cb0d6b7191a0e5bd3284d4e730df33e31835eaee1da90d"
+    }
+  ],
+  "pose_grouping_method": "Whole eight-connected components grouped by bounding-box center into visually confirmed 3x2 pose neighborhoods; boxes are not clipped to nominal cells. Includes tiny components and intentional ornaments.",
+  "edge_touch_alpha_ge128": false,
+  "visual_review_performed": true,
+  "pose_count_observed": 6,
+  "review_notes": [
+    "Six repaired star-mage poses retain crescent staff, physically hanging star ornaments, violet pointed hat, long lavender hair and robe. Free hand now stays low in the same relaxed posture throughout; only chest, wrist, hair, hat-tip and fabric settling vary.",
+    "One targeted repair removed the pronounced chest-to-extension gesture from the initial sheet. No casting windup, release, locomotion or extra equipment; original attempt and exact repair prompt are preserved.",
+    "Raw source contains low-alpha exterior haze. Preserve generated bytes; use meaningful connected-component bounds for pose extraction.",
+    "Requested 15-percent slot padding is not fully met, but complete figures are spatially separate."
+  ],
+  "source_layout_contract_pass": false,
+  "source_geometry_extractable": true,
+  "needs_nonuniform_pose_extraction": true,
+  "subtle_idle_motion_review": "visually_distinct_idle_phases",
+  "packed": false,
+  "runtime_verified": false,
+  "rejected_layout_revisions": [],
+  "review_scope": "Raw-source visual and alpha inspection only; no packing, integrated looping, cross-state scale, timing or runtime verification.",
+  "builtin_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-0393e5d0-bf9e-4082-826e-ec71c7e60d91.png",
+  "original_bytes_copy_verified": true,
+  "motion_repair": {
+    "attempt_count": 1,
+    "reason": "Initial idle alternated free hand from chest to extension and read too much like casting preparation",
+    "rejected_source": "docs/art-generation/u29/idle.rejected-motion.source.png",
+    "rejected_prompt": "docs/art-generation/u29/idle.rejected-motion.prompt.txt",
+    "rejected_review": "docs/art-generation/u29/idle.rejected-motion.review.json",
+    "rejected_source_sha256": "8c15e2e16d3cb72e594f194d678f318b6ef4904c74595cb9bc5f04564f224d26",
+    "repair_prompt": "docs/art-generation/u29/idle.repair-motion.prompt.txt",
+    "repair_prompt_sha256": "ec4ab77ac487099ebcafc841dbad5f098ab3041ab4b41debb38883b363573874",
+    "outcome": "Free hand stays low throughout all six poses; small breathing, wrist, hair and robe changes only"
+  },
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

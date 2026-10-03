@@ -28,6 +28,10 @@ window/size/window_height_override=960
 window/stretch/mode="canvas_items"
 window/handheld/orientation=1
 
+[presentation]
+
+display_name="판타지 랜덤 디펜스"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

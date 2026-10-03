@@ -121,7 +121,7 @@ func _sample_clocks(layout: Dictionary, state: String, count: int) -> Array[floa
 
 func _scale_factor(identity: String) -> float:
 	if catalog.units.has(identity):
-		return 1.0 + float(catalog.units[identity].tier) * 0.035
+		return BOARD.ALLY_RENDER_SCALE * (1.0 + float(catalog.units[identity].tier) * 0.035)
 	return 1.45 if catalog.enemies.has(identity) and catalog.enemies[identity].kind in ["boss", "final"] else 1.0
 
 func _viewport(dimensions: Vector2i, transparent: bool = false) -> SubViewport:
@@ -210,7 +210,7 @@ func _battle_phases(ids: Array, batch: int) -> void:
 		unit.cooldown = 0.09
 		var enemy_kind: String = walk_ids[index % walk_ids.size()] if not walk_ids.is_empty() else "n01"
 		var enemy: Dictionary = sim.add_enemy(enemy_kind, 1)
-		enemy.progress = 25.25 - index
+		enemy.progress = SIMULATION.PATH_LENGTH - 1.0 - index
 		enemy.hp = 1000000.0
 		enemy.max_hp = enemy.hp
 		enemy.stun_until = 1000.0

@@ -1,0 +1,149 @@
+{
+  "id": "s30",
+  "state": "walk",
+  "status": "gait_candidate_not_selected",
+  "source": "walk.gait-candidate.source.png",
+  "prompt": "walk.gait-candidate.prompt.txt",
+  "prompt_sha256": "146e54e3b70c68fad5bffb7e37692425178a1683c0372b117ecd963c8714087a",
+  "visual_review": {
+    "genuine_alternating_gait_unambiguously_passed": false,
+    "assessment": "Six complete crowned royal goblin poses preserve screen-right orb scepter, red white-fur cloak, crown, ornate gold jewelry and loaded sack. Opposite boot positions and knee loading vary, but phase order does not clearly follow the requested two three-phase half-strides. One bounded correction did not clearly improve cycle ordering; original kept."
+  },
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "85eec0b77fae54ac8f89a828eac34a91b68a7f3f73caad206700f55ab7bf26c6",
+  "byte_count": 2409672,
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 896777,
+    "nonzero_pixels": 676087,
+    "meaningful_alpha128_pixels": 601033,
+    "real_transparency": true,
+    "canvas_edge_max_alpha": 0,
+    "canvas_edges_alpha128_pixels": 0,
+    "note": "Alpha 1 residue is not opaque clipping."
+  },
+  "frames": [
+    {
+      "index": 0,
+      "nominal_slot_alpha128_bbox_local": [
+        62,
+        82,
+        465,
+        483
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 1,
+      "nominal_slot_alpha128_bbox_local": [
+        47,
+        84,
+        451,
+        486
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 2,
+      "nominal_slot_alpha128_bbox_local": [
+        40,
+        88,
+        440,
+        493
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 3,
+      "nominal_slot_alpha128_bbox_local": [
+        65,
+        50,
+        487,
+        448
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 4,
+      "nominal_slot_alpha128_bbox_local": [
+        60,
+        47,
+        459,
+        441
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 5,
+      "nominal_slot_alpha128_bbox_local": [
+        63,
+        45,
+        451,
+        448
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    }
+  ],
+  "alpha128_components_area100_or_more": [
+    {
+      "area": 103646,
+      "bbox": [
+        65,
+        562,
+        487,
+        960
+      ]
+    },
+    {
+      "area": 100279,
+      "bbox": [
+        1064,
+        88,
+        1464,
+        493
+      ]
+    },
+    {
+      "area": 100219,
+      "bbox": [
+        559,
+        84,
+        963,
+        486
+      ]
+    },
+    {
+      "area": 99308,
+      "bbox": [
+        62,
+        82,
+        465,
+        483
+      ]
+    },
+    {
+      "area": 99217,
+      "bbox": [
+        572,
+        559,
+        971,
+        953
+      ]
+    },
+    {
+      "area": 98364,
+      "bbox": [
+        1087,
+        557,
+        1475,
+        960
+      ]
+    }
+  ],
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

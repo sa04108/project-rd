@@ -1,0 +1,266 @@
+{
+  "id": "n27",
+  "state": "walk",
+  "status": "generated_and_source_visually_reviewed_not_runtime_verified",
+  "source": "walk.source.png",
+  "prompt": "walk.prompt.txt",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "0dc749c7f0ab5dd9e765ab769e6dbee6379a2faf78f8b6bf5a51e324c4e6a329",
+  "reference": "assets/art/portraits/n27.png",
+  "reference_sha256": "76b572b1d4d53f00ec324e571e75f13d924dc7c723144a2470ec62aeae434efd",
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 823801,
+    "alpha1_pixels": 57280,
+    "nonzero_pixels": 749063,
+    "core_alpha128_pixels": 562161,
+    "real_transparency": true,
+    "max_canvas_outer_edge_alpha": 1,
+    "meaningful_core_outer_edge_clip": false
+  },
+  "measurement_method": "Connected components of alpha >= 128; six largest main silhouettes sorted in 3x2 reading order. Smaller components >= 8 core pixels associated with nearest main silhouette; source not modified. Nominal slots are diagnostics only, never extraction bounds.",
+  "frames": [
+    {
+      "index": 0,
+      "primary_core_bbox_xyxy": [
+        62,
+        58,
+        461,
+        493
+      ],
+      "primary_core_pixels": 91280,
+      "pose_core_bbox_with_assigned_components_xyxy": [
+        62,
+        58,
+        461,
+        493
+      ],
+      "retained_component_count_at_least_8px": 2,
+      "pose_crop_sha256": "80100fe734b0a9f7febbf47c9a54c4e9fab43fe4c669e95d5cf92caf26912a24",
+      "nominal_slot_bbox_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "nominal_slot_padding_px": [
+        62,
+        58,
+        51,
+        19
+      ],
+      "crosses_nominal_slot": false,
+      "touches_canvas_outer_edge_at_alpha128": false
+    },
+    {
+      "index": 1,
+      "primary_core_bbox_xyxy": [
+        577,
+        65,
+        970,
+        493
+      ],
+      "primary_core_pixels": 89553,
+      "pose_core_bbox_with_assigned_components_xyxy": [
+        577,
+        65,
+        970,
+        493
+      ],
+      "retained_component_count_at_least_8px": 3,
+      "pose_crop_sha256": "41b55c81cdf9ac0ba534d17a9fd4e66bc65a1f77a99ff31ff4723d19da452f3c",
+      "nominal_slot_bbox_xyxy": [
+        512,
+        0,
+        1024,
+        512
+      ],
+      "nominal_slot_padding_px": [
+        65,
+        65,
+        54,
+        19
+      ],
+      "crosses_nominal_slot": false,
+      "touches_canvas_outer_edge_at_alpha128": false
+    },
+    {
+      "index": 2,
+      "primary_core_bbox_xyxy": [
+        1087,
+        56,
+        1482,
+        491
+      ],
+      "primary_core_pixels": 89438,
+      "pose_core_bbox_with_assigned_components_xyxy": [
+        1087,
+        56,
+        1482,
+        491
+      ],
+      "retained_component_count_at_least_8px": 3,
+      "pose_crop_sha256": "d6974c8f4dc6b37be627baba60ba2a04fde105b4766221178cd40988958511b2",
+      "nominal_slot_bbox_xyxy": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "nominal_slot_padding_px": [
+        63,
+        56,
+        54,
+        21
+      ],
+      "crosses_nominal_slot": false,
+      "touches_canvas_outer_edge_at_alpha128": false
+    },
+    {
+      "index": 3,
+      "primary_core_bbox_xyxy": [
+        54,
+        566,
+        480,
+        989
+      ],
+      "primary_core_pixels": 95899,
+      "pose_core_bbox_with_assigned_components_xyxy": [
+        54,
+        566,
+        480,
+        989
+      ],
+      "retained_component_count_at_least_8px": 3,
+      "pose_crop_sha256": "3901503ef4f725cbdeacb0e85fa48e2dc39038468ae7e287b4e2f64e45e005d1",
+      "nominal_slot_bbox_xyxy": [
+        0,
+        512,
+        512,
+        1024
+      ],
+      "nominal_slot_padding_px": [
+        54,
+        54,
+        32,
+        35
+      ],
+      "crosses_nominal_slot": false,
+      "touches_canvas_outer_edge_at_alpha128": false
+    },
+    {
+      "index": 4,
+      "primary_core_bbox_xyxy": [
+        564,
+        562,
+        968,
+        989
+      ],
+      "primary_core_pixels": 83326,
+      "pose_core_bbox_with_assigned_components_xyxy": [
+        564,
+        562,
+        968,
+        989
+      ],
+      "retained_component_count_at_least_8px": 3,
+      "pose_crop_sha256": "69d442d7a4f68852f03dedd09872306d5744c95540eb3bb02c4b366cf635b50b",
+      "nominal_slot_bbox_xyxy": [
+        512,
+        512,
+        1024,
+        1024
+      ],
+      "nominal_slot_padding_px": [
+        52,
+        50,
+        56,
+        35
+      ],
+      "crosses_nominal_slot": false,
+      "touches_canvas_outer_edge_at_alpha128": false
+    },
+    {
+      "index": 5,
+      "primary_core_bbox_xyxy": [
+        1070,
+        555,
+        1487,
+        989
+      ],
+      "primary_core_pixels": 90665,
+      "pose_core_bbox_with_assigned_components_xyxy": [
+        1070,
+        555,
+        1487,
+        989
+      ],
+      "retained_component_count_at_least_8px": 3,
+      "pose_crop_sha256": "b6a7f8fcf586b095675b16651fa639595f01262e49d74ff9dedd6ad6afc5a972",
+      "nominal_slot_bbox_xyxy": [
+        1024,
+        512,
+        1536,
+        1024
+      ],
+      "nominal_slot_padding_px": [
+        46,
+        43,
+        49,
+        35
+      ],
+      "crosses_nominal_slot": false,
+      "touches_canvas_outer_edge_at_alpha128": false
+    }
+  ],
+  "provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "generation": {
+    "tool": "built-in image_gen",
+    "original_calls": 1,
+    "repair_calls": 0,
+    "model_identifier": "not exposed",
+    "source_bytes_preserved": true,
+    "deterministic_pose_fabrication": false,
+    "actual_tool_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-bd8f5d3e-18d1-4a6c-a065-aca3aed39a37.png",
+    "actual_prompt_preparation_command": "python3 tools/art/prepare_identity_prompts.py n27 --state walk",
+    "prompt_modifications": "Appended explicit pixel-reference anatomy and locomotion clarification after inspecting exact portrait and layout guide.",
+    "actual_retained_template": "assets/art/families/floating/sprite_run/prompts/walk.txt",
+    "prompt_sha256": "c632feeaafa60e0b3a35fc811b8164ec2d49fd0d316dfe665894bc4731741f5e"
+  },
+  "visual_review": {
+    "complete_six_characters": true,
+    "actual_pose_overlap_or_canvas_clipping_observed": false,
+    "identity_and_anatomy": "The six legless twilight spirit poses preserve pale lavender hair, violet face/eyes, ragged spectral robe and existing crystal ornaments. Hair curls, robe-tail curvature, arm position and body height vary without humanoid footfalls.",
+    "locomotion": "Six distinct generated poses with articulated locomotion-appropriate changes; no attacks or added decorative effects.",
+    "limitations": [
+      "Existing crystals are separate legitimate ornament components; retain them with each pose. Glide motion is intentionally subtle.",
+      "Source geometry does not strictly meet 70-percent nominal occupancy or 15-percent padding; figures are complete and spatially separate. Accepted under connected-pose extraction policy, not equal-slot slicing.",
+      "Sparse low-alpha background residue exists; alpha128 core geometry used for clipping assessment, raw generated bytes preserved.",
+      "Packing, final animation timing, runtime scale and game integration remain parent-owned and unverified."
+    ]
+  },
+  "checks": {
+    "source_sha256_matches_original": true,
+    "six_primary_nonempty_pose_components": true,
+    "six_distinct_crop_hashes": true,
+    "real_alpha": true,
+    "core_canvas_outer_edge_pass": true,
+    "visually_independently_extractable": true
+  },
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

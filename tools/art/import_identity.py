@@ -106,12 +106,16 @@ def pack(identity, state, grid=False, ornaments=False):
     layout={'schema':1,'cell':{'width':256,'height':256},'frame_layout':{'sheetWidth':768,'sheetHeight':combined.height,'rows':rows},'animation':{'rows':animations}}
     combined.save(target/'atlas.png')
     (target/'layout.json').write_text(json.dumps(layout,ensure_ascii=False,indent=2)+'\n')
-    receipt={'identity':identity,'state':state,'source':str(source.relative_to(ROOT)),'source_sha256':digest(source),'prompt_sha256':digest(source.with_name(f'{state}.prompt.txt')),'generator':'built-in image tool','image_model_id':None,'sprite_gen_source_commit':'4a2ebdbcbb9e228b143ef10876ecd48261288df0','source_dimensions':image.size,'packing':'6 connected full poses, single uniform scale, feet baseline232; no repainted pixels','uniform_scale':scale,'source_regions':records,'atlas_sha256':digest(target/'atlas.png'),'review':'agent visually inspected all six poses; runtime review pending'}
+    receipt={'identity':identity,'state':state,'source':str(source.relative_to(ROOT)),'source_sha256':digest(source),'prompt_sha256':digest(source.with_name(f'{state}.prompt.txt')),'generator':'built-in image tool','image_model_id':None,'sprite_gen_source_commit':'4a2ebdbcbb9e228b143ef10876ecd48261288df0','source_dimensions':image.size,'packing':'6 connected full poses, single uniform scale, feet baseline232; no repainted pixels','uniform_scale':scale,'source_regions':records,'atlas_sha256_at_import':digest(target/'atlas.png'),'review':'agent visually inspected all six poses; runtime review pending'}
     receipts_path=target/'receipt.json'
     receipts=json.loads(receipts_path.read_text()) if receipts_path.exists() else {'identity':identity,'states':{}}
     if 'states' not in receipts:
         receipts={'identity':identity,'states':{receipts['state']:receipts}}
+    for prior in receipts['states'].values():
+        if 'atlas_sha256' in prior:
+            prior['atlas_sha256_at_import']=prior.pop('atlas_sha256')
     receipts['states'][state]=receipt
+    receipts['runtime_atlas_sha256']=digest(target/'atlas.png')
     receipts_path.write_text(json.dumps(receipts,ensure_ascii=False,indent=2)+'\n')
     manifest_path=ROOT/'assets/art/identity_animations.json'
     manifest=json.loads(manifest_path.read_text()) if manifest_path.exists() else {'schema':1,'identities':{}}

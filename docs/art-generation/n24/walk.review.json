@@ -1,0 +1,266 @@
+{
+  "id": "n24",
+  "state": "walk",
+  "status": "generated_and_source_visually_reviewed_not_runtime_verified",
+  "source": "walk.source.png",
+  "prompt": "walk.prompt.txt",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "a2e021322fc70b7b1dadf961504c7d080da088b341244cb588f82e7019f58e3d",
+  "reference": "assets/art/portraits/n24.png",
+  "reference_sha256": "cb66d26a46c8cd1b758bd1fc14c2ae05d0e839743c3df1438536de779fd6e28e",
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 759111,
+    "alpha1_pixels": 43117,
+    "nonzero_pixels": 813753,
+    "core_alpha128_pixels": 718010,
+    "real_transparency": true,
+    "max_canvas_outer_edge_alpha": 1,
+    "meaningful_core_outer_edge_clip": false
+  },
+  "measurement_method": "Connected components of alpha >= 128; six largest main silhouettes sorted in 3x2 reading order. Smaller components >= 8 core pixels associated with nearest main silhouette; source not modified. Nominal slots are diagnostics only, never extraction bounds.",
+  "frames": [
+    {
+      "index": 0,
+      "primary_core_bbox_xyxy": [
+        47,
+        62,
+        482,
+        488
+      ],
+      "primary_core_pixels": 116512,
+      "pose_core_bbox_with_assigned_components_xyxy": [
+        47,
+        62,
+        482,
+        488
+      ],
+      "retained_component_count_at_least_8px": 1,
+      "pose_crop_sha256": "2940fa8e1017a4a2a24554cccf121d0f20f744244e5494e176ab1e448ebda991",
+      "nominal_slot_bbox_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "nominal_slot_padding_px": [
+        47,
+        62,
+        30,
+        24
+      ],
+      "crosses_nominal_slot": false,
+      "touches_canvas_outer_edge_at_alpha128": false
+    },
+    {
+      "index": 1,
+      "primary_core_bbox_xyxy": [
+        550,
+        63,
+        985,
+        490
+      ],
+      "primary_core_pixels": 117957,
+      "pose_core_bbox_with_assigned_components_xyxy": [
+        550,
+        63,
+        985,
+        490
+      ],
+      "retained_component_count_at_least_8px": 1,
+      "pose_crop_sha256": "bb233620be8deed56dd922c7430685b07425c532bd79f1679f6b44722ac61dc0",
+      "nominal_slot_bbox_xyxy": [
+        512,
+        0,
+        1024,
+        512
+      ],
+      "nominal_slot_padding_px": [
+        38,
+        63,
+        39,
+        22
+      ],
+      "crosses_nominal_slot": false,
+      "touches_canvas_outer_edge_at_alpha128": false
+    },
+    {
+      "index": 2,
+      "primary_core_bbox_xyxy": [
+        1059,
+        63,
+        1499,
+        495
+      ],
+      "primary_core_pixels": 119091,
+      "pose_core_bbox_with_assigned_components_xyxy": [
+        1059,
+        63,
+        1499,
+        495
+      ],
+      "retained_component_count_at_least_8px": 1,
+      "pose_crop_sha256": "66b0e94127bb67b3c14a545f696a1c816121d63995973b5e5df59bef74e0e9db",
+      "nominal_slot_bbox_xyxy": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "nominal_slot_padding_px": [
+        35,
+        63,
+        37,
+        17
+      ],
+      "crosses_nominal_slot": false,
+      "touches_canvas_outer_edge_at_alpha128": false
+    },
+    {
+      "index": 3,
+      "primary_core_bbox_xyxy": [
+        42,
+        548,
+        496,
+        973
+      ],
+      "primary_core_pixels": 122826,
+      "pose_core_bbox_with_assigned_components_xyxy": [
+        42,
+        548,
+        496,
+        973
+      ],
+      "retained_component_count_at_least_8px": 1,
+      "pose_crop_sha256": "0f8adbe902591c9d14fab92c132bd6efd293d079599a3adc2ffbc557081bc163",
+      "nominal_slot_bbox_xyxy": [
+        0,
+        512,
+        512,
+        1024
+      ],
+      "nominal_slot_padding_px": [
+        42,
+        36,
+        16,
+        51
+      ],
+      "crosses_nominal_slot": false,
+      "touches_canvas_outer_edge_at_alpha128": false
+    },
+    {
+      "index": 4,
+      "primary_core_bbox_xyxy": [
+        556,
+        553,
+        993,
+        968
+      ],
+      "primary_core_pixels": 120266,
+      "pose_core_bbox_with_assigned_components_xyxy": [
+        556,
+        553,
+        993,
+        968
+      ],
+      "retained_component_count_at_least_8px": 1,
+      "pose_crop_sha256": "b211b4ede6a9ee0842e33bf6984e54bf6ccf8fa4cc25381ce93beebd1012b65d",
+      "nominal_slot_bbox_xyxy": [
+        512,
+        512,
+        1024,
+        1024
+      ],
+      "nominal_slot_padding_px": [
+        44,
+        41,
+        31,
+        56
+      ],
+      "crosses_nominal_slot": false,
+      "touches_canvas_outer_edge_at_alpha128": false
+    },
+    {
+      "index": 5,
+      "primary_core_bbox_xyxy": [
+        1058,
+        553,
+        1509,
+        974
+      ],
+      "primary_core_pixels": 121358,
+      "pose_core_bbox_with_assigned_components_xyxy": [
+        1058,
+        553,
+        1509,
+        974
+      ],
+      "retained_component_count_at_least_8px": 1,
+      "pose_crop_sha256": "ab27873a28f505f4d0bf7d3e4face7d40d231a227b03a6a741aba0b57c81967b",
+      "nominal_slot_bbox_xyxy": [
+        1024,
+        512,
+        1536,
+        1024
+      ],
+      "nominal_slot_padding_px": [
+        34,
+        41,
+        27,
+        50
+      ],
+      "crosses_nominal_slot": false,
+      "touches_canvas_outer_edge_at_alpha128": false
+    }
+  ],
+  "provenance": {
+    "repository": "https://github.com/aldegad/sprite-gen",
+    "version": "2.17.0",
+    "commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+    "function": "sprite_gen/gen/prepare.py::row_prompt",
+    "source_url": "https://github.com/aldegad/sprite-gen/blob/4a2ebdbcbb9e228b143ef10876ecd48261288df0/sprite_gen/gen/prepare.py#L753-L826",
+    "retained_template": "assets/art/families/humanoid/sprite_run/prompts/attack.txt",
+    "route": "Source-verified sprite-gen template-derived full prompt, adapted explicitly to native-alpha 3x2 generation through the built-in image tool; no external sprite-gen image API. Record any actually executed CLI preparation separately.",
+    "motion_prompt_role": "Per-identity clauses in this plan are inputs to the full derived prompt, not standalone claims of CLI-generated sprite-gen prompts.",
+    "model_identifier": "not exposed by built-in image tool; do not infer model tier from the reasoning model"
+  },
+  "generation": {
+    "tool": "built-in image_gen",
+    "original_calls": 1,
+    "repair_calls": 0,
+    "model_identifier": "not exposed",
+    "source_bytes_preserved": true,
+    "deterministic_pose_fabrication": false,
+    "actual_tool_output_path": "/workspace/scratch/efd85aae97ef/generated_images/exec-547abf86-0d90-4b0d-8505-c281e90db623.png",
+    "actual_prompt_preparation_command": "python3 tools/art/prepare_identity_prompts.py n24 --state walk",
+    "prompt_modifications": "Appended explicit pixel-reference anatomy and locomotion clarification after inspecting exact portrait and layout guide.",
+    "actual_retained_template": "assets/art/families/quadruped/sprite_run/prompts/walk.txt",
+    "prompt_sha256": "dc6fa4938496efaf7a3356b0360a788a068db8598fc79ba0c986a2f852a5f618"
+  },
+  "visual_review": {
+    "complete_six_characters": true,
+    "actual_pose_overlap_or_canvas_clipping_observed": false,
+    "identity_and_anatomy": "The six white shaggy mammoth poses preserve cyan ice spikes, glowing eye, trunk/tusk silhouette, original four-legged anatomy and reference camera. Front-foot placements and knee/shoulder weighting change across poses.",
+    "locomotion": "Six distinct generated poses with articulated locomotion-appropriate changes; no attacks or added decorative effects.",
+    "limitations": [
+      "Heavy walk articulation is restrained; full gait timing and apparent feet contact should be checked in the packed runtime loop.",
+      "Source geometry does not strictly meet 70-percent nominal occupancy or 15-percent padding; figures are complete and spatially separate. Accepted under connected-pose extraction policy, not equal-slot slicing.",
+      "Sparse low-alpha background residue exists; alpha128 core geometry used for clipping assessment, raw generated bytes preserved.",
+      "Packing, final animation timing, runtime scale and game integration remain parent-owned and unverified."
+    ]
+  },
+  "checks": {
+    "source_sha256_matches_original": true,
+    "six_primary_nonempty_pose_components": true,
+    "six_distinct_crop_hashes": true,
+    "real_alpha": true,
+    "core_canvas_outer_edge_pass": true,
+    "visually_independently_extractable": true
+  },
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

@@ -1,0 +1,149 @@
+{
+  "id": "b70",
+  "state": "walk",
+  "status": "gait_candidate_not_selected",
+  "source": "walk.gait-candidate.source.png",
+  "prompt": "walk.gait-candidate.prompt.txt",
+  "prompt_sha256": "05248a7e0a319e37322a99e69e638030fffd3f598d05bcc2638a6416af6f88ec",
+  "visual_review": {
+    "genuine_alternating_gait_unambiguously_passed": false,
+    "assessment": "Six complete volcanic giant poses preserve two massive fists, molten fissures and spiked boulder plates. Knee/foot loading changes are visible, but near leg dominates all contacts and the six phases do not establish an unambiguous alternating gait. One bounded correction did not fix the core issue; original kept."
+  },
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "sha256": "df9ea22880639db87343e07e798d1d48fd80afe31d0c856002c6b0c414f3e635",
+  "byte_count": 2541844,
+  "alpha": {
+    "min": 0,
+    "max": 254,
+    "transparent_pixels": 794806,
+    "nonzero_pixels": 778058,
+    "meaningful_alpha128_pixels": 698270,
+    "real_transparency": true,
+    "canvas_edge_max_alpha": 0,
+    "canvas_edges_alpha128_pixels": 0,
+    "note": "Alpha 1 residue is not opaque clipping."
+  },
+  "frames": [
+    {
+      "index": 0,
+      "nominal_slot_alpha128_bbox_local": [
+        53,
+        62,
+        512,
+        494
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 1,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        68,
+        490,
+        491
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 2,
+      "nominal_slot_alpha128_bbox_local": [
+        33,
+        65,
+        470,
+        491
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 3,
+      "nominal_slot_alpha128_bbox_local": [
+        54,
+        30,
+        512,
+        465
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 4,
+      "nominal_slot_alpha128_bbox_local": [
+        0,
+        35,
+        508,
+        466
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    },
+    {
+      "index": 5,
+      "nominal_slot_alpha128_bbox_local": [
+        34,
+        23,
+        493,
+        456
+      ],
+      "warning": "Nominal slot bounds are measurements only; parent must pack actual connected poses, never blindly equal-slice."
+    }
+  ],
+  "alpha128_components_area100_or_more": [
+    {
+      "area": 121637,
+      "bbox": [
+        54,
+        542,
+        524,
+        977
+      ]
+    },
+    {
+      "area": 118610,
+      "bbox": [
+        571,
+        547,
+        1020,
+        978
+      ]
+    },
+    {
+      "area": 115974,
+      "bbox": [
+        53,
+        62,
+        518,
+        494
+      ]
+    },
+    {
+      "area": 115085,
+      "bbox": [
+        1057,
+        65,
+        1494,
+        491
+      ]
+    },
+    {
+      "area": 113652,
+      "bbox": [
+        563,
+        68,
+        1002,
+        491
+      ]
+    },
+    {
+      "area": 113312,
+      "bbox": [
+        1058,
+        535,
+        1517,
+        968
+      ]
+    }
+  ],
+  "source_encoding_note": "PNG re-encoded with alpha-zero RGB normalization; alpha and visible RGB exact. Generation-original hashes and current hashes are in ../source-optimization.json. Earlier inspection notes describe pre-normalization originals."
+}

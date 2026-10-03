@@ -5,7 +5,7 @@
       "identity": "u16",
       "state": "attack",
       "source": "docs/art-generation/u16/attack.source.png",
-      "source_sha256": "b33a7189be7cb698d32705a293faeb4d2030db9f48f7bc2b0c534dd25402b58f",
+      "source_sha256": "9943be8bf7a206f2fbee3df42603bc7cc083e893717ead479b8b8e2c550fa812",
       "prompt_sha256": "69fe34f0b724e27962457e6405502dc1c47c46c1947e60d881bf082792f4c713",
       "generator": "built-in image tool",
       "image_model_id": null,
@@ -102,8 +102,115 @@
           ]
         }
       ],
-      "atlas_sha256": "ab23e85508dd30204a0fd6c32748629aca3429da0c0e1d206e6d83a248922808",
-      "review": "agent visually inspected all six poses; runtime review pending"
+      "review": "agent visually inspected all six poses; runtime review pending",
+      "atlas_sha256_at_import": "ab23e85508dd30204a0fd6c32748629aca3429da0c0e1d206e6d83a248922808",
+      "source_encoding_note": "Current source normalized without alpha/visible RGB changes; original hash in docs/art-generation/source-optimization.json."
+    },
+    "idle": {
+      "identity": "u16",
+      "state": "idle",
+      "source": "docs/art-generation/u16/idle.source.png",
+      "source_sha256": "96bdaf7882db10f6e65b7517d1a7e26dadc824516db052db87ae269cc6dcf3b3",
+      "prompt_sha256": "5df6f8322bf9446e5325f121139c6ad9b5ec5b6800bbdecdba342cfb180cf98c",
+      "generator": "built-in image tool",
+      "image_model_id": null,
+      "sprite_gen_source_commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+      "source_dimensions": [
+        1536,
+        1024
+      ],
+      "packing": "6 connected full poses, single uniform scale, feet baseline232; no repainted pixels",
+      "uniform_scale": 0.398576512455516,
+      "source_regions": [
+        {
+          "box": [
+            74,
+            59,
+            529,
+            477
+          ],
+          "anchor_x": 348.0,
+          "ground_y": 473,
+          "center": [
+            301.5,
+            268.0
+          ]
+        },
+        {
+          "box": [
+            572,
+            40,
+            1022,
+            477
+          ],
+          "anchor_x": 841.0,
+          "ground_y": 473,
+          "center": [
+            797.0,
+            258.5
+          ]
+        },
+        {
+          "box": [
+            1076,
+            63,
+            1517,
+            475
+          ],
+          "anchor_x": 1341.0,
+          "ground_y": 471,
+          "center": [
+            1296.5,
+            269.0
+          ]
+        },
+        {
+          "box": [
+            71,
+            563,
+            536,
+            981
+          ],
+          "anchor_x": 352.0,
+          "ground_y": 977,
+          "center": [
+            303.5,
+            772.0
+          ]
+        },
+        {
+          "box": [
+            573,
+            529,
+            1032,
+            982
+          ],
+          "anchor_x": 846.5,
+          "ground_y": 978,
+          "center": [
+            802.5,
+            755.5
+          ]
+        },
+        {
+          "box": [
+            1073,
+            569,
+            1518,
+            981
+          ],
+          "anchor_x": 1340.0,
+          "ground_y": 977,
+          "center": [
+            1295.5,
+            775.0
+          ]
+        }
+      ],
+      "review": "agent visually inspected all six poses; runtime review pending",
+      "atlas_sha256_at_import": "bb747e83ce51c08f2b53b61ea3346ed4b83c02f4a939954cb8a7a7bbd822c962",
+      "source_encoding_note": "Current source normalized without alpha/visible RGB changes; original hash in docs/art-generation/source-optimization.json."
     }
-  }
+  },
+  "runtime_atlas_sha256": "bb747e83ce51c08f2b53b61ea3346ed4b83c02f4a939954cb8a7a7bbd822c962"
 }
