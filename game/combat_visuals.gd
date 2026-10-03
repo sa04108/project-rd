@@ -44,13 +44,15 @@ func sync(sim) -> void:
 			latest.erase(id)
 
 func pose(unit: Dictionary, sim, reduced: bool) -> Dictionary:
-	var result := {"phase": "idle", "amount": 0.0, "direction": Vector2.RIGHT, "style": STYLES.get(str(unit.kind), "cast")}
+	var result := {"phase": "idle", "amount": 0.0, "attack_clock": 0.0, "direction": Vector2.RIGHT, "style": STYLES.get(str(unit.kind), "cast")}
 	if reduced:
 		return result
 	var previous: Dictionary = latest.get(int(unit.id), {})
 	if not previous.is_empty():
 		var age: float = maxf(0, sim.time - float(previous.time))
 		if age < LIFE:
+			# 실제 피해 이벤트는 준비 두 프레임 다음의 접촉 시점에서 즉시 시작한다.
+			result.attack_clock = LEAD + age
 			result.direction = (previous.to - previous.from).normalized()
 			result.phase = "attack" if age < 0.12 else "recover"
 			result.amount = 1.0 if age < 0.12 else 1.0 - smoothstep(0.12, LIFE, age)
@@ -68,6 +70,7 @@ func pose(unit: Dictionary, sim, reduced: bool) -> Dictionary:
 			target = enemy
 	if not target.is_empty():
 		result.phase = "prepare"
+		result.attack_clock = clampf(LEAD - float(unit.cooldown), 0.0, LEAD)
 		result.amount = 1.0 - float(unit.cooldown) / LEAD
 		result.direction = (sim.path_position(target.progress) - origin).normalized()
 	return result

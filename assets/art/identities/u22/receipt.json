@@ -1,0 +1,109 @@
+{
+  "identity": "u22",
+  "states": {
+    "attack": {
+      "identity": "u22",
+      "state": "attack",
+      "source": "docs/art-generation/u22/attack.source.png",
+      "source_sha256": "5fdad5ee95c64dd9f4daad6f09a0467b21b1bc4b3f2e7e1b19b34f3e9ae26f68",
+      "prompt_sha256": "6a3e9c0e769768d6c341dd0983158ce9eb8cf7658432c8988520f6b97e19b190",
+      "generator": "built-in image tool",
+      "image_model_id": null,
+      "sprite_gen_source_commit": "4a2ebdbcbb9e228b143ef10876ecd48261288df0",
+      "source_dimensions": [
+        1536,
+        1024
+      ],
+      "packing": "6 connected full poses, single uniform scale, feet baseline232; no repainted pixels",
+      "uniform_scale": 0.36012861736334406,
+      "source_regions": [
+        {
+          "box": [
+            40,
+            202,
+            480,
+            535
+          ],
+          "anchor_x": 285.5,
+          "ground_y": 531,
+          "center": [
+            260.0,
+            368.5
+          ]
+        },
+        {
+          "box": [
+            596,
+            23,
+            917,
+            534
+          ],
+          "anchor_x": 751.0,
+          "ground_y": 530,
+          "center": [
+            756.5,
+            278.5
+          ]
+        },
+        {
+          "box": [
+            1095,
+            227,
+            1477,
+            541
+          ],
+          "anchor_x": 1301.0,
+          "ground_y": 537,
+          "center": [
+            1286.0,
+            384.0
+          ]
+        },
+        {
+          "box": [
+            87,
+            633,
+            593,
+            967
+          ],
+          "anchor_x": 282.0,
+          "ground_y": 963,
+          "center": [
+            340.0,
+            800.0
+          ]
+        },
+        {
+          "box": [
+            611,
+            577,
+            968,
+            966
+          ],
+          "anchor_x": 803.5,
+          "ground_y": 962,
+          "center": [
+            789.5,
+            771.5
+          ]
+        },
+        {
+          "box": [
+            1100,
+            595,
+            1477,
+            972
+          ],
+          "anchor_x": 1294.5,
+          "ground_y": 968,
+          "center": [
+            1288.5,
+            783.5
+          ]
+        }
+      ],
+      "atlas_sha256": "a719242aedaf9262b31226da79ecf52dc42ad309731697489852ca14f55c9f33",
+      "review": "agent visually inspected all six poses; runtime review pending"
+    }
+  }
+}
