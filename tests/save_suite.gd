@@ -181,8 +181,8 @@ static func _test_profile_settings_migrate_and_roundtrip() -> String:
     var migrated: Variant = SAVE_STORE.new(directory)
     if not migrated.last_error.is_empty():
         return "legacy profile without new settings must remain valid"
-    if migrated.profile.settings.haptics != false or migrated.profile.settings.music_track != "hearth_watch" or migrated.profile.settings.ui_sound != "wood":
-        return "legacy profile must receive the new audio defaults"
+    if migrated.profile.settings.haptics != false or migrated.profile.settings.music_track != "mist_guard" or migrated.profile.settings.ui_sound != "tap":
+        return "legacy profile must receive fixed audio defaults"
     for field in ["best_wave", "cleared", "units", "enemies", "kills", "run_counts", "ended_runs"]:
         if not _same_saved_value(migrated.profile[field], old_profile[field]):
             return "legacy migration must preserve profile field %s" % field
@@ -190,14 +190,24 @@ static func _test_profile_settings_migrate_and_roundtrip() -> String:
         return "legacy migration must preserve existing settings including zero volume"
     migrated.profile.settings.haptics = true
     migrated.profile.settings.music_track = "mist_guard"
-    migrated.profile.settings.ui_sound = "chime"
+    migrated.profile.settings.ui_sound = "tap"
     if not migrated.save_settings():
         return "new audio settings should save"
     var reloaded: Variant = SAVE_STORE.new(directory)
-    if reloaded.profile.settings.haptics != true or reloaded.profile.settings.music_track != "mist_guard" or reloaded.profile.settings.ui_sound != "chime":
+    if reloaded.profile.settings.haptics != true or reloaded.profile.settings.music_track != "mist_guard" or reloaded.profile.settings.ui_sound != "tap":
         return "new audio settings should roundtrip through profile JSON"
     if reloaded.profile.settings.music != 0.0:
         return "zero music volume must survive JSON roundtrip without being raised"
+    var old_choices: Dictionary = reloaded.profile.duplicate(true)
+    old_choices.settings.music_track = "quiet_march"
+    old_choices.settings.ui_sound = "wood"
+    if not _write_json(directory.path_join("profile.json"), old_choices):
+        return "test could not write profile with prior audio choices"
+    var normalized: Variant = SAVE_STORE.new(directory)
+    if normalized.last_error != "" or normalized.profile.settings.music_track != "mist_guard" or normalized.profile.settings.ui_sound != "tap":
+        return "prior audio choices must normalize without quarantining the profile"
+    if normalized.profile.settings.music != 0.0 or normalized.profile.settings.effects != 0.42 or normalized.profile.settings.haptics != true or normalized.profile.kills.n01 != 7:
+        return "normalizing prior audio choices must preserve saved progress and preferences"
     return ""
 
 static func _test_invalid_audio_settings_are_quarantined() -> String:

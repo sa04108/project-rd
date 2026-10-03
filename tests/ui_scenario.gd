@@ -185,14 +185,12 @@ func _run() -> void:
 		_check(game.store.profile.settings.haptics and game.audio.settings.haptics, "real touch enables haptics and saves preference")
 		await _touch(vibration.get_global_rect().get_center())
 		_check(not game.store.profile.settings.haptics, "real touch disables haptics")
+	var removed_audio_choices := true
 	for node in game.overlay.find_children("*", "OptionButton", true, false):
-		_check(node.item_count == 3, "three candidates available in sample selector")
-		node.select(1)
-		node.item_selected.emit(1)
-		var key: String = node.get_meta("qa_action")
-		_check(game.store.profile.settings[key] == ("mist_guard" if key == "music_track" else "tap"), "sample selection persists: " + key)
-		node.select(0)
-		node.item_selected.emit(0)
+		if node.get_meta("qa_action", "") in ["music_track", "ui_sound"]:
+			removed_audio_choices = false
+	_check(removed_audio_choices, "music and UI sound selectors are removed")
+	_check(game.store.profile.settings.music_track == "mist_guard" and game.store.profile.settings.ui_sound == "tap", "fixed audio preferences stay normalized")
 	await _capture("settings")
 	await _tap(_action_center("close_panel"))
 	_check(game.panel_name.is_empty() and not game.sim.pause_reasons.has("settings"), "settings close clears only settings pause")

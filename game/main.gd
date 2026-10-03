@@ -139,7 +139,7 @@ func _paragraph(parent: Node, text_value: String, rect: Rect2, font_size: int = 
 	label.size = rect.size
 	return label
 
-func _button(parent: Node, text_value: String, rect: Rect2, callback: Callable, accent: bool = false, action: String = "") -> Button:
+func _button(parent: Node, text_value: String, rect: Rect2, callback: Callable, accent: bool = false, action: String = "", sound_role: String = "tap") -> Button:
 	var button := Button.new()
 	button.text = text_value
 	button.position = rect.position
@@ -154,7 +154,11 @@ func _button(parent: Node, text_value: String, rect: Rect2, callback: Callable, 
 	button.add_theme_color_override("font_pressed_color", PALE)
 	button.add_theme_color_override("font_disabled_color", Color("b5ac8d"))
 	button.add_theme_font_size_override("font_size", 20)
-	button.pressed.connect(func(): audio.play_ui(); callback.call())
+	button.pressed.connect(func():
+		var sound_serial: int = audio.ui_play_serial
+		callback.call()
+		if sound_role != "none" and audio.ui_play_serial == sound_serial:
+			audio.play_ui(sound_role))
 	parent.add_child(button)
 	return button
 
@@ -305,11 +309,12 @@ func _summon() -> void:
 	var response: Dictionary = sim.summon()
 	if response.ok:
 		selected = int(response.unit_id)
-	_transaction(response)
+	_transaction(response, true)
 
-func _transaction(response: Dictionary) -> void:
+func _transaction(response: Dictionary, confirmation: bool = false) -> void:
 	_toast(response.reason)
 	if response.ok:
+		if confirmation: audio.play_ui("chime")
 		_mark_dirty()
 	_refresh()
 	if sim.result != "active":
@@ -392,8 +397,8 @@ func _open_panel(kind: String, force: bool = false) -> void:
 		shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		overlay.add_child(shade)
 	var large := kind in ["recipes", "codex", "guide", "settings", "result", "confirm_new"]
-	var top := 190.0 if kind == "settings" else (303.0 if large else 637.0)
-	var panel := _panel(overlay, Rect2(35, top, 650, 900 if kind == "settings" else (694 if large else 360)), Color("172b39"), GOLD)
+	var top := 235.0 if kind == "settings" else (303.0 if large else 637.0)
+	var panel := _panel(overlay, Rect2(35, top, 650, 810 if kind == "settings" else (694 if large else 360)), Color("172b39"), GOLD)
 	if is_instance_valid(board):
 		board.blocked_screen_rects.assign([Rect2(0, 0, 720, 1280) if kind in ["settings", "result", "confirm_new"] else panel.get_global_rect()])
 	var titles := {"upgrade": "길드 공방 · 공통 공격력 강화", "gamble": "운명의 계약 · 영입 도전", "special": "특수몬스터 · 보상형 적", "recipes": "조합 도감", "codex": "길드 기록관", "settings": "설정", "guide": "전투 가이드", "result": "마왕 격파" if sim.result == "victory" else "전투 종료", "confirm_new": "새로운 출정"}
@@ -427,7 +432,7 @@ func _upgrade_panel(panel: Control) -> void:
 		_portrait(card, ["u02", "u07", "u12", "u17"][tier - 1], Vector2(17, 44), Vector2(114, 99))
 		_label(card, "%d성 용병 +%d" % [tier, level], Vector2(16, 148), 126, 16, INK)
 		_label(card, "공격 +%d%%" % roundi(level * float(sim.catalog.rules.T.upgrade_factor) * 100), Vector2(16, 178), 126, 15, MUTED)
-		var button := _button(card, "최대 강화" if level >= 10 else "강화   ◈ %d" % sim.upgrade_cost(tier), Rect2(8, 220, 132, 40), func(): _transaction(sim.upgrade(tier)), true)
+		var button := _button(card, "최대 강화" if level >= 10 else "강화   ◈ %d" % sim.upgrade_cost(tier), Rect2(8, 220, 132, 40), func(): _transaction(sim.upgrade(tier), true), true)
 		button.add_theme_font_size_override("font_size", 15)
 		var update := func(): button.disabled = sim.gold < sim.upgrade_cost(tier) or int(sim.upgrades[str(tier)]) >= 10 or sim.result != "active"
 		dynamic.append(update)
@@ -441,7 +446,7 @@ func _gamble_panel(panel: Control) -> void:
 		_label(panel, "★".repeat(tier) + " 도전", Vector2(x + 53, 86), 240, 27, GOLD)
 		_label(panel, "성공 확률  %d%%" % roundi(rule.chance * 100), Vector2(x + 38, 139), 260, 22, PALE)
 		_label(panel, "실패 시 보상 없음", Vector2(x + 52, 181), 250, 18, MUTED)
-		var button := _button(panel, "계약   ◈ %d" % int(rule.cost), Rect2(x + 14, 234, 269, 69), func(): _transaction(sim.gamble(tier)), true)
+		var button := _button(panel, "계약   ◈ %d" % int(rule.cost), Rect2(x + 14, 234, 269, 69), func(): _transaction(sim.gamble(tier), true), true)
 		var update := func(): button.disabled = sim.gold < rule.cost or sim.first_empty() < 0 or sim.result != "active"
 		dynamic.append(update)
 		update.call()
@@ -456,7 +461,7 @@ func _special_panel(panel: Control) -> void:
 		_portrait(card, id, Vector2(38, 36), Vector2(126, 100))
 		_label(card, "처치 ◈ %d" % definition.reward, Vector2(16, 139), 181, 18, INK)
 		var status := _label(card, "", Vector2(12, 174), 183, 15, MUTED)
-		var button := _button(card, "무료 소환", Rect2(10, 218, 181, 43), func(): _transaction(sim.summon_special(id)))
+		var button := _button(card, "무료 소환", Rect2(10, 218, 181, 43), func(): _transaction(sim.summon_special(id), true))
 		button.add_theme_font_size_override("font_size", 18)
 		var update := func():
 			var left: float = maxf(0, float(sim.cooldowns.get(id, 0)) - sim.time)
@@ -510,7 +515,7 @@ func _recipes_panel(panel: Control) -> void:
 			var response: Dictionary = sim.combine(recipe.id, anchor)
 			if response.ok:
 				selected = int(response.unit_id)
-			_transaction(response), true)
+			_transaction(response, true), true)
 		button.disabled = target < 0 or mode != "battle" or sim.result != "active"
 
 func _codex_panel(panel: Control) -> void:
@@ -575,10 +580,10 @@ func _guide_panel(panel: Control) -> void:
 		_paragraph(row, entry[1], Rect2(10, 49, 570, 105), 20, PALE)
 
 func _settings_panel(panel: Control) -> void:
-	_label(panel, "전투가 정지되었습니다" if mode == "battle" else "길드 환경설정 · 전투곡 미리듣기", Vector2(30, 78), 600, 18, MUTED)
+	_label(panel, "전투가 정지되었습니다" if mode == "battle" else "길드 환경설정", Vector2(30, 78), 600, 18, MUTED)
 	for index in range(2):
 		var key := "music" if index == 0 else "effects"
-		var y := 124 + index * 160
+		var y := 124 + index * 110
 		_label(panel, "배경음악" if index == 0 else "효과음", Vector2(35, y + 8), 175, 24, PALE)
 		var slider := HSlider.new()
 		slider.position = Vector2(215, y)
@@ -594,24 +599,22 @@ func _settings_panel(panel: Control) -> void:
 			if not store.save_settings(): _toast(store.last_error))
 		panel.add_child(slider)
 		_label(panel, "0 = 끔", Vector2(565, y + 15), 80, 15, MUTED)
-	_audio_choice(panel, "music_track", ["01 · 성문 곁의 불빛", "02 · 안개의 파수", "03 · 조용한 행군"], AudioDirector.MUSIC_IDS, 193)
-	_audio_choice(panel, "ui_sound", ["버튼음 01 · 나무", "버튼음 02 · 부드러운 탭", "버튼음 03 · 작은 울림"], AudioDirector.UI_IDS, 353)
-	var vibration := _settings_toggle(panel, "진동", 444, bool(store.profile.settings.haptics), "haptics")
+	var vibration := _settings_toggle(panel, "진동", 346, bool(store.profile.settings.haptics), "haptics")
 	vibration.toggled.connect(func(value):
 		audio.play_ui()
 		audio.set_haptics(value)
 		store.profile.settings.haptics = value
 		if not store.save_settings(): _toast(store.last_error))
-	var motion := _settings_toggle(panel, "동작 연출 줄이기", 531, store.profile.settings.reduced_motion, "reduced_motion")
+	var motion := _settings_toggle(panel, "동작 연출 줄이기", 430, store.profile.settings.reduced_motion, "reduced_motion")
 	motion.toggled.connect(func(value):
 		audio.play_ui()
 		store.profile.settings.reduced_motion = value
 		if is_instance_valid(board): board.set("reduced_motion", value)
 		if not store.save_settings(): _toast(store.last_error))
-	_label(panel, "진동: 켤 때 · 목숨 감소 · 클리어 / 지원 기기에서 동작", Vector2(35, 612), 590, 17, MUTED)
-	_button(panel, "전투로 돌아가기" if mode == "battle" else "닫기", Rect2(35, 664, 579, 80), _close_panel, true, "close_panel")
+	_label(panel, "진동: 켤 때 · 목숨 감소 · 클리어 / 지원 기기에서 동작", Vector2(35, 525), 590, 17, MUTED)
+	_button(panel, "전투로 돌아가기" if mode == "battle" else "닫기", Rect2(35, 580, 579, 80), _close_panel, true, "close_panel")
 	if mode == "battle":
-		_button(panel, "저장 후 메인 메뉴", Rect2(35, 764, 579, 80), func():
+		_button(panel, "저장 후 메인 메뉴", Rect2(35, 684, 579, 80), func():
 			if _save(): _show_menu(), false, "save_menu")
 
 func _settings_toggle(panel: Control, title: String, y: float, enabled: bool, action: String) -> CheckButton:
@@ -625,21 +628,6 @@ func _settings_toggle(panel: Control, title: String, y: float, enabled: bool, ac
 	toggle.set_meta("qa_action", action)
 	panel.add_child(toggle)
 	return toggle
-
-func _audio_choice(panel: Control, key: String, titles: Array, ids: Array, y: float) -> void:
-	var choice := OptionButton.new()
-	choice.position = Vector2(35, y)
-	choice.size = Vector2(579, 66)
-	choice.set_meta("qa_action", key)
-	for title in titles:
-		choice.add_item(title)
-	choice.selected = ids.find(store.profile.settings[key])
-	choice.item_selected.connect(func(index):
-		store.profile.settings[key] = ids[index]
-		_apply_audio()
-		if key == "ui_sound": audio.play_ui()
-		if not store.save_settings(): _toast(store.last_error))
-	panel.add_child(choice)
 
 func _result_panel(panel: Control) -> void:
 	_label(panel, "VICTORY" if sim.result == "victory" else "THE GUILD REMEMBERS", Vector2(60, 131), 570, 35, GOLD)
@@ -786,7 +774,7 @@ func _apply_audio() -> void:
 
 func _sync_audio() -> void:
 	if is_instance_valid(audio):
-		audio.set_context((mode == "battle" and sim.result == "active") or panel_name == "settings", not sim.pause_reasons.has("background") and not sim.pause_reasons.has("suspended"))
+		audio.set_context(mode == "battle" and sim.result == "active", not sim.pause_reasons.has("background") and not sim.pause_reasons.has("suspended"))
 
 func run_automation_tests() -> bool:
 	var report: Dictionary = load("res://tests/mvp_suite.gd").run_all()

@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://c4wrwpv47b4ta"
-path="res://.godot/imported/chime.wav-a8b4e2f3bf191048d69ec6bb3b3fd476.sample"
+uid="uid://cxkh61xp2oa3g"
+path="res://.godot/imported/war_drum.wav-c9ee459f8d5f041796a5021afe6e3b8f.sample"
 
 [deps]
 
-source_file="res://assets/audio/ui/chime.wav"
-dest_files=["res://.godot/imported/chime.wav-a8b4e2f3bf191048d69ec6bb3b3fd476.sample"]
+source_file="res://assets/audio/combat/war_drum.wav"
+dest_files=["res://.godot/imported/war_drum.wav-c9ee459f8d5f041796a5021afe6e3b8f.sample"]
 
 [params]
 

@@ -4,10 +4,19 @@ extends Node
 signal haptic_requested(duration_ms: int, strength: float)
 signal effect_played(category: String)
 
-const Visuals = preload("res://game/combat_visuals.gd")
-const MUSIC_IDS := ["hearth_watch", "mist_guard", "quiet_march"]
-const UI_IDS := ["wood", "tap", "chime"]
-const STYLE_AUDIO := {"slash": "blade", "thrust": "blade", "bow": "bow", "javelin": "bow", "strike": "blunt", "slam": "blunt", "cast": "magic", "breath": "magic", "lob": "magic", "shot": "shot"}
+const MUSIC_TRACK := "mist_guard"
+const UI_CATEGORIES := ["tap", "chime"]
+const UNIT_SOUNDS := {
+	"u01": "blade_sweep", "u02": "bow_arrow", "u03": "arcane_burst", "u04": "hand_impact",
+	"u05": "holy_cast", "u06": "thrown_vial", "u07": "spear_thrust", "u08": "bow_arrow",
+	"u09": "war_drum", "u10": "frost_trap", "u11": "iron_mace", "u12": "blade_sweep",
+	"u13": "arcane_burst", "u14": "golden_totem", "u15": "stone_fist", "u16": "dragon_breath",
+	"u17": "flintlock", "u18": "curse_cast", "u19": "crystal_pulse", "u20": "javelin_throw",
+	"u21": "alchemical_blast", "u22": "war_hammer", "u23": "curse_cast", "u24": "bow_arrow",
+	"u25": "blade_sweep", "u26": "battle_banner", "u27": "blade_sweep", "u28": "holy_cast",
+	"u29": "arcane_burst", "u30": "nature_vine", "u31": "war_hammer", "u32": "web_cast",
+	"u33": "dragon_breath", "u34": "arcane_burst"
+}
 const VOICES := 3
 const ATTACK_GAP := 0.16
 const FAMILY_GAP := 0.32
@@ -19,7 +28,7 @@ const HAPTIC_VICTORY_MS := 320
 var music: AudioStreamPlayer
 var ui: AudioStreamPlayer
 var attacks: Array[AudioStreamPlayer] = []
-var settings := {"music": 0.35, "effects": 0.65, "haptics": false, "music_track": "hearth_watch", "ui_sound": "wood"}
+var settings := {"music": 0.35, "effects": 0.65, "haptics": false, "music_track": MUSIC_TRACK, "ui_sound": "tap"}
 var streams: Dictionary = {}
 var sound_rng := RandomNumberGenerator.new()
 var clock := 0.0
@@ -29,6 +38,7 @@ var next_ui := 0.0
 var active := false
 var foreground := true
 var current_track := ""
+var ui_play_serial := 0
 var tracked_run := ""
 var last_lives := 20
 var last_result := "active"
@@ -82,7 +92,7 @@ func _sync_music() -> void:
 		music.stop()
 		return
 	music.stream_paused = not foreground
-	var track: String = str(settings.get("music_track", MUSIC_IDS[0]))
+	var track: String = MUSIC_TRACK
 	if track != current_track:
 		var stream := _stream("res://assets/audio/music/%s.ogg" % track) as AudioStreamOggVorbis
 		stream.loop = true
@@ -98,35 +108,38 @@ func _process(delta: float) -> void:
 		var target := linear_to_db(maxf(0.0001, float(settings.music))) - 2.0
 		music.volume_db = move_toward(music.volume_db, target, delta * 24.0)
 
-func play_ui() -> bool:
+func play_ui(category: String = "tap") -> bool:
 	if not foreground or float(settings.effects) <= 0.0 or clock < next_ui:
 		return false
+	if not UI_CATEGORIES.has(category):
+		return false
 	next_ui = clock + 0.045
-	ui.stream = _stream("res://assets/audio/ui/%s.wav" % str(settings.get("ui_sound", UI_IDS[0])))
+	ui.stream = _stream("res://assets/audio/ui/%s.wav" % category)
 	ui.pitch_scale = sound_rng.randf_range(0.98, 1.02)
 	ui.play()
+	ui_play_serial += 1
 	effect_played.emit("ui")
 	return true
 
-static func attack_family(kind: String) -> String:
-	return str(STYLE_AUDIO.get(Visuals.STYLES.get(kind, "cast"), "magic"))
+static func attack_sound(kind: String) -> String:
+	return str(UNIT_SOUNDS.get(kind, ""))
 
 func play_attack(event: Dictionary) -> bool:
 	if not active or not foreground or float(settings.effects) <= 0.0 or clock < next_attack:
 		return false
-	var family := attack_family(str(event.get("kind", "")))
-	if clock < float(next_family.get(family, 0.0)):
+	var sound_id := attack_sound(str(event.get("kind", "")))
+	if sound_id.is_empty() or clock < float(next_family.get(sound_id, 0.0)):
 		return false
 	# 실제 시간 기준 간격과 제한된 보이스로 ×5 배속의 소리 폭주를 막는다.
 	for player in attacks:
 		if player.playing:
 			continue
-		player.stream = _stream("res://assets/audio/combat/%s.wav" % family)
+		player.stream = _stream("res://assets/audio/combat/%s.wav" % sound_id)
 		player.pitch_scale = sound_rng.randf_range(0.97, 1.03)
 		player.play()
 		next_attack = clock + ATTACK_GAP
-		next_family[family] = clock + FAMILY_GAP
-		effect_played.emit(family)
+		next_family[sound_id] = clock + FAMILY_GAP
+		effect_played.emit(sound_id)
 		return true
 	return false
 
