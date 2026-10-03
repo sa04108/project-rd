@@ -1774,5 +1774,23 @@
     "ko": "저장 데이터가 지원 범위를 넘었습니다. 원본은 보존했습니다.",
     "zh_CN": "无法读取存档。原文件已保留。",
     "ja": "セーブデータを読み込めません。元のファイルは保持されています。"
+  },
+  "save.persistence.pending": {
+    "en": "Saving… Keep the game open",
+    "ko": "저장 중 · 게임을 닫지 마세요",
+    "zh_CN": "正在保存，请不要关闭游戏",
+    "ja": "保存中です。ゲームを閉じないでください"
+  },
+  "error.save.browser_persistence": {
+    "en": "Save failed · Retrying. Keep the game open",
+    "ko": "저장 실패 · 다시 시도 중 · 게임을 닫지 마세요",
+    "zh_CN": "保存失败，将重新保存，请不要关闭游戏",
+    "ja": "保存失敗。再試行中です。ゲームを閉じないでください"
+  },
+  "error.save.browser_unavailable": {
+    "en": "Storage unavailable · Progress is not saved",
+    "ko": "저장 공간 사용 불가 · 진행 상황을 저장하지 못했습니다",
+    "zh_CN": "无法保存，请不要关闭游戏",
+    "ja": "保存できません。ゲームを閉じないでください"
   }
 }

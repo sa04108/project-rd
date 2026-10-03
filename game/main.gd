@@ -3,6 +3,7 @@ extends Control
 const L = preload("res://game/localization.gd")
 const UiSkin = preload("res://game/ui_skin.gd")
 const CurrencyLabel = preload("res://game/currency_label.gd")
+const WebPersistence = preload("res://game/web_save_persistence.gd")
 const DragScrollContainer = preload("res://game/drag_scroll_container.gd")
 const BATTLE_BACKGROUND = preload("res://assets/art/orthographic/battle-map.webp")
 const VisualAssets = preload("res://game/visual_assets.gd")
@@ -39,6 +40,10 @@ var resume_data: Dictionary = {}
 var dynamic: Array[Callable] = []
 var labels: Dictionary = {}
 var toast_label: RichTextLabel
+var persistence_label: RichTextLabel
+var persistence_text := ""
+var persistence_pending_since := -1.0
+var persistence_poll_time := 0.0
 var toast_until := 0.0
 var wall_time := 0.0
 var refresh_time := 0.0
@@ -425,6 +430,7 @@ func _show_menu() -> void:
 	labels.menu_footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	if not store.last_error.is_empty():
 		_toast(L.text(store.last_error))
+	_update_persistence_status(true)
 
 func _request_new() -> void:
 	if resume_data.is_empty():
@@ -654,6 +660,7 @@ func _purchase_permanent(identity: String, level: int, revision: int) -> void:
 		audio.play_ui("chime")
 		labels.menu_diamonds.set_currency_text(L.text("progression.wallet.balance") % store.diamond_balance())
 	_open_panel("progression", true)
+	_update_persistence_status(true)
 
 func _mark_dirty() -> void:
 	dirty_time = wall_time + 0.3
@@ -665,6 +672,7 @@ func _save_settings() -> bool:
 		_toast(L.text(store.last_error))
 		return false
 	settings_dirty = false
+	_update_persistence_status(true)
 	return true
 
 func _save() -> bool:
@@ -1198,8 +1206,7 @@ func _settings_panel(panel: Control) -> void:
 		_save_settings())
 	_button(panel, L.text("battle.return") if mode == "battle" else L.text("ui.close"), Rect2(35, 632, 579, 100), _close_panel, true, "close_panel")
 	if mode == "battle":
-		_button(panel, L.text("menu.return_to_main"), Rect2(35, 744, 579, 100), func():
-			if _save() or store.read_only: _show_menu(), false, "save_menu")
+		_button(panel, L.text("menu.return_to_main"), Rect2(35, 744, 579, 100), _show_menu, false, "save_menu")
 
 func _settings_language_row(panel: Control) -> void:
 	var row := HBoxContainer.new()
@@ -1310,8 +1317,7 @@ func _result_panel(panel: Control) -> void:
 	if sim.result == "defeat":
 		tip = L.text("battle.menu.tip.wait_then_upgrade") if sim.enemies.size() >= sim.enemy_limit() else L.text("battle.menu.tip.pause_reposition")
 	_diamond_text(panel, L.text("progression.result.reward") % store.run_diamond_reward(sim) + "\n" + tip, Rect2(64, 403, 535, 95), 20, MUTED)
-	_button(panel, L.text("menu.main.open"), Rect2(62, 523, 526, 100), func():
-		if _save() or store.read_only: _show_menu(), true, "result_menu")
+	_button(panel, L.text("menu.main.open"), Rect2(62, 523, 526, 100), _show_menu, true, "result_menu")
 
 func _toast(message: String) -> void:
 	if not is_instance_valid(screen):
@@ -1332,6 +1338,42 @@ func _toast(message: String) -> void:
 	toast_label.set_currency_text(message)
 	toast_until = wall_time + 3.0
 	move_child(toast_label, get_child_count() - 1)
+
+func _update_persistence_status(force: bool = false) -> void:
+	if not OS.has_feature("web"): return
+	if not force and wall_time < persistence_poll_time: return
+	persistence_poll_time = wall_time + 0.15
+	var status: Dictionary = WebPersistence.poll()
+	var state := str(status.get("state", "error"))
+	var key := ""
+	if state == "pending":
+		if persistence_pending_since < 0.0: persistence_pending_since = wall_time
+		# 빠른 전투 자동 저장은 깜빡이지 않되, 메뉴와 오래 걸리는 저장은 명시한다.
+		if (mode == "menu" or wall_time - persistence_pending_since >= 1.0) and not store.read_only:
+			key = "save.persistence.pending"
+	else:
+		persistence_pending_since = -1.0
+		if state == "error":
+			key = "error.save.browser_persistence" if bool(status.get("available", false)) else "error.save.browser_unavailable"
+	if key.is_empty():
+		if is_instance_valid(persistence_label): persistence_label.hide()
+		persistence_text = ""
+		return
+	if not is_instance_valid(persistence_label):
+		persistence_label = _diamond_text(self, "", Rect2(30, 2, 660, 28), 18, GOLD, true)
+		persistence_label.name = "WebSaveStatus"
+		persistence_label.fit_content = false
+		persistence_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		persistence_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		persistence_label.add_theme_stylebox_override("normal", _style(Color(INK, 0.88), Color(GOLD, 0.55), 1, 3))
+		persistence_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		persistence_label.z_as_relative = false
+		persistence_label.z_index = 101
+	var message := L.text(key)
+	if message != persistence_text:
+		persistence_text = message
+		persistence_label.set_currency_text(message)
+	persistence_label.show()
 
 func _advance_battle_to_now() -> float:
 	var now := Time.get_ticks_usec()
@@ -1357,6 +1399,7 @@ func _process(_delta: float) -> void:
 		# 메뉴에는 진행 중 자동 저장이 없으므로 실패한 설정만 다시 저장한다.
 		_save()
 	_observe_result()
+	_update_persistence_status()
 	refresh_time += elapsed
 	if refresh_time > 0.15:
 		refresh_time = 0

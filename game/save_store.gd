@@ -8,6 +8,7 @@ var read_only := false
 var _blocked_error := "error.save.unsupported_version"
 var _observed_files: Dictionary = {}
 const Limits = preload("res://game/save_limits.gd")
+const WebPersistence = preload("res://game/web_save_persistence.gd")
 var _recipe_results: Dictionary = {}
 const PROFILE_SCHEMA := 3
 const Progression = preload("res://game/permanent_progression.gd")
@@ -20,6 +21,7 @@ const LEGACY_MUSIC_TRACKS := ["hearth_watch", "mist_guard", "quiet_march"]
 const LEGACY_UI_SOUNDS := ["wood", "tap", "chime"]
 
 func _init(path: String = "user://") -> void:
+	WebPersistence.initialize()
 	directory = path
 	DirAccess.make_dir_recursive_absolute(directory)
 	for recipe in Catalog.new().recipes:
@@ -140,13 +142,17 @@ func mark_corrupt(filename: String) -> void:
 		_block("error.save.profile_invalid")
 		if FileAccess.file_exists(path):
 			var quarantine := path + ".corrupt-" + str(_observed_files.get(filename, "unknown"))
-			if not FileAccess.file_exists(quarantine) and DirAccess.copy_absolute(path, quarantine) != OK:
-				last_error = "error.save.quarantine_failed"
+			if not FileAccess.file_exists(quarantine):
+				if DirAccess.copy_absolute(path, quarantine) != OK:
+					last_error = "error.save.quarantine_failed"
+				else:
+					WebPersistence.mark_dirty()
 	elif FileAccess.file_exists(path):
 		var quarantine := path + ".corrupt-%d-%d" % [Time.get_unix_time_from_system(), Time.get_ticks_usec()]
 		if DirAccess.rename_absolute(path, quarantine) != OK:
 			_block("error.save.quarantine_failed")
 		else:
+			WebPersistence.mark_dirty()
 			_observed_files[filename] = "missing"
 
 func _file_state(filename: String) -> Dictionary:
@@ -270,6 +276,7 @@ func _write(filename: String, value: Dictionary) -> bool:
 	if DirAccess.rename_absolute(temp, path) != OK:
 		last_error = "error.save.replace_failed"
 		return false
+	WebPersistence.mark_dirty()
 	_observed_files[filename] = encoded.sha256_text()
 	last_error = ""
 	corrupt_files.erase(filename)
@@ -463,6 +470,7 @@ func save_run(sim) -> bool:
 				if DirAccess.remove_absolute(path) != OK:
 					last_error = "error.save.failed"
 					return false
+				WebPersistence.mark_dirty()
 			if filename == "run.json": _observed_files[filename] = "missing"
 		return true
 	return _write("run.json", snapshot)
