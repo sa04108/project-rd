@@ -24,19 +24,14 @@ bash scripts/web-setup.sh
 
 플레이 데이터에는 용병 34종, 적 53종(일반 40·보스 10·특수 3), 조합법 28개가 등록돼 있습니다. 수치와 레시피 원본은 [data/](data/)에 있습니다. 고유 애니메이션은 아군 공격·대기 각 34행과 적 이동 53행, 총 121행/726프레임입니다. 제작 원본·런타임 연결·시각 품질 검증은 구분하며, 남은 조정·검증은 아래 단일 목록에서 관리합니다.
 
-## 검증
+## 개발과 내보내기
 
-```bash
-bash scripts/verify.sh
-VERIFY_VISUAL=1 bash scripts/verify.sh
-```
-
-두 번째 명령은 Xvfb/Mesa 환경에서 실제 UI 입력과 화면 캡처를 추가합니다. 로그·캡처·테스트 저장 데이터는 `artifacts/`에 생성합니다. 환경 의존성과 변경 유형별 추가 검사는 [개발·검증 안내](docs/DEVELOPMENT.md)에 있습니다.
+고정 엔진 설치, 리소스 가져오기, 네이티브 실행, Web 로컬 실행과 Android 내보내기는 [개발 안내](docs/DEVELOPMENT.md)를 참고하세요. 산출물과 임시 사용자 데이터는 `artifacts/` 아래에 둡니다. 화면·입력·저장·소리 변경은 해당 플랫폼에서 직접 실행해 확인합니다. 테스트 코드는 로컬에서만 사용하고 저장소에는 커밋하지 않습니다.
 
 ## 문서
 
 - [AGENTS.md](AGENTS.md): Godot 개발 원칙과 작업 분담
 - [게임 규칙](docs/GAME_RULES.md): 현재 요구와 보존할 동작
 - [리소스 제작](docs/RESOURCE_GUIDE.md): 원화·프레임·음원 제작과 런타임 연결
-- [개발·검증](docs/DEVELOPMENT.md): 환경, 테스트, Web·Android 재현 절차
+- [개발 환경과 실행](docs/DEVELOPMENT.md): 환경 준비, 가져오기, 네이티브/Web 실행과 Android 내보내기
 - [남은 작업과 결정](docs/REMAINING.md): 결정 대기·구현 미완료·검증 필요 항목

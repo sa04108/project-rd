@@ -40,17 +40,9 @@ var save_time := 0.0
 var dirty_time := -1.0
 var ended_saved := false
 var dev_mode := false
-var ui_test_mode := false
 var audio: Node
 var codex_tab := "units"
 var enemy_filter := "all"
-var visual_seed := false
-var android_qa := false
-var qa_elapsed := 0.0
-var qa_max_frame_msec := 0.0
-var qa_frames_over_50_msec := 0
-var web_qa := false
-var qa_session := str(Time.get_unix_time_from_system()) + "-" + str(Time.get_ticks_usec())
 
 func _ready() -> void:
 	get_tree().auto_accept_quit = false
@@ -65,35 +57,9 @@ func _ready() -> void:
 	theme = ui_theme
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	dev_mode = "--dev" in OS.get_cmdline_user_args()
-	ui_test_mode = "--ui-test" in OS.get_cmdline_user_args()
-	android_qa = OS.has_feature("debug") and "--android-qa" in OS.get_cmdline_user_args()
-	web_qa = OS.has_feature("web") and str(JavaScriptBridge.eval("new URLSearchParams(location.search).get(\"qa\")", true)) == "1"
-	if web_qa:
-		store = SaveStore.new("user://web-qa")
-	elif ui_test_mode:
-		store = SaveStore.new("user://ui-test")
-	elif android_qa:
-		store = SaveStore.new("user://android-qa")
-	else:
-		store = SaveStore.new()
+	store = SaveStore.new()
 	_setup_sound()
 	_show_menu()
-	_write_qa_state()
-	if "--capture-battle" in OS.get_cmdline_user_args():
-		visual_seed = true
-		_start_new()
-		sim.developer_run = true
-		sim.gold = 0
-		for entry in [{"kind": "u07", "cell": 0}, {"kind": "u02", "cell": 2}, {"kind": "u03", "cell": 4}, {"kind": "u06", "cell": 6}, {"kind": "u09", "cell": 8}, {"kind": "u12", "cell": 11}, {"kind": "u13", "cell": 16}, {"kind": "u04", "cell": 29}]:
-			sim.add_unit(entry.kind, entry.cell)
-		for index in range(7):
-			var enemy: Dictionary = sim.add_enemy("n%02d" % (index + 1), 1)
-			enemy.progress = index * 2.9 + 0.6
-		selected = int(sim.units[2].id)
-		visual_seed = true
-		_refresh()
-	if "--capture-panel" in OS.get_cmdline_user_args():
-		_open_panel("recipes")
 
 func _style(fill: Color, border: Color = Color.TRANSPARENT, width: int = 1, radius: int = 9) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
@@ -154,7 +120,7 @@ func _button(parent: Node, text_value: String, rect: Rect2, callback: Callable, 
 		button.add_theme_stylebox_override(state, UiSkin.button_style("gold" if accent else "blue", state))
 	button.add_theme_stylebox_override("focus", _style(Color.TRANSPARENT, Color("f9dc87"), 1, 3))
 	if not action.is_empty():
-		button.set_meta("qa_action", action)
+		button.name = action
 	button.add_theme_color_override("font_color", INK if accent else PALE)
 	button.add_theme_color_override("font_hover_color", INK if accent else Color.WHITE)
 	button.add_theme_color_override("font_pressed_color", PALE)
@@ -266,7 +232,7 @@ func _request_new() -> void:
 		_open_panel("confirm_new")
 
 func _start_new() -> void:
-	sim.new_run(913 if ui_test_mode or android_qa or web_qa else 0)
+	sim.new_run()
 	selected = -1
 	ended_saved = false
 	mode = "battle"
@@ -291,16 +257,20 @@ func _show_battle() -> void:
 	_panel(screen, Rect2(22, 20, 166, 64), INK, GOLD, "brass")
 	labels.lives = _label(screen, "", Vector2(36, 32), 139, 28, Color("ff9484"))
 	labels.lives.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var home := _hud_button(screen, "", Rect2(190, 20, 100, 100), _show_menu, "battle_home", "home")
-	home.tooltip_text = "저장 후 메인 메뉴"
-	home.accessibility_name = home.tooltip_text
 	_panel(screen, Rect2(202, 135, 276, 51), INK, GOLD, "brass")
 	labels.wave = _label(screen, "", Vector2(217, 141), 246, 26, PALE)
 	labels.wave.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var tools := [["recipes", "조합법"], ["guide", "게임 가이드"], ["codex", "도감"], ["settings", "설정"]]
 	for index in range(tools.size()):
 		var action: String = tools[index][0]
-		var button := _hud_button(screen, "", Rect2(292 + index * 102, 20, 100, 100), func(): _open_panel(action), action, action)
+		var rect := Rect2(292 + index * 102, 20, 100, 100)
+		if action == "recipes":
+			rect = Rect2(190, 20, 202, 100)
+		var button := _hud_button(screen, "", rect, func(): _open_panel(action), action, "" if action == "recipes" else action, action == "recipes")
+		if action == "recipes":
+			_hud_icon(button, "recipes", Rect2(17, 23, 54, 54))
+			var caption := _label(button, "조합법", Vector2(79, 33), 110, 28, Color("fff5d7"))
+			caption.size.y = 42
 		button.tooltip_text = tools[index][1]
 		button.accessibility_name = tools[index][1]
 	_panel(screen, Rect2(510, 132, 188, 54), INK, GOLD, "brass")
@@ -387,8 +357,6 @@ func _mark_dirty() -> void:
 	dirty_time = wall_time + 0.3
 
 func _save() -> bool:
-	if visual_seed:
-		return true
 	if mode == "battle":
 		if not store.save_run(sim):
 			# 저장 실패를 매 프레임 반복하지 않는다. 사용자 저장 요청은 즉시 시도한다.
@@ -664,7 +632,7 @@ func _settings_panel(panel: Control) -> void:
 		slider.max_value = 1
 		slider.step = 0.05
 		slider.value = store.profile.settings[key]
-		slider.set_meta("qa_action", key + "_volume")
+		slider.name = key + "_volume"
 		slider.value_changed.connect(func(value):
 			store.profile.settings[key] = value
 			_apply_audio()
@@ -697,7 +665,7 @@ func _settings_toggle(panel: Control, title: String, y: float, enabled: bool, ac
 	toggle.position = Vector2(34, y)
 	toggle.size = Vector2(570, 75)
 	toggle.button_pressed = enabled
-	toggle.set_meta("qa_action", action)
+	toggle.name = action
 	panel.add_child(toggle)
 	return toggle
 
@@ -745,14 +713,6 @@ func _process(delta: float) -> void:
 		if sim.result == "active" and wall_time >= save_retry_time and (wall_time - save_time >= 10.0 or (dirty_time > 0 and wall_time >= dirty_time)):
 			_save()
 	_observe_result()
-	if android_qa or web_qa:
-		qa_max_frame_msec = maxf(qa_max_frame_msec, delta * 1000.0)
-		if delta > 0.05:
-			qa_frames_over_50_msec += 1
-	qa_elapsed += delta
-	if (android_qa or web_qa) and qa_elapsed >= 0.2:
-		qa_elapsed = 0.0
-		_write_qa_state()
 	refresh_time += delta
 	if refresh_time > 0.15:
 		refresh_time = 0
@@ -770,68 +730,6 @@ func _observe_result() -> void:
 		if panel_name != "result":
 			_open_panel("result", true)
 
-func _write_qa_state() -> void:
-	# 격리 QA 세션의 읽기 관측값이다. 실제 Android 또는 브라우저 입력으로만 조작한다.
-	if not android_qa and not web_qa:
-		return
-	var state := {"mode": mode, "panel_name": panel_name, "gold": sim.gold, "lives": sim.lives,
-		"wave": sim.wave, "time": sim.time, "speed": sim.speed, "result": sim.result,
-		"pause_reasons": sim.pause_reasons.duplicate(), "units": sim.units.duplicate(true),
-		"enemy_count": sim.enemies.size(), "selected": selected, "save_error": store.last_error,
-		"snapshot_exists": FileAccess.file_exists(store.directory.path_join("run.json")),
-		"save_snapshot": resume_data.duplicate(true) if mode == "menu" else {},
-		"save_profile": store.profile.duplicate(true) if mode == "menu" else {},
-		"android_qa": android_qa, "session_id": qa_session, "process_id": OS.get_process_id(), "frame_size": [get_viewport_rect().size.x, get_viewport_rect().size.y],
-		"art_ready": visuals.ready_count() == 87 and visuals.portraits.size() == 87,
-		"scroll": {}}
-	# 해제되지 않은 개체와 Wasm의 회수되지 않는 최대 용량을 구분하는 관측값이다.
-	# release에서 지원되지 않는 모니터의 0은 측정 도구가 별도로 표시한다.
-	state.qa_ticks_msec = Time.get_ticks_msec()
-	state.qa_process_frames = Engine.get_process_frames()
-	state.qa_max_frame_msec = qa_max_frame_msec
-	state.qa_frames_over_50_msec = qa_frames_over_50_msec
-	state.qa_debug_build = OS.is_debug_build()
-	state.codex_tab = codex_tab
-	state.enemy_filter = enemy_filter
-	state.memory = {
-		"static_bytes": int(Performance.get_monitor(Performance.MEMORY_STATIC)),
-		"static_peak_bytes": int(Performance.get_monitor(Performance.MEMORY_STATIC_MAX)),
-		"object_count": int(Performance.get_monitor(Performance.OBJECT_COUNT)),
-		"node_count": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
-		"orphan_node_count": int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)),
-		"resource_count": int(Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT)),
-		"video_bytes": int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)),
-		"texture_bytes": int(Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED)),
-		"buffer_bytes": int(Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED))}
-	state.buttons = {}
-	state.cell_centers = []
-	for node in find_children("*", "Button", true, false):
-		if node.is_visible_in_tree() and node.has_meta("qa_action"):
-			var rect: Rect2 = node.get_global_rect()
-			state.buttons[node.get_meta("qa_action")] = {"x": rect.position.x, "y": rect.position.y, "width": rect.size.x, "height": rect.size.y, "disabled": node.disabled}
-	if is_instance_valid(board):
-		for cell in range(36):
-			var center: Vector2 = board.global_position + board.ground_to_screen(Vector2(cell / 6 + 0.5, cell % 6 + 0.5))
-			state.cell_centers.append({"cell": cell, "x": center.x, "y": center.y})
-	if is_instance_valid(overlay):
-		for node in overlay.find_children("PanelScroll", "ScrollContainer", true, false):
-			var scroller := node as ScrollContainer
-			if scroller.is_visible_in_tree():
-				var rect := scroller.get_global_rect()
-				var scrollbar := scroller.get_v_scroll_bar()
-				state.scroll = {"x": rect.position.x, "y": rect.position.y, "width": rect.size.x, "height": rect.size.y,
-					"value": float(scroller.scroll_vertical), "maximum": maxf(0.0, scrollbar.max_value - scrollbar.page)}
-				break
-	if web_qa:
-		# URL로 명시한 격리 QA 세션에만 읽기 관측값을 공개한다.
-		JavaScriptBridge.eval("window.__projectRdQa = " + JSON.stringify(state) + ";", true)
-		return
-	var file := FileAccess.open("user://qa_state.json.tmp", FileAccess.WRITE)
-	if file != null:
-		file.store_string(JSON.stringify(state))
-		file.close()
-		DirAccess.rename_absolute("user://qa_state.json.tmp", "user://qa_state.json")
-
 func _notification(what: int) -> void:
 	if store == null:
 		return
@@ -844,11 +742,9 @@ func _notification(what: int) -> void:
 		sim.set_pause("background" if what == NOTIFICATION_APPLICATION_FOCUS_OUT else "suspended", true)
 		_sync_audio()
 		_save()
-		_write_qa_state()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_APPLICATION_RESUMED:
 		sim.set_pause("background" if what == NOTIFICATION_APPLICATION_FOCUS_IN else "suspended", false)
 		_sync_audio()
-		_write_qa_state()
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
@@ -865,7 +761,6 @@ func _handle_back() -> void:
 		_open_panel("settings")
 	elif panel_name != "result":
 		_close_panel()
-	_write_qa_state()
 
 func _draw() -> void:
 	if mode == "menu":
@@ -888,20 +783,6 @@ func _apply_audio() -> void:
 func _sync_audio() -> void:
 	if is_instance_valid(audio):
 		audio.set_context(mode == "battle" and sim.result == "active", not sim.pause_reasons.has("background") and not sim.pause_reasons.has("suspended"))
-
-func run_automation_tests() -> bool:
-	var report: Dictionary = load("res://tests/mvp_suite.gd").run_all()
-	var saves: Dictionary = load("res://tests/save_suite.gd").run_all()
-	report.passed += saves.passed
-	report.failed.append_array(saves.failed)
-	var art: Dictionary = load("res://tests/art_suite.gd").run_all()
-	report.passed += art.passed
-	report.failed.append_array(art.failed)
-	var animation: Dictionary = load("res://tests/animation_suite.gd").run_all()
-	report.passed += animation.passed
-	report.failed.append_array(animation.failed)
-	print("MVP_TEST_REPORT ", JSON.stringify(report))
-	return report.failed.is_empty()
 
 func _exit_tree() -> void:
 	dynamic.clear()

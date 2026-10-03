@@ -195,7 +195,7 @@
     "Representative runtime captures exercise all 34 attack identities and all 53 enemy identities with pause/speed/reduced-motion/restore cases",
     "Splash hit/death, simultaneous kills, escape, victory cleanup and rapid repeated attacks preserve simulation and RNG",
     "Art metadata paths point to the actual orthographic battlefield; static historical art is not counted as active coverage",
-    "Final VERIFY_VISUAL=1 bash scripts/verify.sh, export and browser QA results name the exact tested snapshot and remaining limits"
+    "최종 리소스는 Godot 실행 화면과 Web export에서 로컬로 확인하고 대상 커밋과 남은 한계를 기록한다. 검증 코드는 커밋하지 않는다."
   ],
   "identities": [
     {

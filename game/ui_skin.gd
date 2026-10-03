@@ -71,7 +71,7 @@ static func _texture(path: String) -> Texture2D:
 static func icon_texture(kind: String) -> Texture2D:
 	var shapes := {
 		"home": '<path d="M5 29 31 7l26 22-6 7-20-17-20 17z" fill="url(#metal)"/><path d="M13 31v24h13V39h10v16h13V31L31 16z" fill="url(#paper)"/><path d="M25 55V38h12v17" fill="#29251f"/><path d="M40 10h9v12l-9-8z" fill="url(#metal)"/>',
-		"recipes": '<path d="M18 9h30c-7 5-7 11-4 16L33 49H9c5-5 7-10 4-15L24 14" fill="url(#paper)"/><path d="M18 9c-8 0-9 11-2 14h27M9 49c-7-2-5-12 2-13h26c-6 2-7 9-4 13M22 26h14m-17 7h13m-2-18h10"/><path d="m26 43 5-11 14-17 5 5-14 17z" fill="url(#metal)"/>',
+		"recipes": '<path d="M9 13c8-3 15-2 23 3 8-5 15-6 23-3v37c-8-3-15-2-23 3-8-5-15-6-23-3z" fill="url(#paper)"/><path d="M32 16v37M15 23h10m-10 7h10m-10 7h10" fill="none"/><path d="M44 25v14m-7-7h14" fill="none" stroke-width="3"/>',
 		"guide": '<path d="M19 20c0-8 5-12 13-12s13 4 13 12c0 6-4 9-8 12-4 3-5 5-5 8" fill="none" stroke="url(#paper)" stroke-width="9"/><circle cx="32" cy="53" r="5" fill="url(#paper)" stroke="none"/>',
 		"codex": '<path d="M5 13c9-4 19-2 27 3 8-5 18-7 27-3v40c-9-3-19-1-27 4-8-5-18-7-27-4z" fill="url(#metal)"/><path d="M9 9c8-2 16 1 23 6v35c-7-5-15-7-23-5zM55 9c-8-2-16 1-23 6v35c7-5 15-7 23-5z" fill="url(#paper)"/><path d="M32 15v35M15 20c4 0 7 1 11 3m-11 7c4 0 7 1 11 3m23-13c-4 0-7 1-11 3m11 7c-4 0-7 1-11 3" fill="none" stroke="#886335" stroke-width="2"/>',
 		"settings": '<path d="m27 4 9 0 2 8 5 2 7-4 6 7-5 6 2 5 8 2v9l-8 2-2 5 4 7-7 6-6-5-5 2-2 8h-9l-2-8-5-2-7 4-6-7 5-6-2-5-8-2v-9l8-2 2-5-4-7 7-6 6 5 5-2z" transform="translate(2 -2) scale(.94)" fill="url(#metal)"/><circle cx="31" cy="30" r="11" fill="#29251f" stroke="#f0d396" stroke-width="2"/>',
